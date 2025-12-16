@@ -1,0 +1,2807 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-11 00:29+0200\n"
+"PO-Revision-Date: 2025-11-30 17:30+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Bulgarian <LL@li.org>\n"
+"Language: bg\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\datanaut_site\settings.py:93 .\landing\templates\landing\base.html:432
+msgid "English"
+msgstr "Английски"
+
+#: .\datanaut_site\settings.py:94 .\landing\templates\landing\base.html:442
+msgid "Bulgarian"
+msgstr "Български"
+
+#: .\datanaut_site\settings.py:95 .\landing\templates\landing\base.html:452
+msgid "German"
+msgstr "Немски"
+
+#: .\landing\templates\landing\about.html:4
+#| msgid "How it works · DataNaut"
+msgid "About · DataNaut"
+msgstr "За DataNaut · DataNaut"
+
+#: .\landing\templates\landing\about.html:11
+#| msgid "Who DataNaut is for"
+msgid "Why DataNaut exists"
+msgstr "Защо съществува DataNaut"
+
+#: .\landing\templates\landing\about.html:14
+msgid ""
+"Market data and technology subscriptions are one of the largest – and least "
+"transparent – cost lines in trading and financial firms. DataNaut was "
+"created to bring contract, usage and cost data into a single, trusted view."
+msgstr ""
+"Абонаментите за пазарни и технологични данни са една от най-големите – и "
+"най-непрозрачни – пера на разходите в търговските и финансовите "
+"организации. DataNaut е създаден, за да събере данните за договори, "
+"използване и разходи в единен, надежден изглед."
+
+#: .\landing\templates\landing\about.html:21
+msgid ""
+"Our goal is simple: cut waste without slowing down the desks, and give CFOs "
+"and investors a clean story on efficiency and control."
+msgstr ""
+"Нашата цел е проста: да намалим излишните разходи, без да забавяме десковете, "
+"и да дадем на CFO и инвеститорите ясна история за ефективност и контрол."
+
+#: .\landing\templates\landing\about.html:34
+msgid "The problem"
+msgstr "Проблемът"
+
+#: .\landing\templates\landing\about.html:37
+msgid ""
+"Trading and market data teams rely on dozens of vendors – Bloomberg, ICE, "
+"Refinitiv, EnAppSys and many more – each with their own contracts, "
+"entitlement files and invoices. Overlapping feeds, unused licences and "
+"renewals with little time to analyse options mean spend keeps rising while "
+"transparency lags behind."
+msgstr ""
+"Трейдинг екипите и екипите за пазарни данни разчитат на десетки доставчици – "
+"Bloomberg, ICE, Refinitiv, EnAppSys и много други – всеки със собствени "
+"договори, entitlement файлове и фактури. Припокриващи се потоци, неизползвани "
+"лицензи и подновявания с малко време за анализ на опциите водят до траен "
+"растеж на разходите, докато прозрачността изостава."
+
+#: .\landing\templates\landing\about.html:47
+msgid "Our approach"
+msgstr "Нашият подход"
+
+#: .\landing\templates\landing\about.html:50
+msgid ""
+"DataNaut is <strong>contract-first</strong>, not a data-reselling platform. "
+"We ingest invoices, contracts, entitlement files and usage data into a "
+"single schema, then normalise it into a single cost &amp; usage repository. "
+"Dashboards and alerts sit on top, giving desks, CFOs and procurement a "
+"shared source of truth."
+msgstr ""
+"DataNaut е платформа с фокус върху <strong>договорите</strong>, а не "
+"препродажба на данни. Импортираме фактури, договори, entitlement файлове и "
+"данни за използване в единна схема, след което ги нормализираме в общо "
+"хранилище за разходи и използване. Върху него стъпват табла и известия, които "
+"дават на десковете, CFO и снабдяването общ източник на истина."
+
+#: .\landing\templates\landing\about.html:60
+msgid "Why now"
+msgstr "Защо сега"
+
+#: .\landing\templates\landing\about.html:63
+msgid ""
+"Market data and technology spend keeps growing faster than revenues. At the "
+"same time, regulators and boards expect tighter governance and full "
+"auditability. With cloud adoption and stricter cost discipline, firms need a "
+"dedicated system of record for data contracts and entitlements – not just "
+"another Excel file."
+msgstr ""
+"Разходите за пазарни данни и технологии растат по-бързо от приходите. В "
+"същото време регулатори и бордове очакват по-строго управление и пълна "
+"проследимост. С навлизането на облака и по-строгата дисциплина на разходите "
+"организациите се нуждаят от специализирана система за запис на договори и "
+"entitlement-и – не просто още един Excel файл."
+
+#: .\landing\templates\landing\about.html:74
+msgid "Product roadmap"
+msgstr "Продуктова пътна карта"
+
+#: .\landing\templates\landing\about.html:81
+msgid "PHASE 1 – MVP"
+msgstr "ФАЗА 1 – MVP"
+
+#: .\landing\templates\landing\about.html:84
+msgid "Contract & spend visibility"
+msgstr "Видимост на договори и разходи"
+
+#: .\landing\templates\landing\about.html:87
+#| msgid "Contracts, invoices & entitlement files"
+msgid "Import contracts, invoices and entitlement files."
+msgstr "Импортиране на договори, фактури и entitlement файлове."
+
+#: .\landing\templates\landing\about.html:88
+#| msgid "Contract-level view of spend by vendor, desk, user and entity."
+msgid "Normalised mapping by vendor, desk, user and entity."
+msgstr ""
+"Нормализирано картографиране по доставчик, деск, потребител и юридическо лице."
+
+#: .\landing\templates\landing\about.html:89
+msgid "Basic dashboards with spend visibility and quick wins."
+msgstr ""
+"Базови табла с видимост на разходите и бързи възможности за спестявания."
+
+#: .\landing\templates\landing\about.html:90
+msgid "Exports for finance and compliance (Excel / PDF)."
+msgstr "Експорти за финанси и комплайънс (Excel / PDF)."
+
+#: .\landing\templates\landing\about.html:98
+msgid "PHASE 2"
+msgstr "ФАЗА 2"
+
+#: .\landing\templates\landing\about.html:101
+#| msgid "Usage & entitlement analytics to support renewals and re-pricing."
+msgid "Usage & entitlement analytics"
+msgstr ""
+"Аналитика за използване и entitlement-и, която подпомага подновяванията и "
+"препазаруването."
+
+#: .\landing\templates\landing\about.html:104
+msgid "Deeper duplicate / underuse detection across vendors."
+msgstr ""
+"По-задълбочено откриване на дублиране и недоизползване при всички доставчици."
+
+#: .\landing\templates\landing\about.html:105
+msgid "What-if scenarios for consolidation and renegotiation."
+msgstr ""
+"What-if сценарии за консолидация и предоговаряне на условията."
+
+#: .\landing\templates\landing\about.html:106
+msgid "APIs for integrating with internal BI tools."
+msgstr "API-та за интеграция с вътрешни BI инструменти."
+
+#: .\landing\templates\landing\about.html:107
+msgid "Governance-ready reporting for risk and compliance."
+msgstr "Отчети, готови за управление на риска и комплайънс."
+
+#: .\landing\templates\landing\about.html:115
+msgid "PHASE 3"
+msgstr "ФАЗА 3"
+
+#: .\landing\templates\landing\about.html:118
+msgid "Optimisation engine"
+msgstr "Модул за оптимизация"
+
+#: .\landing\templates\landing\about.html:121
+msgid "Data-driven recommendations at each renewal."
+msgstr "Препоръки, базирани на данни, при всяко подновяване."
+
+#: .\landing\templates\landing\about.html:122
+msgid "Automated alerts for compliance and licence breaches."
+msgstr "Автоматични известия за комплайънс и нарушения на лицензи."
+
+#: .\landing\templates\landing\about.html:123
+msgid "Benchmarking across clients (anonymised)."
+msgstr "Бенчмарк анализ между клиенти (анонимизиран)."
+
+#: .\landing\templates\landing\about.html:124
+msgid "Playbooks for vendor negotiations."
+msgstr "Playbook-и за преговори с доставчици."
+
+#: .\landing\templates\landing\about.html:133
+#: .\landing\templates\landing\contact.html:12
+msgid "Talk to us about DataNaut"
+msgstr "Свържете се с нас за DataNaut"
+
+#: .\landing\templates\landing\base.html:9
+#: .\landing\templates\landing\home.html:4
+msgid "DataNaut — Smart Data. Smarter Decisions."
+msgstr "DataNaut — Умни данни. Още по-умни решения."
+
+#: .\landing\templates\landing\base.html:366
+#: .\landing\templates\landing\base.html:477
+msgid "DataNaut logo"
+msgstr "Лого на DataNaut"
+
+#: .\landing\templates\landing\base.html:379
+msgid "How it works"
+msgstr "Как работи"
+
+#: .\landing\templates\landing\base.html:385
+msgid "Who it’s for"
+msgstr "За кого е DataNaut"
+
+#: .\landing\templates\landing\base.html:390
+#: .\landing\templates\landing\home.html:161
+msgid "Trading & dealing desks"
+msgstr "Търговски и дилърски дескове"
+
+#: .\landing\templates\landing\base.html:395
+#: .\landing\templates\landing\home.html:175
+msgid "CFO & finance"
+msgstr "Финансов директор и финанси"
+
+#: .\landing\templates\landing\base.html:400
+#: .\landing\templates\landing\home.html:189
+msgid "Investors & board"
+msgstr "Инвеститори и борд"
+
+#: .\landing\templates\landing\base.html:407
+msgid "Demo"
+msgstr "Демо"
+
+#: .\landing\templates\landing\base.html:410
+msgid "Pricing"
+msgstr "Цена"
+
+#: .\landing\templates\landing\base.html:413
+#: .\landing\templates\landing\base.html:486
+msgid "Contact"
+msgstr "Контакти"
+
+#: .\landing\templates\landing\base.html:416
+msgid "About"
+msgstr "За DataNaut"
+
+#: .\landing\templates\landing\base.html:461
+msgid "Request demo"
+msgstr "Заявете демо"
+
+#: .\landing\templates\landing\base.html:480
+msgid "Contract & Market Data Cost Optimization Platform."
+msgstr "Платформа за оптимизация на разходите за договори и пазарни данни."
+
+#: .\landing\templates\landing\base.html:491
+#: .\landing\templates\landing\contact.html:114
+msgid "LinkedIn"
+msgstr "ЛинкедИн"
+
+#: .\landing\templates\landing\contact.html:4
+#| msgid "How it works · DataNaut"
+msgid "Contact · DataNaut"
+msgstr "Контакти · DataNaut"
+
+#: .\landing\templates\landing\contact.html:15
+#| msgid ""
+#| "Share a bit about your current market data setup, vendors and pain points."
+msgid ""
+"Share a bit about your current market data setup, vendors and pain points "
+"and we’ll follow up with a tailored Data Cost Assessment and live demo."
+msgstr ""
+"Разкажете накратко за текущата си инфраструктура за пазарни данни, "
+"доставчиците и основните предизвикателства и ние ще ви върнем персонализирана "
+"оценка на разходите за данни и предложение за live демо."
+
+#: .\landing\templates\landing\contact.html:32
+#| msgid "Request a demo"
+msgid "Request a demo / assessment"
+msgstr "Заявете демо / оценка"
+
+#: .\landing\templates\landing\contact.html:35
+msgid ""
+"Fill in the form below and we’ll get back to you within one business day."
+msgstr ""
+"Попълнете формата по-долу и ние ще се свържем с вас до един работен ден."
+
+#: .\landing\templates\landing\contact.html:44
+#: .\landing\templates\landing\home.html:221
+msgid "Name"
+msgstr "Име"
+
+#: .\landing\templates\landing\contact.html:48
+#: .\landing\templates\landing\home.html:223
+msgid "Your name"
+msgstr "Вашето име"
+
+#: .\landing\templates\landing\contact.html:52
+#: .\landing\templates\landing\home.html:228
+msgid "Company"
+msgstr "Компания"
+
+#: .\landing\templates\landing\contact.html:56
+#: .\landing\templates\landing\home.html:228
+msgid "Your company"
+msgstr "Вашата компания"
+
+#: .\landing\templates\landing\contact.html:63
+#: .\landing\templates\landing\home.html:231
+msgid "Role"
+msgstr "Роля"
+
+#: .\landing\templates\landing\contact.html:67
+#: .\landing\templates\landing\home.html:233
+msgid "e.g. Head of Trading, CFO"
+msgstr "напр. Ръководител „Търговия“, CFO"
+
+#: .\landing\templates\landing\contact.html:71
+#: .\landing\templates\landing\home.html:236
+msgid "Work email"
+msgstr "Служебен имейл"
+
+#: .\landing\templates\landing\contact.html:75
+#: .\landing\templates\landing\home.html:238
+msgid "you@firm.com"
+msgstr "you@firm.com"
+
+#: .\landing\templates\landing\contact.html:81
+#: .\landing\templates\landing\home.html:241
+msgid "Message / Notes"
+msgstr "Съобщение / Бележки"
+
+#: .\landing\templates\landing\contact.html:85
+msgid "Vendors you use today, approximate spend, main challenges…"
+msgstr ""
+"Доставчици, които използвате в момента, приблизителни разходи, основни "
+"предизвикателства…"
+
+#: .\landing\templates\landing\contact.html:89
+msgid "Send request"
+msgstr "Изпратете запитване"
+
+#: .\landing\templates\landing\contact.html:99
+#| msgid "Contact"
+msgid "Contact details"
+msgstr "Контактни данни"
+
+#: .\landing\templates\landing\contact.html:102
+msgid ""
+"For general enquiries, partnership discussions or press, you can also reach "
+"us at:"
+msgstr ""
+"За общи запитвания, партньорства или медии можете да се свържете с нас и на:"
+
+#: .\landing\templates\landing\contact.html:107
+msgid "Email"
+msgstr "Имейл"
+
+#: .\landing\templates\landing\contact.html:122
+#| msgid ""
+#| "We’ll run an upfront assessment on a subset of your contracts and "
+#| "invoices to size the savings before you commit."
+msgid ""
+"We typically start with a focused assessment on a subset of contracts and "
+"invoices to estimate savings, then move to a broader rollout if the fit is "
+"right."
+msgstr ""
+"Обикновено започваме с фокусирана оценка върху част от договорите и фактурите, "
+"за да оценим потенциалните спестявания, а след това преминаваме към по-широко "
+"обхващане, ако подходът е подходящ."
+
+#: .\landing\templates\landing\demo.html:4
+msgid "DataNaut demo dashboard · DataNaut"
+msgstr "Демо табло на DataNaut · DataNaut"
+
+#: .\landing\templates\landing\demo.html:15
+#| msgid "DataNaut logo"
+msgid "DataNaut demo dashboard"
+msgstr "Демо табло на DataNaut"
+
+#: .\landing\templates\landing\demo.html:18
+#| msgid ""
+#| "A contract-first platform that connects your vendors, contracts, invoices "
+#| "and entitlement files into a single, actionable view."
+msgid ""
+"Preview of how DataNaut can look as an internal platform: contracts, "
+"invoices and entitlements combined into a single cost & usage cockpit."
+msgstr ""
+"Преглед как DataNaut може да изглежда като вътрешна платформа: договори, "
+"фактури и entitlement-и, събрани в един общ „cockpit“ за разходи и използване."
+
+#: .\landing\templates\landing\demo.html:24
+msgid ""
+"Numbers and entities below are illustrative, but the structure reflects what "
+"a real deployment looks like – by vendor, entity, desk and user."
+msgstr ""
+"Числата и юридическите лица по-долу са примерни, но структурата отразява "
+"реално внедряване – по доставчик, юридическо лице, деск и потребител."
+
+#: .\landing\templates\landing\demo.html:32
+msgid "Typical deployment:"
+msgstr "Типично внедряване:"
+
+#: .\landing\templates\landing\demo.html:35
+msgid "12+ vendors, 5–10 entities, 30+ desks."
+msgstr "12+ доставчици, 5–10 юридически лица, 30+ деска."
+
+#: .\landing\templates\landing\demo.html:36
+#| msgid "Contracts, invoices & entitlement files"
+msgid "Direct feeds from contracts, invoices and entitlement files."
+msgstr ""
+"Директни потоци данни от договори, фактури и entitlement файлове."
+
+#: .\landing\templates\landing\demo.html:37
+msgid "Optional export into PowerBI / internal data warehouse."
+msgstr "Опционален експорт към PowerBI / вътрешно хранилище за данни."
+
+#: .\landing\templates\landing\demo.html:40
+msgid "Book a live demo"
+msgstr "Запазете live демо"
+
+#: .\landing\templates\landing\demo.html:43
+msgid "Back to homepage"
+msgstr "Обратно към началната страница"
+
+#: .\landing\templates\landing\demo.html:55
+msgid "Market data & tech spend cockpit"
+msgstr "Cockpit за разходи за пазарни данни и технологии"
+
+#: .\landing\templates\landing\demo.html:58
+msgid "Last updated: 04 Nov 2025 · Dummy data for illustration"
+msgstr ""
+"Последна актуализация: 04 ноември 2025 · Примерни данни за илюстрация"
+
+#: .\landing\templates\landing\demo.html:64
+msgid "All entities"
+msgstr "Всички юридически лица"
+
+#: .\landing\templates\landing\demo.html:68
+#| msgid "Trading & dealing desks"
+msgid "Trading desks"
+msgstr "Търговски дескове"
+
+#: .\landing\templates\landing\demo.html:72
+#| msgid "Last 12 months"
+msgid "Rolling 12 months"
+msgstr "Търкалящи се 12 месеца"
+
+#: .\landing\templates\landing\demo.html:82
+#| msgid "10–30%% reduction in market data & tech spend."
+msgid "Total market data & tech spend"
+msgstr "Общ разход за пазарни данни и технологии"
+
+#: .\landing\templates\landing\demo.html:87
+#, python-format
+msgid "+4.1%% vs. previous 12 months"
+msgstr "+4.1%% спрямо предходните 12 месеца"
+
+#: .\landing\templates\landing\demo.html:94
+#: .\landing\templates\landing\home.html:67
+msgid "Identified savings"
+msgstr "Идентифицирани спестявания"
+
+#: .\landing\templates\landing\demo.html:99
+msgid "27 active initiatives"
+msgstr "27 активни инициативи"
+
+#: .\landing\templates\landing\demo.html:106
+#| msgid "Underused licenses"
+msgid "Underused / duplicate licences"
+msgstr "Недоизползвани / дублирани лицензи"
+
+#: .\landing\templates\landing\demo.html:110
+msgid "Across 7 entities, 34 desks"
+msgstr "В 7 юридически лица, 34 деска"
+
+#: .\landing\templates\landing\demo.html:117
+msgid "Next 12-month saving potential"
+msgstr "Потенциални спестявания за следващите 12 месеца"
+
+#: .\landing\templates\landing\demo.html:122
+msgid "Pipeline + renewals"
+msgstr "Пайплайн + подновявания"
+
+#: .\landing\templates\landing\demo.html:136
+msgid "Spend vs. budget by quarter"
+msgstr "Разходи спрямо бюджет по тримесечия"
+
+#: .\landing\templates\landing\demo.html:139
+msgid "Illustrative values · USD m"
+msgstr "Примерни стойности · млн. USD"
+
+#: .\landing\templates\landing\demo.html:169
+msgid "Q1 · Actual: 112m"
+msgstr "Q1 · Реално: 112m"
+
+#: .\landing\templates\landing\demo.html:173
+msgid "Q1 · Budget: 110m"
+msgstr "Q1 · Бюджет: 110m"
+
+#: .\landing\templates\landing\demo.html:179
+msgid "Q2 · Actual: 118m"
+msgstr "Q2 · Реално: 118m"
+
+#: .\landing\templates\landing\demo.html:183
+msgid "Q2 · Budget: 115m"
+msgstr "Q2 · Бюджет: 115m"
+
+#: .\landing\templates\landing\demo.html:189
+msgid "Q3 · Actual: 109m"
+msgstr "Q3 · Реално: 109m"
+
+#: .\landing\templates\landing\demo.html:193
+msgid "Q3 · Budget: 112m"
+msgstr "Q3 · Бюджет: 112m"
+
+#: .\landing\templates\landing\demo.html:199
+msgid "Q4 · Actual: 121m"
+msgstr "Q4 · Реално: 121m"
+
+#: .\landing\templates\landing\demo.html:203
+msgid "Q4 · Budget: 118m"
+msgstr "Q4 · Бюджет: 118m"
+
+#: .\landing\templates\landing\demo.html:221
+msgid "Under budget · –3.2m"
+msgstr "Под бюджета · –3.2m"
+
+#: .\landing\templates\landing\demo.html:232
+#| msgid "Total spend"
+msgid "Actual spend"
+msgstr "Реален разход"
+
+#: .\landing\templates\landing\demo.html:234
+msgid "Budget"
+msgstr "Бюджет"
+
+#: .\landing\templates\landing\demo.html:236
+msgid "Target range"
+msgstr "Целеви диапазон"
+
+#: .\landing\templates\landing\demo.html:239
+msgid ""
+"The shaded band shows the range where spend is considered “on target”. "
+"Moving outside it (Q2/Q4 above, Q3 below) is a trigger for deeper analysis."
+msgstr ""
+"Оцветената зона показва диапазона, в който разходите се считат за „в целта“. "
+"Излизането извън него (Q2/Q4 нагоре, Q3 надолу) е сигнал за по-задълбочен анализ."
+
+#: .\landing\templates\landing\demo.html:251
+msgid "Savings pipeline by stage"
+msgstr "Пайплайн на спестяванията по етапи"
+
+#: .\landing\templates\landing\demo.html:254
+msgid "Based on current initiatives"
+msgstr "На база текущите инициативи"
+
+#: .\landing\templates\landing\demo.html:259
+#| msgid "Identified savings"
+msgid "Identified"
+msgstr "Идентифицирани"
+
+#: .\landing\templates\landing\demo.html:269
+#: .\landing\templates\landing\home.html:69
+msgid "In negotiation"
+msgstr "В процес на договаряне"
+
+#: .\landing\templates\landing\demo.html:279
+#| msgid "Contact"
+msgid "Contracted"
+msgstr "Договорени"
+
+#: .\landing\templates\landing\demo.html:288
+msgid ""
+"DataNaut tracks status by vendor × desk × user and can connect to CRM / PM "
+"tools for real pipeline tracking."
+msgstr ""
+"DataNaut следи статуса по доставчик × деск × потребител и може да се свърже с "
+"CRM / PM инструменти за реално проследяване на пайплайна."
+
+#: .\landing\templates\landing\demo.html:303
+#| msgid "Underused licenses"
+msgid "Underused licences by desk (top 6)"
+msgstr "Недоизползвани лицензи по дескове (топ 6)"
+
+#: .\landing\templates\landing\demo.html:306
+msgid "Dummy data · sorted by saving impact"
+msgstr "Примерни данни · сортирани по ефект върху спестяванията"
+
+#: .\landing\templates\landing\demo.html:313
+msgid "Desk"
+msgstr "Деск"
+
+#: .\landing\templates\landing\demo.html:314
+#| msgid "12 vendors"
+msgid "Vendor"
+msgstr "Доставчик"
+
+#: .\landing\templates\landing\demo.html:315
+msgid "Licences"
+msgstr "Лицензи"
+
+#: .\landing\templates\landing\demo.html:316
+#| msgid "Underused licenses"
+msgid "Underuse"
+msgstr "Недоизползване"
+
+#: .\landing\templates\landing\demo.html:317
+msgid "Est. saving"
+msgstr "Прогнозни спестявания"
+
+#: .\landing\templates\landing\demo.html:322
+msgid "Power trading"
+msgstr "Търговия с електроенергия"
+
+#: .\landing\templates\landing\demo.html:329
+msgid "Macro / rates"
+msgstr "Макро / лихвени проценти"
+
+#: .\landing\templates\landing\demo.html:336
+msgid "FX & money markets"
+msgstr "Валути и парични пазари"
+
+#: .\landing\templates\landing\demo.html:343
+msgid "Struct. products"
+msgstr "Структурирани продукти"
+
+#: .\landing\templates\landing\demo.html:344
+msgid "Mixed"
+msgstr "Смесени"
+
+#: .\landing\templates\landing\demo.html:350
+msgid "Equities trading"
+msgstr "Търговия с акции"
+
+#: .\landing\templates\landing\demo.html:357
+msgid "Risk / middle office"
+msgstr "Риск / middle office"
+
+#: .\landing\templates\landing\demo.html:358
+msgid "Various"
+msgstr "Разни"
+
+#: .\landing\templates\landing\demo.html:372
+msgid "Renewal calendar (next 12 months)"
+msgstr "Календар на подновяванията (следващи 12 месеца)"
+
+#: .\landing\templates\landing\demo.html:378
+msgid "Bloomberg enterprise licence"
+msgstr "Bloomberg enterprise лиценз"
+
+#: .\landing\templates\landing\demo.html:381
+msgid "Entity: London trading · Vendor: Bloomberg"
+msgstr "Юридическо лице: London trading · Доставчик: Bloomberg"
+
+#: .\landing\templates\landing\demo.html:385
+#: .\landing\templates\landing\demo.html:400
+#: .\landing\templates\landing\demo.html:415
+msgid "Renewal"
+msgstr "Подновяване"
+
+#: .\landing\templates\landing\demo.html:393
+#| msgid "Internal feeds"
+msgid "ICE data feeds"
+msgstr "ICE data feeds"
+
+#: .\landing\templates\landing\demo.html:396
+msgid "Entity: EU power · Vendor: ICE"
+msgstr "Юридическо лице: EU power · Доставчик: ICE"
+
+#: .\landing\templates\landing\demo.html:408
+msgid "Refinitiv desktop licences"
+msgstr "Refinitiv desktop лицензи"
+
+#: .\landing\templates\landing\demo.html:411
+msgid "Entity: US commodities · Vendor: Refinitiv"
+msgstr "Юридическо лице: US commodities · Доставчик: Refinitiv"
+
+#: .\landing\templates\landing\demo.html:421
+msgid ""
+"In a live deployment, DataNaut would allow drill-down into each renewal – "
+"which desks / users are in scope, what optimisation options exist and which "
+"savings are already planned."
+msgstr ""
+"В реално внедряване DataNaut позволява детайлен drill-down за всяко "
+"подновяване – кои дескове / потребители са в обхвата, какви опции за "
+"оптимизация има и кои спестявания вече са планирани."
+
+#: .\landing\templates\landing\demo.html:438
+msgid "Ready to plug in your own contracts & invoices?"
+msgstr "Готови ли сте да включите вашите договори и фактури?"
+
+#: .\landing\templates\landing\demo.html:441
+msgid ""
+"Start with a focused Data Cost Assessment on a subset of vendors – typically "
+"4–6 weeks from data ingestion to first savings."
+msgstr ""
+"Започнете с фокусиран Data Cost Assessment върху част от доставчиците – "
+"обикновено 4–6 седмици от въвеждането на данните до първите спестявания."
+
+#: .\landing\templates\landing\demo.html:447
+#| msgid "Book a free Data Cost Assessment"
+msgid "Book a free assessment"
+msgstr "Запазете безплатна оценка"
+
+#: .\landing\templates\landing\for_cfo.html:4
+#| msgid "CFO & finance"
+msgid "For CFO & finance · DataNaut"
+msgstr "За CFO и финанси · DataNaut"
+
+#: .\landing\templates\landing\for_cfo.html:70
+#| msgid "CFO & finance"
+msgid "For CFO & finance"
+msgstr "За CFO и финанси"
+
+#: .\landing\templates\landing\for_cfo.html:73
+#: .\landing\templates\landing\home.html:176
+msgid "Turn opaque spend into a managed asset class."
+msgstr "Превърнете неясните разходи в управляван клас активи."
+
+#: .\landing\templates\landing\for_cfo.html:76
+msgid ""
+"Move market data and tech subscriptions out of the “miscellaneous IT” bucket "
+"and into a transparent, governable asset with clear ROI."
+msgstr ""
+"Извадете абонаментите за пазарни данни и технологии от графата „разни IT“ и "
+"ги превърнете в прозрачен, управляван актив с ясно измерим ROI."
+
+#: .\landing\templates\landing\for_cfo.html:84
+#| msgid "Contract-level view of spend by vendor, desk, user and entity."
+msgid "Contract-level view of spend by vendor, entity, desk and user."
+msgstr ""
+"Изглед на разходите на ниво договор – по доставчик, юридическо лице, деск и "
+"потребител."
+
+#: .\landing\templates\landing\for_cfo.html:87
+#| msgid "Usage & entitlement analytics to support renewals and re-pricing."
+msgid "Normalised usage & entitlement data to support renewal decisions."
+msgstr ""
+"Нормализирани данни за използване и entitlement-и в подкрепа на решенията за "
+"подновяване."
+
+#: .\landing\templates\landing\for_cfo.html:90
+msgid "Scenario tools for budgeting, savings initiatives and stress tests."
+msgstr ""
+"Инструменти за сценарийно планиране при бюджети, инициативи за спестявания и "
+"стрес тестове."
+
+#: .\landing\templates\landing\for_cfo.html:93
+#| msgid "Export-ready reports for regulators and internal audit."
+msgid "Audit-ready narrative for boards, regulators and internal control."
+msgstr ""
+"Ясен, готов за одит разказ за бордове, регулатори и вътрешен контрол."
+
+#: .\landing\templates\landing\for_cfo.html:99
+#: .\landing\templates\landing\for_investors.html:98
+#: .\landing\templates\landing\for_trading_desks.html:88
+msgid "View demo dashboard"
+msgstr "Вижте демо таблото"
+
+#: .\landing\templates\landing\for_cfo.html:102
+msgid "Talk to us about ROI"
+msgstr "Говорете с нас за ROI"
+
+#: .\landing\templates\landing\for_cfo.html:115
+msgid "Spend transparency"
+msgstr "Прозрачност на разходите"
+
+#: .\landing\templates\landing\for_cfo.html:117
+msgid ""
+"Map every invoice line back to vendor, feed, desk, entity and user. "
+"Understand exactly what drives the market data & tech cost line."
+msgstr ""
+"Свържете всяка фактурна позиция обратно с доставчик, поток, деск, юридическо "
+"лице и потребител. Разберете точно какво движи разходите за пазарни данни и "
+"технологии."
+
+#: .\landing\templates\landing\for_cfo.html:126
+msgid "Scenario planning"
+msgstr "Сценарийно планиране"
+
+#: .\landing\templates\landing\for_cfo.html:128
+msgid ""
+"Model savings initiatives, vendor changes and policy tweaks before you "
+"commit. See impact by business line, entity and P&L."
+msgstr ""
+"Моделирайте инициативи за спестявания, промени на доставчици и политики още "
+"преди да се ангажирате. Вижте ефекта по бизнес линия, юридическо лице и P&L."
+
+#: .\landing\templates\landing\for_cfo.html:137
+msgid "Governance & reporting"
+msgstr "Управление и отчетност"
+
+#: .\landing\templates\landing\for_cfo.html:139
+msgid ""
+"Provide boards, regulators and audit with a clear, defensible record of "
+"contracts, entitlements and usage – not just another spreadsheet."
+msgstr ""
+"Дайте на бордовете, регулаторите и одита ясен, защитим запис на договори, "
+"entitlement-и и използване – не просто още една електронна таблица."
+
+#: .\landing\templates\landing\for_investors.html:4
+#| msgid "How it works · DataNaut"
+msgid "For investors & board · DataNaut"
+msgstr "За инвеститори и борд · DataNaut"
+
+#: .\landing\templates\landing\for_investors.html:72
+#| msgid "Investors & board"
+msgid "For investors & boards"
+msgstr "За инвеститори и бордове"
+
+#: .\landing\templates\landing\for_investors.html:75
+msgid "A focused platform with clear ROI levers."
+msgstr "Фокусирана платформа с ясни лостове за ROI."
+
+#: .\landing\templates\landing\for_investors.html:78
+msgid ""
+"DataNaut is built for institutions where market data and technology "
+"subscriptions are one of the largest – and least transparent – cost lines."
+msgstr ""
+"DataNaut е създаден за институции, в които абонаментите за пазарни данни и "
+"технологии са сред най-големите – и най-непрозрачни – пера на разходите."
+
+#: .\landing\templates\landing\for_investors.html:86
+msgid "Contracts-first approach – no dependence on reselling data."
+msgstr ""
+"Подход „първо договорите“ – без зависимост от препродажба на данни."
+
+#: .\landing\templates\landing\for_investors.html:89
+msgid "Clear value story: subscription as a fraction of realised savings."
+msgstr ""
+"Ясна стойностна история: абонаментът е само част от реализираните спестявания."
+
+#: .\landing\templates\landing\for_investors.html:92
+msgid "Expandable product roadmap from cost visibility to optimisation engine."
+msgstr ""
+"Разширяема продуктова пътна карта – от видимост на разходите до модул за "
+"оптимизация."
+
+#: .\landing\templates\landing\for_investors.html:101
+msgid "Discuss investor use cases"
+msgstr "Обсъдете сценарии за инвеститори"
+
+#: .\landing\templates\landing\for_investors.html:115
+msgid "Initial wedge"
+msgstr "Първоначален „wedge“"
+
+#: .\landing\templates\landing\for_investors.html:117
+msgid ""
+"Data Cost Assessment – focused 4–6 week engagement on a subset of vendors, "
+"validating saving potential and building the normalised data model."
+msgstr ""
+"Data Cost Assessment – фокусиран ангажимент от 4–6 седмици върху част от "
+"доставчиците, валидиращ потенциала за спестявания и изграждащ нормализирания "
+"датамодел."
+
+#: .\landing\templates\landing\for_investors.html:126
+msgid "Platform phase"
+msgstr "Фаза „Платформа“"
+
+#: .\landing\templates\landing\for_investors.html:128
+msgid ""
+"Ongoing subscription across entities and desks, with dashboards for trading, "
+"finance and procurement, plus automation of renewal decisions."
+msgstr ""
+"Текущ абонамент за множество юридически лица и дескове с табла за трейдинг, "
+"финанси и снабдяване, плюс автоматизация на решенията за подновяване."
+
+#: .\landing\templates\landing\for_investors.html:137
+msgid "Longer-term upside"
+msgstr "Дългосрочен потенциал"
+
+#: .\landing\templates\landing\for_investors.html:139
+msgid ""
+"Optimisation engine that can benchmark usage patterns, vendor packages and "
+"internal costs to recommend the most efficient configuration over time."
+msgstr ""
+"Модул за оптимизация, който сравнява модели на използване, пакети на "
+"доставчици и вътрешни разходи, за да препоръчва най-ефективната конфигурация "
+"във времето."
+
+#: .\landing\templates\landing\for_trading_desks.html:4
+#| msgid "Trading & dealing desks"
+msgid "For trading & dealing desks · DataNaut"
+msgstr "За търговски и дилърски дескове · DataNaut"
+
+#: .\landing\templates\landing\for_trading_desks.html:70
+#| msgid "Trading & dealing desks"
+msgid "For trading & dealing desks"
+msgstr "За търговски и дилърски дескове"
+
+#: .\landing\templates\landing\for_trading_desks.html:73
+#| msgid "Less admin, more trading."
+msgid "Less admin. More trading."
+msgstr "По-малко администрация. Повече търговия."
+
+#: .\landing\templates\landing\for_trading_desks.html:76
+msgid ""
+"Give every desk a clear view of the market data and tech feeds they rely on, "
+"without getting stuck in spreadsheets and entitlement files."
+msgstr ""
+"Дайте на всеки деск ясен изглед към пазарните и технологични потоци, на които "
+"разчита, без да затъва в таблици и entitlement файлове."
+
+#: .\landing\templates\landing\for_trading_desks.html:80
+#| msgid "Single view of all market data feeds per desk, trader and strategy."
+msgid "Single view of feeds and licences by desk, trader, strategy and venue."
+msgstr ""
+"Единен изглед на потоците и лицензите по деск, трейдър, стратегия и място на "
+"търговия."
+
+#: .\landing\templates\landing\for_trading_desks.html:81
+#| msgid "Spot overlapping feeds and unused licenses before renewals."
+msgid "Spot overlapping feeds and unused licences before renewals hit."
+msgstr ""
+"Откриване на припокриващи се потоци и неизползвани лицензи още преди "
+"подновяванията."
+
+#: .\landing\templates\landing\for_trading_desks.html:82
+#| msgid "Entitlement checks so every desk has exactly what they need."
+msgid ""
+"Entitlement checks so every desk has exactly what they need – nothing more, "
+"nothing less."
+msgstr ""
+"Проверки на правата за достъп, така че всеки деск да има точно това, което му "
+"е нужно – нито повече, нито по-малко."
+
+#: .\landing\templates\landing\for_trading_desks.html:83
+#| msgid "Export-ready reports for regulators and internal audit."
+msgid "Export-ready reports for regulators, internal audit and control teams."
+msgstr ""
+"Готови за експорт отчети за регулатори, вътрешен одит и контролни екипи."
+
+#: .\landing\templates\landing\for_trading_desks.html:91
+msgid "Discuss trading use cases"
+msgstr "Обсъдете трейдинг use case-и"
+
+#: .\landing\templates\landing\for_trading_desks.html:104
+msgid "Desk-level visibility"
+msgstr "Видимост на ниво деск"
+
+#: .\landing\templates\landing\for_trading_desks.html:106
+msgid ""
+"See exactly which feeds each desk is using, how licences map to users and "
+"which packages are actually critical to day-to-day trading."
+msgstr ""
+"Вижте точно кои потоци използва всеки деск, как лицензите са вързани към "
+"потребители и кои пакети са критични за ежедневната търговия."
+
+#: .\landing\templates\landing\for_trading_desks.html:112
+msgid "Renewal control"
+msgstr "Контрол върху подновяванията"
+
+#: .\landing\templates\landing\for_trading_desks.html:114
+msgid ""
+"Flag underused and duplicate licences before renewal dates. Feed structured "
+"recommendations into vendor negotiations and budgeting."
+msgstr ""
+"Отбелязвайте недоизползвани и дублирани лицензи преди датите на подновяване. "
+"Подайте структурирани препоръки в преговорите с доставчици и при бюджетирането."
+
+#: .\landing\templates\landing\for_trading_desks.html:120
+msgid "Faster onboarding"
+msgstr "По-бързо onboarding-ване"
+
+#: .\landing\templates\landing\for_trading_desks.html:122
+msgid ""
+"Standardised entitlement workflows help new desks, traders and strategies "
+"get the right access on day one – without weeks of email back-and-forth."
+msgstr ""
+"Стандартизирани entitlement процеси помагат на нови дескове, трейдъри и "
+"стратегии да получат нужния достъп още в първия ден – без седмици писма напред-"
+"назад."
+
+#: .\landing\templates\landing\home.html:14
+msgid "Smart Data. Smarter"
+msgstr "Умни данни. Още по-умни"
+
+#: .\landing\templates\landing\home.html:14
+msgid "Decisions."
+msgstr "решения."
+
+#: .\landing\templates\landing\home.html:17
+msgid ""
+"DataNaut optimizes your financial and market data spend by analyzing "
+"contracts, invoices and entitlements – so you cut waste, stay compliant and "
+"keep every desk fully empowered."
+msgstr ""
+"DataNaut оптимизира разходите ви за финансови и пазарни данни, като анализира "
+"договори, фактури и entitlement файлове – така намалявате излишните разходи, "
+"оставате в пълно съответствие и всяко звено получава точно това, от което се "
+"нуждае."
+
+#: .\landing\templates\landing\home.html:26
+#, python-format
+msgid "10–30%% reduction in market data & tech spend."
+msgstr "10–30%% намаление на разходите за пазарни данни и технологии."
+
+#: .\landing\templates\landing\home.html:27
+msgid "Single view of contracts, usage and underused licenses."
+msgstr "Единен изглед на договори, реално използване и недоизползвани лицензи."
+
+#: .\landing\templates\landing\home.html:28
+msgid "No code changes. No vendor lock-in. Results in weeks, not months."
+msgstr ""
+"Без промени по кода. Без обвързване с конкретен доставчик. Резултати за "
+"седмици, не за месеци."
+
+#: .\landing\templates\landing\home.html:33
+msgid "Request a demo"
+msgstr "Заявете демо"
+
+#: .\landing\templates\landing\home.html:36
+msgid "Book a free data cost audit"
+msgstr "Запазете безплатен одит на разходите за данни"
+
+#: .\landing\templates\landing\home.html:41
+msgid ""
+"We’ll run an upfront assessment on a subset of your contracts and invoices "
+"to size the savings before you commit."
+msgstr ""
+"Ще направим предварителна оценка върху част от вашите договори и фактури, за "
+"да измерим потенциалните спестявания още преди да вземете решение."
+
+#: .\landing\templates\landing\home.html:53
+msgid "Market data spend overview · Illustrative data"
+msgstr "Обзор на разходите за пазарни данни · Примерни данни"
+
+#: .\landing\templates\landing\home.html:56
+msgid "Last 12 months"
+msgstr "Последните 12 месеца"
+
+#: .\landing\templates\landing\home.html:62
+msgid "Total spend"
+msgstr "Общ разход"
+
+#: .\landing\templates\landing\home.html:64
+#, python-format
+msgid "Target: -12%%"
+msgstr "Цел: –12%%"
+
+#: .\landing\templates\landing\home.html:72
+msgid "Underused licenses"
+msgstr "Непълно използвани лицензи"
+
+#: .\landing\templates\landing\home.html:74
+msgid "High opportunity"
+msgstr "Висок потенциал"
+
+#: .\landing\templates\landing\home.html:79
+msgid "Vendors monitored"
+msgstr "Следени доставчици"
+
+#: .\landing\templates\landing\home.html:80
+msgid "Desks & teams"
+msgstr "Дескове и екипи"
+
+#: .\landing\templates\landing\home.html:86
+msgid "12 vendors"
+msgstr "12 доставчика"
+
+#: .\landing\templates\landing\home.html:87
+msgid "34 desks"
+msgstr "34 деска"
+
+#: .\landing\templates\landing\home.html:98
+msgid "Trusted by teams working with"
+msgstr "Доверен партньор на екипи, които работят с"
+
+#: .\landing\templates\landing\home.html:99
+msgid "Leading market data & trading platforms"
+msgstr "Водещи платформи за пазарни данни и търговия"
+
+#: .\landing\templates\landing\home.html:105
+msgid "Internal feeds"
+msgstr "Вътрешни източници на данни"
+
+#: .\landing\templates\landing\home.html:117
+msgid ""
+"Market data is one of your biggest costs – and one of the least transparent"
+msgstr ""
+"Пазарните данни са един от най-големите ви разходи – и един от най-"
+"непрозрачните."
+
+#: .\landing\templates\landing\home.html:120
+msgid ""
+"Multiple vendors (Bloomberg, ICE, Refinitiv, EnAppSys, …) with overlapping "
+"feeds."
+msgstr ""
+"Множество доставчици (Bloomberg, ICE, Refinitiv, EnAppSys …) с припокриващи "
+"се потоци данни."
+
+#: .\landing\templates\landing\home.html:121
+msgid "Little visibility into who actually uses which licenses."
+msgstr "Ограничена видимост кой реално използва кой лиценз."
+
+#: .\landing\templates\landing\home.html:122
+msgid ""
+"Complex entitlement files and invoices that nobody has time to reconcile."
+msgstr ""
+"Сложни entitlement файлове и фактури, за които никой няма време да прави "
+"пълно съпоставяне."
+
+#: .\landing\templates\landing\home.html:123
+msgid "Regulatory pressure while costs keep growing."
+msgstr "Регулаторен натиск, докато разходите продължават да нарастват."
+
+#: .\landing\templates\landing\home.html:129
+msgid "Result today"
+msgstr "Резултатът днес"
+
+#: .\landing\templates\landing\home.html:131
+msgid "Overspend, compliance risk and endless Excel firefighting."
+msgstr "Преразход, регулаторен риск и безкрайни „пожари“ в Excel."
+
+#: .\landing\templates\landing\home.html:134
+msgid ""
+"DataNaut gives you a clean, contract-first view so you can act with "
+"confidence: rationalise feeds, re-price contracts and redeploy usage where "
+"it matters most."
+msgstr ""
+"DataNaut ви дава ясен, contract-first изглед, за да действате с увереност: "
+"да оптимизирате потоци данни, да предоговорите договори и да преразпределите "
+"използването там, където носи най-голяма стойност."
+
+#: .\landing\templates\landing\home.html:149
+msgid "Who DataNaut is for"
+msgstr "За кого е DataNaut"
+
+#: .\landing\templates\landing\home.html:151
+msgid ""
+"Different teams care about different outcomes. Pick the persona that best "
+"matches you, and we’ll tailor the conversation and roadmap."
+msgstr ""
+"Различните екипи се фокусират върху различни резултати. Изберете профила, "
+"който най-добре ви описва, и ние ще адаптираме разговора и пътната карта "
+"специално за вас."
+
+#: .\landing\templates\landing\home.html:162
+msgid "Less admin, more trading."
+msgstr "По-малко администрация, повече търговия."
+
+#: .\landing\templates\landing\home.html:164
+msgid "Single view of all market data feeds per desk, trader and strategy."
+msgstr "Единен изглед на всички пазарни данни по деск, трейдър и стратегия."
+
+#: .\landing\templates\landing\home.html:165
+msgid "Spot overlapping feeds and unused licenses before renewals."
+msgstr ""
+"Откриване на припокриващи се потоци и неизползвани лицензи още преди "
+"подновяване."
+
+#: .\landing\templates\landing\home.html:166
+msgid "Entitlement checks so every desk has exactly what they need."
+msgstr ""
+"Проверки на правата за достъп, така че всеки деск да има точно това, което "
+"му е нужно."
+
+#: .\landing\templates\landing\home.html:167
+msgid "Export-ready reports for regulators and internal audit."
+msgstr "Готови за експорт отчети за регулатори и вътрешен одит."
+
+#: .\landing\templates\landing\home.html:179
+msgid "Usage & entitlement analytics to support renewals and re-pricing."
+msgstr ""
+"Аналитика за използване и entitlement-и, която подпомага подновяванията и "
+"препазаруването."
+
+#: .\landing\templates\landing\home.html:180
+msgid "Forecasting tools to support budgeting and scenario analysis."
+msgstr ""
+"Инструменти за прогнозиране в подкрепа на бюджетирането и анализ на сценарии."
+
+#: .\landing\templates\landing\home.html:181
+msgid "Clear, defensible narrative for cost optimisation and ROI."
+msgstr ""
+"Ясен и защитим разказ за оптимизацията на разходите и възвръщаемостта на "
+"инвестициите."
+
+#: .\landing\templates\landing\home.html:190
+msgid "Clear story on efficiency, control and growth."
+msgstr "Ясна история за ефективност, контрол и растеж."
+
+#: .\landing\templates\landing\home.html:192
+msgid "Show how market data and tech subscriptions are under control."
+msgstr ""
+"Покажете, че разходите за пазарни данни и технологични абонаменти са под "
+"контрол."
+
+#: .\landing\templates\landing\home.html:193
+msgid "Bridge between cost savings agenda and growth initiatives."
+msgstr ""
+"Мост между програмата за спестяване на разходи и инициативите за растеж."
+
+#: .\landing\templates\landing\home.html:194
+msgid "Governance trail from contracts through to desks and entities."
+msgstr "Пълна проследимост – от договора до конкретния деск и юридическо лице."
+
+#: .\landing\templates\landing\home.html:195
+msgid "Scalable operating model that won’t break as volumes grow."
+msgstr ""
+"Скалируем оперативен модел, който не се „чупи“, когато обемите нараснат."
+
+#: .\landing\templates\landing\home.html:209
+msgid "Book a free Data Cost Assessment"
+msgstr "Запазете безплатна оценка на разходите за данни"
+
+#: .\landing\templates\landing\home.html:211
+msgid ""
+"Leave your details and we’ll get back to you to estimate your savings "
+"potential based on a sample of your contracts and invoices."
+msgstr ""
+"Оставете вашите данни и ние ще се свържем с вас, за да оценим потенциалните "
+"спестявания на база извадка от вашите договори и фактури."
+
+#: .\landing\templates\landing\home.html:244
+msgid ""
+"Share a bit about your current market data setup, vendors and pain points."
+msgstr ""
+"Разкажете накратко за текущата си инфраструктура за пазарни данни, "
+"доставчиците и основните предизвикателства."
+
+#: .\landing\templates\landing\home.html:250
+msgid "Send"
+msgstr "Изпрати"
+
+#: .\landing\templates\landing\how_it_works.html:4
+msgid "How it works · DataNaut"
+msgstr "Как работи · DataNaut"
+
+#: .\landing\templates\landing\how_it_works.html:10
+msgid "How DataNaut works"
+msgstr "Как работи DataNaut"
+
+#: .\landing\templates\landing\how_it_works.html:12
+msgid ""
+"A contract-first platform that connects your vendors, contracts, invoices "
+"and entitlement files into a single, actionable view."
+msgstr ""
+"Платформа, която започва от договорите и свързва вашите доставчици, "
+"договори, фактури и entitlement файлове в една обща, използваема картина."
+
+#: .\landing\templates\landing\how_it_works.html:15
+msgid ""
+"This page expands the “How it works” section from the homepage with more "
+"detail for desks, finance and investors."
+msgstr ""
+"Тази страница разширява секцията „How it works“ от началната страница и дава "
+"повече детайл за трейдинг маси, финанси и инвеститори."
+
+#: .\landing\templates\landing\how_it_works.html:26
+msgid "1. Ingest"
+msgstr "1. Въвеждане"
+
+#: .\landing\templates\landing\how_it_works.html:29
+msgid "Contracts, invoices & entitlement files"
+msgstr "Договори, фактури и entitlement файлове"
+
+#: .\landing\templates\landing\how_it_works.html:32
+msgid ""
+"We ingest contracts, invoices and entitlement files from your core market "
+"data and technology vendors – Bloomberg, ICE, Refinitiv, EnAppSys and "
+"internal feeds. No code changes required on your side."
+msgstr ""
+"Импортираме договори, фактури и entitlement файлове от основните ви "
+"доставчици на пазарни данни и технологии – Bloomberg, ICE, Refinitiv, "
+"EnAppSys и вътрешни източници. Не са нужни промени по вашия код."
+
+#: .\landing\templates\landing\how_it_works.html:39
+msgid "2. Normalise"
+msgstr "2. Нормализиране"
+
+#: .\landing\templates\landing\how_it_works.html:42
+msgid "Single cost & usage model"
+msgstr "Единен модел за разходи и използване"
+
+#: .\landing\templates\landing\how_it_works.html:45
+msgid ""
+"DataNaut maps everything to a common model by vendor, desk, user and legal "
+"entity – turning PDFs and CSVs into a clean data layer. The result is a "
+"single repository where finance, trading and procurement see the same "
+"numbers."
+msgstr ""
+"DataNaut картографира всичко към общ модел по доставчик, деск, потребител и "
+"юридическо лице – превръща PDF-и и CSV файлове в чист слой от данни. "
+"Резултатът е единно хранилище, в което финансите, търговията и снабдяването "
+"гледат едни и същи числа."
+
+#: .\landing\templates\landing\how_it_works.html:52
+msgid "3. Optimise"
+msgstr "3. Оптимизация"
+
+#: .\landing\templates\landing\how_it_works.html:55
+msgid "Dashboards, alerts & savings"
+msgstr "Табла, аларми и спестявания"
+
+#: .\landing\templates\landing\how_it_works.html:58
+msgid ""
+"Dashboards highlight duplicate and underused licences, upcoming renewals and "
+"saving opportunities. Exports for CFO, procurement and desks make it easy to "
+"take decisions and document the savings story for investors and regulators."
+msgstr ""
+"Таблата подчертават дублиращи се и недоизползвани лицензи, предстоящи "
+"подновявания и възможности за спестяване. Експорти за CFO, снабдяване и "
+"трейдинг екипите улесняват вземането на решения и документирането на "
+"историята на спестяванията пред инвеститори и регулатори."
+
+#: .\landing\templates\landing\how_it_works.html:65
+msgid "Start with a Data Cost Assessment"
+msgstr "Започнете с анализ на разходите за данни"
+
+#: .\landing\templates\landing\pricing.html:4
+#| msgid "How it works · DataNaut"
+msgid "Pricing · DataNaut"
+msgstr "Цени · DataNaut"
+
+#: .\landing\templates\landing\pricing.html:53
+msgid "Simple pricing, aligned with value"
+msgstr "Просто ценообразуване, обвързано със стойността"
+
+#: .\landing\templates\landing\pricing.html:56
+msgid ""
+"DataNaut is priced around the number of legal entities, desks and vendors – "
+"so that costs stay predictable while savings grow."
+msgstr ""
+"Ценообразуването на DataNaut се базира на броя юридически лица, дескове и "
+"доставчици – така разходите остават предвидими, докато спестяванията растат."
+
+#: .\landing\templates\landing\pricing.html:67
+msgid ""
+"Indicative structure – final pricing depends on scope, number of entities "
+"and vendors. The goal is always to keep <strong>subscription &lt; realised "
+"savings</strong>."
+msgstr ""
+"Показателна структура – крайната цена зависи от обхвата, броя юридически лица "
+"и доставчици. Целта винаги е <strong>абонаментът да е по-малък от "
+"реализираните спестявания</strong>."
+
+#: .\landing\templates\landing\pricing.html:78
+msgid "PILOT"
+msgstr "PILOT"
+
+#: .\landing\templates\landing\pricing.html:81
+#| msgid "Book a free Data Cost Assessment"
+msgid "Data Cost Assessment"
+msgstr "Оценка на разходите за данни"
+
+#: .\landing\templates\landing\pricing.html:84
+msgid "4–6 weeks, focused on a subset of your market data / technology stack."
+msgstr ""
+"4–6 седмици, фокусирани върху част от вашия стек за пазарни данни / технологии."
+
+#: .\landing\templates\landing\pricing.html:88
+#| msgid "Contracts, invoices & entitlement files"
+msgid "Ingestion of selected contracts, invoices & entitlement files."
+msgstr "Импортиране на избрани договори, фактури и entitlement файлове."
+
+#: .\landing\templates\landing\pricing.html:91
+#| msgid "Contract-level view of spend by vendor, desk, user and entity."
+msgid "Normalised view of spend by vendor, desk, user and entity."
+msgstr ""
+"Нормализиран изглед на разходите по доставчик, деск, потребител и юридическо "
+"лице."
+
+#: .\landing\templates\landing\pricing.html:94
+msgid "Identified saving opportunities & quick wins."
+msgstr "Идентифицирани възможности за спестявания и бързи победи."
+
+#: .\landing\templates\landing\pricing.html:97
+msgid "Exportable report for CFO / procurement / desks."
+msgstr "Експортируем отчет за CFO / снабдяване / дескове."
+
+#: .\landing\templates\landing\pricing.html:101
+#: .\landing\templates\landing\pricing.html:143
+#: .\landing\templates\landing\pricing.html:185
+msgid "Best for"
+msgstr "Най-подходящо за"
+
+#: .\landing\templates\landing\pricing.html:104
+msgid ""
+"Firms that want to validate savings potential before committing to a "
+"platform."
+msgstr ""
+"Фирми, които искат да валидират потенциала за спестявания, преди да се "
+"ангажират с платформа."
+
+#: .\landing\templates\landing\pricing.html:108
+#| msgid "Request a demo"
+msgid "Request pilot details"
+msgstr "Заявете детайли за пилот"
+
+#: .\landing\templates\landing\pricing.html:117
+msgid "STANDARD · MOST COMMON"
+msgstr "STANDARD · НАЙ-ЧЕСТО"
+
+#: .\landing\templates\landing\pricing.html:120
+msgid "Platform subscription"
+msgstr "Абонамент за платформата"
+
+#: .\landing\templates\landing\pricing.html:123
+msgid "Ongoing use of DataNaut across core entities, desks and key vendors."
+msgstr ""
+"Постоянно използване на DataNaut в основните юридически лица, дескове и при "
+"ключовите доставчици."
+
+#: .\landing\templates\landing\pricing.html:127
+msgid "All Pilot features, continuously updated."
+msgstr "Всички функционалности от Pilot, поддържани в актуален вид."
+
+#: .\landing\templates\landing\pricing.html:130
+msgid "Full contract & usage repository across in-scope vendors."
+msgstr ""
+"Пълно хранилище на договори и използване за всички доставчици в обхвата."
+
+#: .\landing\templates\landing\pricing.html:133
+msgid "Dashboards for trading desks, finance and procurement."
+msgstr "Табла за трейдинг дескове, финанси и снабдяване."
+
+#: .\landing\templates\landing\pricing.html:136
+msgid "Renewal calendar, duplicate / underuse detection."
+msgstr "Календар на подновяванията, откриване на дублиране и недоизползване."
+
+#: .\landing\templates\landing\pricing.html:139
+msgid "Email / call support, quarterly optimisation reviews."
+msgstr "Поддръжка по имейл / телефон, тримесечни прегледи за оптимизация."
+
+#: .\landing\templates\landing\pricing.html:146
+msgid ""
+"Institutions that treat market data & tech subscriptions as a managed asset "
+"class, not just a cost line."
+msgstr ""
+"Институции, които третират абонаментите за пазарни данни и технологии като "
+"управляван клас активи, а не просто като разходно перо."
+
+#: .\landing\templates\landing\pricing.html:153
+msgid "Talk to us about pricing"
+msgstr "Говорете с нас за ценообразуването"
+
+#: .\landing\templates\landing\pricing.html:162
+msgid "ENTERPRISE"
+msgstr "ENTERPRISE"
+
+#: .\landing\templates\landing\pricing.html:165
+msgid "Group-wide optimisation"
+msgstr "Оптимизация на ниво група"
+
+#: .\landing\templates\landing\pricing.html:168
+msgid ""
+"Custom scope for multi-entity, multi-region groups with complex vendor "
+"portfolios."
+msgstr ""
+"Персонализиран обхват за групи с много юридически лица и региони и сложни "
+"портфейли от доставчици."
+
+#: .\landing\templates\landing\pricing.html:172
+msgid "Unlimited entities and desks in scope."
+msgstr "Неограничен брой юридически лица и дескове в обхвата."
+
+#: .\landing\templates\landing\pricing.html:175
+msgid "Advanced integration with internal systems & BI tools."
+msgstr "Разширена интеграция с вътрешни системи и BI инструменти."
+
+#: .\landing\templates\landing\pricing.html:178
+#| msgid "Export-ready reports for regulators and internal audit."
+msgid "Bespoke reporting for regulators and internal audit."
+msgstr "Специализирани отчети за регулатори и вътрешен одит."
+
+#: .\landing\templates\landing\pricing.html:181
+msgid "Support for transformation / consolidation projects."
+msgstr "Поддръжка при проекти за трансформация и консолидация."
+
+#: .\landing\templates\landing\pricing.html:188
+#| msgid ""
+#| "Multiple vendors (Bloomberg, ICE, Refinitiv, EnAppSys, …) with "
+#| "overlapping feeds."
+msgid ""
+"Groups with significant spend and multiple platforms (Bloomberg, ICE, "
+"Refinitiv, EnAppSys, internal feeds, etc.)."
+msgstr ""
+"Групи със значителни разходи и множество платформи (Bloomberg, ICE, "
+"Refinitiv, EnAppSys, вътрешни потоци и др.)."
+
+#: .\landing\templates\landing\pricing.html:195
+msgid "Schedule conversation"
+msgstr "Насрочете разговор"
+
+#: .\landing\templates\landing\pricing.html:202
+msgid ""
+"Subscription should be a fraction of the savings DataNaut helps you unlock."
+msgstr ""
+"Абонаментът трябва да е само част от спестяванията, които DataNaut ви помага "
+"да отключите."
+
+# --- Django core / venv strings (преведени) ---
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
+msgid "Messages"
+msgstr "Съобщения"
+
+#: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
+msgid "Site Maps"
+msgstr "Карти на сайта"
+
+#: .\venv\Lib\site-packages\django\contrib\staticfiles\apps.py:9
+msgid "Static Files"
+msgstr "Статични файлове"
+
+#: .\venv\Lib\site-packages\django\contrib\syndication\apps.py:7
+msgid "Syndication"
+msgstr "Синдикация"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: .\venv\Lib\site-packages\django\core\paginator.py:30
+msgid "…"
+msgstr "…"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:32
+msgid "That page number is not an integer"
+msgstr "Този номер на страница не е цяло число"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:33
+msgid "That page number is less than 1"
+msgstr "Този номер на страница е по-малък от 1"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:34
+msgid "That page contains no results"
+msgstr "Тази страница не съдържа резултати"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:22
+msgid "Enter a valid value."
+msgstr "Въведете валидна стойност."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:70
+msgid "Enter a valid domain name."
+msgstr "Въведете валидно домейн име."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:153
+#: .\venv\Lib\site-packages\django\forms\fields.py:775
+msgid "Enter a valid URL."
+msgstr "Въведете валиден URL адрес."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:200
+msgid "Enter a valid integer."
+msgstr "Въведете валидно цяло число."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:211
+msgid "Enter a valid email address."
+msgstr "Въведете валиден имейл адрес."
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: .\venv\Lib\site-packages\django\core\validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+"Въведете валиден „slug“, съставен от букви, цифри, долни черти или тирета."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+"Въведете валиден „slug“, съставен от Unicode букви, цифри, долни черти или "
+"тирета."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:309
+#: .\venv\Lib\site-packages\django\core\validators.py:318
+#: .\venv\Lib\site-packages\django\core\validators.py:332
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2220
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr "Въведете валиден %(protocol)s адрес."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:311
+msgid "IPv4"
+msgstr "IPv4"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:320
+#: .\venv\Lib\site-packages\django\utils\ipv6.py:43
+msgid "IPv6"
+msgstr "IPv6"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:334
+msgid "IPv4 or IPv6"
+msgstr "IPv4 или IPv6"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr "Въведете само цифри, разделени със запетаи."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+"Уверете се, че тази стойност е %(limit_value)s (в момента е %(show_value)s)."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+"Уверете се, че тази стойност е по-малка или равна на %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+"Уверете се, че тази стойност е по-голяма или равна на %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+"Уверете се, че тази стойност е кратна на стъпката %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+"Уверете се, че стойността е кратна на стъпката %(limit_value)s, започвайки от "
+"%(offset)s, напр. %(offset)s, %(valid_value1)s, %(valid_value2)s и т.н."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Уверете се, че стойността има поне %(limit_value)d знак (в момента има "
+"%(show_value)d)."
+msgstr[1] ""
+"Уверете се, че стойността има поне %(limit_value)d знака (в момента има "
+"%(show_value)d)."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Уверете се, че стойността има най-много %(limit_value)d знак (в момента има "
+"%(show_value)d)."
+msgstr[1] ""
+"Уверете се, че стойността има най-много %(limit_value)d знака (в момента има "
+"%(show_value)d)."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:514
+#: .\venv\Lib\site-packages\django\forms\fields.py:366
+#: .\venv\Lib\site-packages\django\forms\fields.py:405
+msgid "Enter a number."
+msgstr "Въведете число."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+"Уверете се, че общият брой цифри не е повече от %(max)s."
+msgstr[1] ""
+"Уверете се, че общият брой цифри не е повече от %(max)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+"Уверете се, че има не повече от %(max)s знак след десетичната запетая."
+msgstr[1] ""
+"Уверете се, че има не повече от %(max)s знака след десетичната запетая."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+"Уверете се, че има не повече от %(max)s цифра преди десетичната запетая."
+msgstr[1] ""
+"Уверете се, че има не повече от %(max)s цифри преди десетичната запетая."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+"Разширението „%(extension)s“ не е позволено. Позволените разширения са: "
+"%(allowed_extensions)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:659
+msgid "Null characters are not allowed."
+msgstr "Нулеви знаци не са позволени."
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1600
+#: .\venv\Lib\site-packages\django\forms\models.py:908
+msgid "and"
+msgstr "и"
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "%(model_name)s с този %(field_labels)s вече съществува."
+
+#: .\venv\Lib\site-packages\django\db\models\constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr "Ограничението „%(name)s“ е нарушено."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr "Стойността %(value)r не е валиден избор."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:135
+msgid "This field cannot be null."
+msgstr "Това поле не може да бъде null."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:136
+msgid "This field cannot be blank."
+msgstr "Това поле не може да бъде празно."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "%(model_name)s с този %(field_label)s вече съществува."
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+"%(field_label)s трябва да е уникално за %(lookup_type)s на "
+"%(date_field_label)s."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr "Поле от тип: %(field_type)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr "Стойността „%(value)s“ трябва да е True или False."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "Стойността „%(value)s“ трябва да е True, False или None."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr "Булева стойност (True или False)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "Низ (до %(max_length)s знака)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1217
+msgid "String (unlimited)"
+msgstr "Низ (неограничена дължина)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1326
+msgid "Comma-separated integers"
+msgstr "Цели числа, разделени със запетаи"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+"Стойността „%(value)s“ е с невалиден формат на дата. Трябва да е във формат "
+"ГГГГ-ММ-ДД (YYYY-MM-DD)."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1431
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+"Стойността „%(value)s“ е с правилен формат (YYYY-MM-DD), но датата е "
+"невалидна."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1435
+msgid "Date (without time)"
+msgstr "Дата (без час)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
+msgstr ""
+"Стойността „%(value)s“ е с невалиден формат. Трябва да е във формат "
+"ГГГГ-ММ-ДД ЧЧ:ММ[:ss[.uuuuuu]][TZ]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+"Стойността „%(value)s“ е с правилен формат (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]), но датата/часът са невалидни."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1575
+msgid "Date (with time)"
+msgstr "Дата (с час)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr "Стойността „%(value)s“ трябва да е десетично число."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1704
+msgid "Decimal number"
+msgstr "Десетично число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
+msgstr ""
+"Стойността „%(value)s“ е с невалиден формат. Трябва да е във формат [ДД] "
+"[[ЧЧ:]ММ:]ss[.uuuuuu]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1868
+msgid "Duration"
+msgstr "Продължителност"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1920
+msgid "Email address"
+msgstr "Имейл адрес"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1945
+msgid "File path"
+msgstr "Път към файл"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr "Стойността „%(value)s“ трябва да е число с плаваща запетая."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2025
+msgid "Floating point number"
+msgstr "Число с плаваща запетая"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr "Стойността „%(value)s“ трябва да е цяло число."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2067
+msgid "Integer"
+msgstr "Цяло число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr "Голямо цяло число (8 байта)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2180
+msgid "Small integer"
+msgstr "Малко цяло число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2188
+msgid "IPv4 address"
+msgstr "IPv4 адрес"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2219
+msgid "IP address"
+msgstr "IP адрес"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2310
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "Стойността „%(value)s“ трябва да е None, True или False."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr "Булева стойност (True, False или None)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2364
+msgid "Positive big integer"
+msgstr "Положително голямо цяло число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2379
+msgid "Positive integer"
+msgstr "Положително цяло число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2394
+msgid "Positive small integer"
+msgstr "Положително малко цяло число"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr "Slug (до %(max_length)s знака)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2446
+msgid "Text"
+msgstr "Текст"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+"Стойността „%(value)s“ е с невалиден формат. Трябва да е във формат "
+"ЧЧ:ММ[:ss[.uuuuuu]]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+"Стойността „%(value)s“ е с правилен формат (ЧЧ:ММ[:ss[.uuuuuu]]), но часът е "
+"невалиден."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2534
+msgid "Time"
+msgstr "Час"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2642
+msgid "URL"
+msgstr "URL"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2666
+msgid "Raw binary data"
+msgstr "Сурови двоични данни"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr "„%(value)s“ не е валиден UUID."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2733
+msgid "Universally unique identifier"
+msgstr "Универсален уникален идентификатор"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:244
+msgid "File"
+msgstr "Файл"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:420
+msgid "Image"
+msgstr "Изображение"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:24
+msgid "A JSON object"
+msgstr "JSON обект"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:26
+msgid "Value must be valid JSON."
+msgstr "Стойността трябва да е валиден JSON."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr "Обект %(model)s с %(field)s %(value)r не е валиден избор."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr "Външен ключ (типът се определя от свързаното поле)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1276
+msgid "One-to-one relationship"
+msgstr "Връзка „едно към едно“"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr "Връзка %(from)s-%(to)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr "Връзки %(from)s-%(to)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1383
+msgid "Many-to-many relationship"
+msgstr "Връзка „много към много“"
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: .\venv\Lib\site-packages\django\forms\boundfield.py:185
+msgid ":?.!"
+msgstr ":?.!"
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:95
+msgid "This field is required."
+msgstr "Това поле е задължително."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:315
+msgid "Enter a whole number."
+msgstr "Въведете цяло число."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:486
+#: .\venv\Lib\site-packages\django\forms\fields.py:1267
+msgid "Enter a valid date."
+msgstr "Въведете валидна дата."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:509
+#: .\venv\Lib\site-packages\django\forms\fields.py:1268
+msgid "Enter a valid time."
+msgstr "Въведете валиден час."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:536
+msgid "Enter a valid date/time."
+msgstr "Въведете валидна дата и час."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:570
+msgid "Enter a valid duration."
+msgstr "Въведете валидна продължителност."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Броят дни трябва да е между {min_days} и {max_days}."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+"Не беше изпратен файл. Проверете типа на кодиране (enctype) на формуляра."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:641
+msgid "No file was submitted."
+msgstr "Не беше изпратен файл."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:642
+msgid "The submitted file is empty."
+msgstr "Изпратеният файл е празен."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+"Уверете се, че името на файла има най-много %(max)d знак (в момента има "
+"%(length)d)."
+msgstr[1] ""
+"Уверете се, че името на файла има най-много %(max)d знака (в момента има "
+"%(length)d)."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+"Моля, или изпратете файл, или маркирайте отметката за изчистване, но не и "
+"двете."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+"Качете валидно изображение. Файлът, който качихте, не е изображение или е "
+"повреден."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:889
+#: .\venv\Lib\site-packages\django\forms\fields.py:975
+#: .\venv\Lib\site-packages\django\forms\models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+"Изберете валидна стойност. %(value)s не е сред възможните избори."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:977
+#: .\venv\Lib\site-packages\django\forms\fields.py:1096
+#: .\venv\Lib\site-packages\django\forms\models.py:1590
+msgid "Enter a list of values."
+msgstr "Въведете списък от стойности."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1097
+msgid "Enter a complete value."
+msgstr "Въведете завършена стойност."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1339
+msgid "Enter a valid UUID."
+msgstr "Въведете валиден UUID."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1369
+msgid "Enter a valid JSON."
+msgstr "Въведете валиден JSON."
+
+#. Translators: This is the default suffix added to form field labels
+#: .\venv\Lib\site-packages\django\forms\forms.py:97
+msgid ":"
+msgstr ":"
+
+#: .\venv\Lib\site-packages\django\forms\forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Скрито поле %(name)s) %(error)s"
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+"Данните на ManagementForm липсват или са подменени. Липсващи полета: "
+"%(field_names)s. Ако проблемът продължи, може да подадете bug report."
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] "Моля, изпратете най-много %(num)d формуляр."
+msgstr[1] "Моля, изпратете най-много %(num)d формуляра."
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] "Моля, изпратете поне %(num)d формуляр."
+msgstr[1] "Моля, изпратете поне %(num)d формуляра."
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:484
+#: .\venv\Lib\site-packages\django\forms\formsets.py:491
+msgid "Order"
+msgstr "Ред"
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:499
+msgid "Delete"
+msgstr "Изтриване"
+
+#: .\venv\Lib\site-packages\django\forms\models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Моля, коригирайте дублираните данни за %(field)s."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr "Моля, коригирайте дублираните данни за %(field)s, които трябва да са уникални."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+"Моля, коригирайте дублираните данни за %(field_name)s, които трябва да са "
+"уникални за %(lookup)s в %(date_field)s."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:922
+msgid "Please correct the duplicate values below."
+msgstr "Моля, коригирайте дублираните стойности по-долу."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr "Вградената стойност не съответства на родителския обект."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr "Изберете валидна стойност. Този избор не е сред наличните."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr "„%(pk)s“ не е валидна стойност."
+
+#: .\venv\Lib\site-packages\django\forms\utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+"%(datetime)s не може да бъде интерпретирано в часовата зона "
+"%(current_timezone)s; може да е двусмислено или да не съществува."
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:527
+msgid "Clear"
+msgstr "Изчистване"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:528
+msgid "Currently"
+msgstr "Текущо"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:529
+msgid "Change"
+msgstr "Промяна"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:866
+msgid "Unknown"
+msgstr "Неизвестно"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:867
+msgid "Yes"
+msgstr "Да"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:868
+msgid "No"
+msgstr "Не"
+
+#. Translators: Please do not add spaces around commas.
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr "да,не,може би"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:903
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] "%(size)d байт"
+msgstr[1] "%(size)d байта"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr "%s KB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr "%s MB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr "%s GB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr "%s TB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr "%s PB"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:74
+msgid "p.m."
+msgstr "сл.об."
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:75
+msgid "a.m."
+msgstr "пр.об."
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:80
+msgid "PM"
+msgstr "PM"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:81
+msgid "AM"
+msgstr "AM"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:153
+msgid "midnight"
+msgstr "полунощ"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:155
+msgid "noon"
+msgstr "обед"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:7
+msgid "Monday"
+msgstr "понеделник"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:8
+msgid "Tuesday"
+msgstr "вторник"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:9
+msgid "Wednesday"
+msgstr "сряда"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:10
+msgid "Thursday"
+msgstr "четвъртък"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:11
+msgid "Friday"
+msgstr "петък"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:12
+msgid "Saturday"
+msgstr "събота"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:13
+msgid "Sunday"
+msgstr "неделя"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:16
+msgid "Mon"
+msgstr "пон"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:17
+msgid "Tue"
+msgstr "вто"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:18
+msgid "Wed"
+msgstr "сря"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:19
+msgid "Thu"
+msgstr "чет"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:20
+msgid "Fri"
+msgstr "пет"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:21
+msgid "Sat"
+msgstr "съб"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:22
+msgid "Sun"
+msgstr "нед"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:25
+msgid "January"
+msgstr "януари"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:26
+msgid "February"
+msgstr "февруари"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:27
+msgid "March"
+msgstr "март"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:28
+msgid "April"
+msgstr "април"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:29
+msgid "May"
+msgstr "май"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:30
+msgid "June"
+msgstr "юни"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:31
+msgid "July"
+msgstr "юли"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:32
+msgid "August"
+msgstr "август"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:33
+msgid "September"
+msgstr "септември"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:34
+msgid "October"
+msgstr "октомври"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:35
+msgid "November"
+msgstr "ноември"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:36
+msgid "December"
+msgstr "декември"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:39
+msgid "jan"
+msgstr "яну"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:40
+msgid "feb"
+msgstr "фев"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:41
+msgid "mar"
+msgstr "мар"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:42
+msgid "apr"
+msgstr "апр"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:43
+msgid "may"
+msgstr "май"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:44
+msgid "jun"
+msgstr "юни"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:45
+msgid "jul"
+msgstr "юли"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:46
+msgid "aug"
+msgstr "авг"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:47
+msgid "sep"
+msgstr "сеп"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:48
+msgid "oct"
+msgstr "окт"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:49
+msgid "nov"
+msgstr "ное"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:50
+msgid "dec"
+msgstr "дек"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr "ян."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr "февр."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "март"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "апр."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "май"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "юни"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "юли"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr "авг."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr "септ."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr "окт."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr "ное."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr "дек."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr "януари"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr "февруари"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr "март"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr "април"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr "май"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr "юни"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr "юли"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr "август"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr "септември"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr "октомври"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr "ноември"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr "декември"
+
+#: .\venv\Lib\site-packages\django\utils\ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr "Това не е валиден IPv6 адрес."
+
+#: .\venv\Lib\site-packages\django\utils\text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr "%(truncated_text)s…"
+
+#: .\venv\Lib\site-packages\django\utils\text.py:287
+msgid "or"
+msgstr "или"
+
+#. Translators: This string is used as a separator between list elements
+#: .\venv\Lib\site-packages\django\utils\text.py:306
+#: .\venv\Lib\site-packages\django\utils\timesince.py:135
+msgid ", "
+msgstr ", "
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d година"
+msgstr[1] "%(num)d години"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d месец"
+msgstr[1] "%(num)d месеца"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d седмица"
+msgstr[1] "%(num)d седмици"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d ден"
+msgstr[1] "%(num)d дни"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d час"
+msgstr[1] "%(num)d часа"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d минута"
+msgstr[1] "%(num)d минути"
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:29
+msgid "Forbidden"
+msgstr "Забранено"
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr "CSRF проверката неуспешна. Заявката е прекратена."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+"Виждате това съобщение, защото този HTTPS сайт изисква „Referer header“, който "
+"да бъде изпратен от вашия браузър, но такъв не е изпратен. Този header е "
+"необходим поради съображения за сигурност, за да се гарантира, че браузърът "
+"ви не е компрометиран от трети страни."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+"Ако сте конфигурирали браузъра си да не изпраща „Referer“ header-и, моля "
+"разрешете ги поне за този сайт, за HTTPS връзки или за заявки „same-origin“."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+"Ако използвате маркера <meta name=\"referrer\" content=\"no-referrer\"> или "
+"включвате заглавка „Referrer-Policy: no-referrer“, моля премахнете ги. "
+"CSRF защитата изисква „Referer“ header за стриктна проверка. Ако се "
+"притеснявате за поверителността, използвайте алтернативи като <a "
+"rel=\"noreferrer\" …> за връзки към външни сайтове."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+"Виждате това съобщение, защото този сайт изисква CSRF бисквитка при изпращане "
+"на формуляри. Тази бисквитка е необходима поради съображения за сигурност, за "
+"да се гарантира, че браузърът ви не е компрометиран от трети страни."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+"Ако сте конфигурирали браузъра си да блокира бисквитки, моля разрешете ги "
+"поне за този сайт или за заявки „same-origin“."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr "Повече информация е налична при DEBUG=True."
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:44
+msgid "No year specified"
+msgstr "Не е посочена година"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:64
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:115
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:214
+msgid "Date out of range"
+msgstr "Датата е извън допустимия диапазон"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:94
+msgid "No month specified"
+msgstr "Не е посочен месец"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:147
+msgid "No day specified"
+msgstr "Не е посочен ден"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:194
+msgid "No week specified"
+msgstr "Не е посочена седмица"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:353
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr "Няма налични %(verbose_name_plural)s"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
+msgstr ""
+"Бъдещи %(verbose_name_plural)s не са налични, защото "
+"%(class_name)s.allow_future е False."
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+"Невалидна дата „%(datestr)s“ за зададения формат „%(format)s“"
+
+#: .\venv\Lib\site-packages\django\views\generic\detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Не е намерен %(verbose_name)s, съответстващ на заявката"
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Страницата не е „last“ и не може да бъде конвертирана в цяло число."
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Невалидна страница (%(page_number)s): %(message)s"
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Списъкът е празен, а „%(class_name)s.allow_empty“ е False."
+
+#: .\venv\Lib\site-packages\django\views\static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr "Индекси на директории не са позволени тук."
+
+#: .\venv\Lib\site-packages\django\views\static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr "„%(path)s“ не съществува"
+
+#: .\venv\Lib\site-packages\django\views\static.py:68
+#: .\venv\Lib\site-packages\django\views\templates\directory_index.html:8
+#: .\venv\Lib\site-packages\django\views\templates\directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr "Индекс на %(directory)s"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:7
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr "Инсталацията беше успешна! Поздравления!"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+"Вижте <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">бележките към версиите</a> за Django "
+"%(version)s"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+"Виждате тази страница, защото <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> е зададено във вашия settings файл и не сте "
+"конфигурирали никакви URL-и."
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:217
+msgid "Django Documentation"
+msgstr "Документация на Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Теми, справки и ръководства"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr "Обучение: Приложение за анкети"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:227
+msgid "Get started with Django"
+msgstr "Първи стъпки с Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:235
+msgid "Django Community"
+msgstr "Общност на Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr "Свържете се, потърсете помощ или допринесете"

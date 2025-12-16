@@ -1,0 +1,260 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "DataNaut — Smart Data. Smarter Decisions." %}{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero-section" id="top">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    {% trans "Smart Data. Smarter" %}<br>{% trans "Decisions." %}
+                </h1>
+                <p class="hero-lead">
+                    {% blocktrans trimmed %}
+                    DataNaut optimizes your financial and market data spend by analyzing
+                    contracts, invoices and entitlements – so you cut waste, stay compliant
+                    and keep every desk fully empowered.
+                    {% endblocktrans %}
+                </p>
+
+                <!-- VALUE BULLETS -->
+                <ul class="hero-value-list">
+                    <li>{% trans "10–30% reduction in market data & tech spend." %}</li>
+                    <li>{% trans "Single view of contracts, usage and underused licenses." %}</li>
+                    <li>{% trans "No code changes. No vendor lock-in. Results in weeks, not months." %}</li>
+                </ul>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'contact' %}" class="btn btn-cta-primary px-4 py-2">
+                        {% trans "Request a demo" %}
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn btn-cta-secondary px-4 py-2">
+                        {% trans "Book a free data cost audit" %}
+                    </a>
+                </div>
+
+                <p class="hero-subtext">
+                    {% blocktrans trimmed %}
+                    We’ll run an upfront assessment on a subset of your contracts and invoices
+                    to size the savings before you commit.
+                    {% endblocktrans %}
+                </p>
+            </div>
+
+            <!-- Metrics card -->
+            <div class="col-lg-5 ms-lg-auto">
+                <div class="metrics-card shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="metrics-label">
+                            {% trans "Market data spend overview · Illustrative data" %}
+                        </span>
+                        <span class="metrics-tagline">
+                            {% trans "Last 12 months" %}
+                        </span>
+                    </div>
+
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="metrics-label mb-1">{% trans "Total spend" %}</div>
+                            <div class="metrics-value">$113.8M</div>
+                            <div class="metrics-sub">{% trans "Target: -12%" %}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metrics-label mb-1">{% trans "Identified savings" %}</div>
+                            <div class="metrics-value">$8.4M</div>
+                            <div class="metrics-sub text-warning">{% trans "In negotiation" %}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metrics-label mb-1">{% trans "Underused licenses" %}</div>
+                            <div class="metrics-value">27%</div>
+                            <div class="metrics-sub text-info">{% trans "High opportunity" %}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="metrics-label">{% trans "Vendors monitored" %}</small>
+                        <small class="metrics-label">{% trans "Desks & teams" %}</small>
+                    </div>
+                    <div class="metrics-progress-rail mb-1">
+                        <div class="metrics-progress-bar"></div>
+                    </div>
+                    <div class="d-flex justify-content-between metrics-tagline">
+                        <span>{% trans "12 vendors" %}</span>
+                        <span>{% trans "34 desks" %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trusted by -->
+<section class="section-light section-padding">
+    <div class="container text-center">
+        <p class="eyebrow mb-2">{% trans "Trusted by teams working with" %}</p>
+        <h2 class="h6 mb-3">{% trans "Leading market data & trading platforms" %}</h2>
+        <div class="trusted-logos mt-2">
+            <div class="trusted-logo-pill">Bloomberg</div>
+            <div class="trusted-logo-pill">ICE</div>
+            <div class="trusted-logo-pill">Refinitiv</div>
+            <div class="trusted-logo-pill">EnAppSys</div>
+            <div class="trusted-logo-pill">{% trans "Internal feeds" %}</div>
+            <div class="trusted-logo-pill">APIs &amp; SFTP</div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem & outcome -->
+<section class="section-light section-padding" id="how-it-works">
+    <div class="container">
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-7">
+                <p class="eyebrow mb-2">
+                    {% trans "Market data is one of your biggest costs – and one of the least transparent" %}
+                </p>
+                <ul class="mb-0 text-muted" style="font-size: 0.9rem;">
+                    <li>{% trans "Multiple vendors (Bloomberg, ICE, Refinitiv, EnAppSys, …) with overlapping feeds." %}</li>
+                    <li>{% trans "Little visibility into who actually uses which licenses." %}</li>
+                    <li>{% trans "Complex entitlement files and invoices that nobody has time to reconcile." %}</li>
+                    <li>{% trans "Regulatory pressure while costs keep growing." %}</li>
+                </ul>
+            </div>
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="eyebrow mb-2">{% trans "Result today" %}</p>
+                        <p class="mb-2" style="font-size:0.9rem;">
+                            {% trans "Overspend, compliance risk and endless Excel firefighting." %}
+                        </p>
+                        <p class="mb-0 text-muted" style="font-size:0.9rem;">
+                            {% blocktrans trimmed %}
+                            DataNaut gives you a clean, contract-first view so you can act with confidence:
+                            rationalise feeds, re-price contracts and redeploy usage where it matters most.
+                            {% endblocktrans %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Personas / Who it's for -->
+<section class="section-light section-padding" id="personas">
+    <div class="container">
+        <p class="eyebrow mb-2">{% trans "Who DataNaut is for" %}</p>
+        <p class="text-muted mb-4" style="font-size:0.9rem; max-width:640px;">
+            {% blocktrans trimmed %}
+            Different teams care about different outcomes. Pick the persona that best matches you,
+            and we’ll tailor the conversation and roadmap.
+            {% endblocktrans %}
+        </p>
+
+        <div class="row g-4">
+            <!-- Trading -->
+            <div class="col-md-4" id="personas-trading">
+                <div class="persona-card">
+                    <h5>{% trans "Trading & dealing desks" %}</h5>
+                    <small>{% trans "Less admin, more trading." %}</small>
+                    <ul>
+                        <li>{% trans "Single view of all market data feeds per desk, trader and strategy." %}</li>
+                        <li>{% trans "Spot overlapping feeds and unused licenses before renewals." %}</li>
+                        <li>{% trans "Entitlement checks so every desk has exactly what they need." %}</li>
+                        <li>{% trans "Export-ready reports for regulators and internal audit." %}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CFO -->
+            <div class="col-md-4" id="personas-cfo">
+                <div class="persona-card">
+                    <h5>{% trans "CFO & finance" %}</h5>
+                    <small>{% trans "Turn opaque spend into a managed asset class." %}</small>
+                    <ul>
+                        <li>{% trans "Contract-level view of spend by vendor, desk, user and entity." %}</li>
+                        <li>{% trans "Usage & entitlement analytics to support renewals and re-pricing." %}</li>
+                        <li>{% trans "Forecasting tools to support budgeting and scenario analysis." %}</li>
+                        <li>{% trans "Clear, defensible narrative for cost optimisation and ROI." %}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Investors -->
+            <div class="col-md-4" id="personas-investors">
+                <div class="persona-card">
+                    <h5>{% trans "Investors & board" %}</h5>
+                    <small>{% trans "Clear story on efficiency, control and growth." %}</small>
+                    <ul>
+                        <li>{% trans "Show how market data and tech subscriptions are under control." %}</li>
+                        <li>{% trans "Bridge between cost savings agenda and growth initiatives." %}</li>
+                        <li>{% trans "Governance trail from contracts through to desks and entities." %}</li>
+                        <li>{% trans "Scalable operating model that won’t break as volumes grow." %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Inline contact form at the bottom -->
+<section class="section-light section-padding" id="assessment">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-4">
+                    <h2 class="h4 mb-2">{% trans "Book a free Data Cost Assessment" %}</h2>
+                    <p class="text-muted" style="font-size:0.9rem;">
+                        {% blocktrans trimmed %}
+                        Leave your details and we’ll get back to you to estimate your savings potential
+                        based on a sample of your contracts and invoices.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+
+                <form method="get" action="{% url 'contact' %}" class="card border-0 shadow-sm p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small">{% trans "Name" %}</label>
+                            <input type="text" name="name" class="form-control form-control-sm"
+                                   placeholder="{% trans 'Your name' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">{% trans "Company" %}</label>
+                            <input type="text" name="company" class="form-control form-control-sm"
+                                   placeholder="{% trans 'Your company' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">{% trans "Role" %}</label>
+                            <input type="text" name="role" class="form-control form-control-sm"
+                                   placeholder="{% trans 'e.g. Head of Trading, CFO' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">{% trans "Work email" %}</label>
+                            <input type="email" name="email" class="form-control form-control-sm"
+                                   placeholder="{% trans 'you@firm.com' %}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">{% trans "Message / Notes" %}</label>
+                            <textarea name="message" rows="4"
+                                      class="form-control form-control-sm"
+                                      placeholder="{% trans 'Share a bit about your current market data setup, vendors and pain points.' %}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            {% trans "Send" %}
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

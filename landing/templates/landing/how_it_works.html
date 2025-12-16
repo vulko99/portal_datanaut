@@ -1,0 +1,118 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "How it works · DataNaut" %}{% endblock %}
+
+{% block content %}
+
+<section class="how-hero">
+    <div class="container-lg">
+        <h1 class="how-hero-title mb-3">{% trans "How DataNaut works" %}</h1>
+        <p class="how-hero-lead mb-3">
+            {% trans "A contract-first platform that connects your vendors, contracts, invoices and entitlement files into a single, actionable view." %}
+        </p>
+        <p class="how-hero-sub small mb-0">
+            {% trans "This page expands the “How it works” section from the homepage with more detail for desks, finance and investors." %}
+        </p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container-lg">
+        <div class="row g-4 mb-4">
+            <!-- 1. Ingest -->
+            <div class="col-md-4">
+                <p class="how-step-label mb-1">
+                    {% trans "1. Ingest" %}
+                </p>
+                <h2 class="how-step-title mb-2">
+                    {% trans "Contracts, invoices & entitlement files" %}
+                </h2>
+                <p class="how-step-text small mb-0">
+                    {% trans "We ingest contracts, invoices and entitlement files from your core market data and technology vendors – Bloomberg, ICE, Refinitiv, EnAppSys and internal feeds. No code changes required on your side." %}
+                </p>
+            </div>
+
+            <!-- 2. Normalise -->
+            <div class="col-md-4">
+                <p class="how-step-label mb-1">
+                    {% trans "2. Normalise" %}
+                </p>
+                <h2 class="how-step-title mb-2">
+                    {% trans "Single cost & usage model" %}
+                </h2>
+                <p class="how-step-text small mb-0">
+                    {% trans "DataNaut maps everything to a common model by vendor, desk, user and legal entity – turning PDFs and CSVs into a clean data layer. The result is a single repository where finance, trading and procurement see the same numbers." %}
+                </p>
+            </div>
+
+            <!-- 3. Optimise -->
+            <div class="col-md-4">
+                <p class="how-step-label mb-1">
+                    {% trans "3. Optimise" %}
+                </p>
+                <h2 class="how-step-title mb-2">
+                    {% trans "Dashboards, alerts & savings" %}
+                </h2>
+                <p class="how-step-text small mb-0">
+                    {% trans "Dashboards highlight duplicate and underused licences, upcoming renewals and saving opportunities. Exports for CFO, procurement and desks make it easy to take decisions and document the savings story for investors and regulators." %}
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'home' %}#assessment-form" class="btn btn-primary">
+                {% trans "Start with a Data Cost Assessment" %}
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .how-hero {
+        padding: 96px 0 40px; /* повече място отгоре заради fixed navbar */
+        background:
+            radial-gradient(circle at 0% 0%, #0f766e 0, #020617 45%),
+            radial-gradient(circle at 100% 0%, #4c1d95 0, #020617 55%),
+            #020617;
+        color: #f9fafb;
+    }
+
+    .how-hero-title {
+        font-weight: 800;
+        font-size: clamp(2.1rem, 3vw, 2.6rem);
+        letter-spacing: -0.03em;
+    }
+
+    .how-hero-lead {
+        font-size: 0.98rem;
+        color: #e5e7eb;
+        max-width: 640px;
+    }
+
+    .how-hero-sub {
+        color: #9ca3af;
+        max-width: 640px;
+    }
+
+    .how-step-label {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.78rem;
+        color: #9ca3af;
+        font-weight: 600;
+    }
+
+    .how-step-title {
+        font-size: 0.95rem;
+        color: #f9fafb;
+        font-weight: 600;
+    }
+
+    .how-step-text {
+        color: #d1d5db;
+        line-height: 1.5;
+    }
+</style>
+
+{% endblock %}

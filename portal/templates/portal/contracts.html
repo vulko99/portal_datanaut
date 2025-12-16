@@ -1,0 +1,142 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Contracts{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- LEFT: Contracts list -->
+    <div class="col-lg-7">
+        <div class="portal-card h-100">
+            <h5 class="mb-1">Contracts</h5>
+            <p class="portal-card-muted mb-3">
+                Upload and manage your market &amp; reference data vendor contracts.
+            </p>
+
+            {% if contracts %}
+                <div class="table-responsive">
+                    <table class="portal-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 26%;">Contract</th>
+                                <th style="width: 24%;">Vendor</th>
+                                <th style="width: 18%;">Start</th>
+                                <th style="width: 18%;">End</th>
+                                <th style="width: 14%; text-align: right;">Annual value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for c in contracts %}
+                            <tr>
+                                <td>
+                                    {{ c.title }}
+                                    <div class="cell-muted">
+                                        {% if c.file %}
+                                            <a class="link-inline" href="{{ c.file.url }}" target="_blank" rel="noopener">
+                                                View file
+                                            </a>
+                                        {% else %}
+                                            <span class="cell-muted">No file</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ c.vendor.name }}</td>
+                                <td class="cell-muted">
+                                    {{ c.start_date|date:"Y-m-d"|default:"–" }}
+                                </td>
+                                <td class="cell-muted">
+                                    {{ c.end_date|date:"Y-m-d"|default:"–" }}
+                                </td>
+                                <td style="text-align: right;">
+                                    {% if c.annual_value %}
+                                        {{ c.annual_value }}
+                                    {% else %}
+                                        <span class="cell-muted">n/a</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="portal-card-muted">
+                    You don’t have any contracts yet. Use the form on the right to upload the first one.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT: Upload form -->
+    <div class="col-lg-5">
+        <div class="portal-card h-100">
+            <h5 class="mb-1">Upload contract</h5>
+            <p class="portal-card-muted mb-3">
+                Store your contracts securely and make them available for analysis and optimization.
+            </p>
+
+            <form method="post" enctype="multipart/form-data" class="mt-2">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-1 px-2 mb-2">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="mb-2">
+                    <label class="form-label small mb-1" for="{{ form.title.id_for_label }}">
+                        Contract name
+                    </label>
+                    {{ form.title }}
+                    {{ form.title.errors }}
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-1" for="{{ form.vendor_name.id_for_label }}">
+                        Vendor
+                    </label>
+                    {{ form.vendor_name }}
+                    {{ form.vendor_name.errors }}
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label small mb-1" for="{{ form.start_date.id_for_label }}">
+                            Start date
+                        </label>
+                        {{ form.start_date }}
+                        {{ form.start_date.errors }}
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label small mb-1" for="{{ form.end_date.id_for_label }}">
+                            End date
+                        </label>
+                        {{ form.end_date }}
+                        {{ form.end_date.errors }}
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-1" for="{{ form.annual_value.id_for_label }}">
+                        Annual value
+                    </label>
+                    {{ form.annual_value }}
+                    {{ form.annual_value.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small mb-1" for="{{ form.file.id_for_label }}">
+                        Contract file
+                    </label>
+                    {{ form.file }}
+                    {{ form.file.errors }}
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-primary px-3">
+                    Upload contract
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

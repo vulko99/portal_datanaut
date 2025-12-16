@@ -1,0 +1,207 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Pricing · DataNaut" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Hover ефект за картите */
+  .dn-pricing-card {
+      position: relative;
+      transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease;
+  }
+
+  .dn-pricing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+      border-color: var(--dn-accent-teal);
+      background: #ffffff;
+      cursor: pointer;
+  }
+
+  .dn-pricing-card:hover .h5 {
+      color: #0f172a;
+  }
+
+  .dn-pricing-card:hover .btn-primary,
+  .dn-pricing-card:hover .btn-outline-secondary {
+      filter: brightness(1.07);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+  }
+
+  .dn-pricing-featured {
+      border-width: 2px;
+      border-color: rgba(59, 130, 246, 0.65);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.3);
+  }
+
+  .dn-pricing-featured:hover {
+      border-color: var(--dn-accent-teal);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="dn-hero">
+    <div class="container-lg">
+        <h1 class="dn-hero-title mb-3">
+            {% trans "Simple pricing, aligned with value" %}
+        </h1>
+        <p class="dn-hero-lead mb-0">
+            {% blocktrans trimmed %}
+            DataNaut is priced around the number of legal entities, desks and vendors – so that
+            costs stay predictable while savings grow.
+            {% endblocktrans %}
+        </p>
+    </div>
+</section>
+
+<section class="section-light py-5">
+    <div class="container-lg">
+        <p class="text-center small mb-4" style="color:#4b5563;">
+            {% blocktrans trimmed %}
+            Indicative structure – final pricing depends on scope, number of entities and vendors.
+            The goal is always to keep <strong>subscription &lt; realised savings</strong>.
+            {% endblocktrans %}
+        </p>
+
+        <div class="row g-4">
+            <!-- PILOT -->
+            <div class="col-lg-4">
+                <div class="dn-card-light dn-pricing-card h-100 p-4">
+                    <p class="dn-pill-badge mb-1">
+                        {% trans "PILOT" %}
+                    </p>
+                    <h2 class="h5 mb-2">
+                        {% trans "Data Cost Assessment" %}
+                    </h2>
+                    <p class="small text-muted mb-3">
+                        {% trans "4–6 weeks, focused on a subset of your market data / technology stack." %}
+                    </p>
+                    <ul class="small mb-3">
+                        <li>
+                            {% trans "Ingestion of selected contracts, invoices & entitlement files." %}
+                        </li>
+                        <li>
+                            {% trans "Normalised view of spend by vendor, desk, user and entity." %}
+                        </li>
+                        <li>
+                            {% trans "Identified saving opportunities & quick wins." %}
+                        </li>
+                        <li>
+                            {% trans "Exportable report for CFO / procurement / desks." %}
+                        </li>
+                    </ul>
+                    <p class="small fw-semibold mb-1">
+                        {% trans "Best for" %}
+                    </p>
+                    <p class="small mb-4">
+                        {% trans "Firms that want to validate savings potential before committing to a platform." %}
+                    </p>
+                    <a href="{% url 'home' %}#assessment-form"
+                       class="btn btn-outline-secondary w-100">
+                        {% trans "Request pilot details" %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- STANDARD -->
+            <div class="col-lg-4">
+                <div class="dn-card-light dn-pricing-card dn-pricing-featured h-100 p-4">
+                    <p class="dn-pill-badge mb-1 text-primary">
+                        {% trans "STANDARD · MOST COMMON" %}
+                    </p>
+                    <h2 class="h5 mb-2">
+                        {% trans "Platform subscription" %}
+                    </h2>
+                    <p class="small text-muted mb-3">
+                        {% trans "Ongoing use of DataNaut across core entities, desks and key vendors." %}
+                    </p>
+                    <ul class="small mb-3">
+                        <li>
+                            {% trans "All Pilot features, continuously updated." %}
+                        </li>
+                        <li>
+                            {% trans "Full contract & usage repository across in-scope vendors." %}
+                        </li>
+                        <li>
+                            {% trans "Dashboards for trading desks, finance and procurement." %}
+                        </li>
+                        <li>
+                            {% trans "Renewal calendar, duplicate / underuse detection." %}
+                        </li>
+                        <li>
+                            {% trans "Email / call support, quarterly optimisation reviews." %}
+                        </li>
+                    </ul>
+                    <p class="small fw-semibold mb-1">
+                        {% trans "Best for" %}
+                    </p>
+                    <p class="small mb-4">
+                        {% blocktrans trimmed %}
+                        Institutions that treat market data & tech subscriptions as a managed asset class,
+                        not just a cost line.
+                        {% endblocktrans %}
+                    </p>
+                    <a href="{% url 'home' %}#assessment-form"
+                       class="btn btn-primary w-100">
+                        {% trans "Talk to us about pricing" %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- ENTERPRISE -->
+            <div class="col-lg-4">
+                <div class="dn-card-light dn-pricing-card h-100 p-4">
+                    <p class="dn-pill-badge mb-1">
+                        {% trans "ENTERPRISE" %}
+                    </p>
+                    <h2 class="h5 mb-2">
+                        {% trans "Group-wide optimisation" %}
+                    </h2>
+                    <p class="small text-muted mb-3">
+                        {% trans "Custom scope for multi-entity, multi-region groups with complex vendor portfolios." %}
+                    </p>
+                    <ul class="small mb-3">
+                        <li>
+                            {% trans "Unlimited entities and desks in scope." %}
+                        </li>
+                        <li>
+                            {% trans "Advanced integration with internal systems & BI tools." %}
+                        </li>
+                        <li>
+                            {% trans "Bespoke reporting for regulators and internal audit." %}
+                        </li>
+                        <li>
+                            {% trans "Support for transformation / consolidation projects." %}
+                        </li>
+                    </ul>
+                    <p class="small fw-semibold mb-1">
+                        {% trans "Best for" %}
+                    </p>
+                    <p class="small mb-4">
+                        {% blocktrans trimmed %}
+                        Groups with significant spend and multiple platforms
+                        (Bloomberg, ICE, Refinitiv, EnAppSys, internal feeds, etc.).
+                        {% endblocktrans %}
+                    </p>
+                    <a href="{% url 'home' %}#assessment-form"
+                       class="btn btn-outline-secondary w-100">
+                        {% trans "Schedule conversation" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center small mb-0" style="color:#4b5563;">
+            {% trans "Subscription should be a fraction of the savings DataNaut helps you unlock." %}
+        </p>
+    </div>
+</section>
+
+{% endblock %}

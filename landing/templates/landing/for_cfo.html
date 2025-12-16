@@ -1,0 +1,150 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "For CFO & finance · DataNaut" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .persona-hero-copy p,
+    .persona-hero-copy li {
+        color: #e5e7eb;
+    }
+
+    .persona-hero-copy ul {
+        padding-left: 1.1rem;
+        font-size: 0.9rem;
+    }
+
+    .persona-hero-copy li + li {
+        margin-top: 0.25rem;
+    }
+
+    .persona-cta-secondary {
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        color: #e5e7eb;
+        background: transparent;
+        font-size: 0.9rem;
+    }
+
+    .persona-cta-secondary:hover {
+        background: rgba(15, 23, 42, 0.9);
+    }
+
+    .cfo-section {
+        background: var(--dn-bg-page);
+        padding: 56px 0 80px;
+    }
+
+    .cfo-card {
+        background: #ffffff;
+        color: #111827;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 18px 20px;
+        font-size: 0.85rem;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        height: 100%;
+    }
+
+    .cfo-card h6 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6b7280;
+        margin-bottom: 0.35rem;
+    }
+
+    .cfo-card p {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7 persona-hero-copy">
+                <p class="eyebrow mb-2">
+                    {% trans "For CFO & finance" %}
+                </p>
+                <h1 class="hero-title mb-3">
+                    {% trans "Turn opaque spend into a managed asset class." %}
+                </h1>
+                <p class="hero-lead mb-3">
+                    {% blocktrans trimmed %}
+                    Move market data and tech subscriptions out of the “miscellaneous IT” bucket
+                    and into a transparent, governable asset with clear ROI.
+                    {% endblocktrans %}
+                </p>
+
+                <ul class="mb-4">
+                    <li>
+                        {% trans "Contract-level view of spend by vendor, entity, desk and user." %}
+                    </li>
+                    <li>
+                        {% trans "Normalised usage & entitlement data to support renewal decisions." %}
+                    </li>
+                    <li>
+                        {% trans "Scenario tools for budgeting, savings initiatives and stress tests." %}
+                    </li>
+                    <li>
+                        {% trans "Audit-ready narrative for boards, regulators and internal control." %}
+                    </li>
+                </ul>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'demo' %}" class="btn btn-cta-secondary px-4 py-2">
+                        {% trans "View demo dashboard" %}
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn persona-cta-secondary px-4 py-2">
+                        {% trans "Talk to us about ROI" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cfo-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="cfo-card">
+                    <h6>{% trans "Spend transparency" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Map every invoice line back to vendor, feed, desk, entity and user.
+                        Understand exactly what drives the market data & tech cost line.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cfo-card">
+                    <h6>{% trans "Scenario planning" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Model savings initiatives, vendor changes and policy tweaks before you
+                        commit. See impact by business line, entity and P&L.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cfo-card">
+                    <h6>{% trans "Governance & reporting" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Provide boards, regulators and audit with a clear, defensible record of
+                        contracts, entitlements and usage – not just another spreadsheet.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

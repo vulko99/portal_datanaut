@@ -1,0 +1,762 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "DataNaut demo dashboard · DataNaut" %}{% endblock %}
+
+{% block content %}
+
+<section class="hero-section hero-demo">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-lg-7">
+        <h1 class="h2 fw-bold mb-3">
+          {% trans "DataNaut demo dashboard" %}
+        </h1>
+        <p class="lead mb-2">
+          {% blocktrans trimmed %}
+          Preview of how DataNaut can look as an internal platform: contracts, invoices and
+          entitlements combined into a single cost & usage cockpit.
+          {% endblocktrans %}
+        </p>
+        <p class="mb-0">
+          {% blocktrans trimmed %}
+          Numbers and entities below are illustrative, but the structure reflects what a real
+          deployment looks like – by vendor, entity, desk and user.
+          {% endblocktrans %}
+        </p>
+      </div>
+      <div class="col-lg-5 mt-3 mt-lg-0 text-lg-end">
+        <div class="small text-muted">
+          {% trans "Typical deployment:" %}
+        </div>
+        <ul class="small text-muted mb-2">
+          <li>{% trans "12+ vendors, 5–10 entities, 30+ desks." %}</li>
+          <li>{% trans "Direct feeds from contracts, invoices and entitlement files." %}</li>
+          <li>{% trans "Optional export into PowerBI / internal data warehouse." %}</li>
+        </ul>
+        <a href="{% url 'contact' %}" class="btn btn-primary btn-sm me-2">
+          {% trans "Book a live demo" %}
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+          {% trans "Back to homepage" %}
+        </a>
+      </div>
+    </div>
+
+    <!-- APP SHELL -->
+    <div class="demo-shell">
+
+      <!-- Header / filters -->
+      <div class="demo-header mb-3">
+        <div>
+          <div class="demo-title">
+            {% trans "Market data & tech spend cockpit" %}
+          </div>
+          <div class="small text-muted">
+            {% trans "Last updated: 04 Nov 2025 · Dummy data for illustration" %}
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <div class="filter-pill">
+            <i class="bi bi-building me-1"></i>
+            {% trans "All entities" %}
+          </div>
+          <div class="filter-pill">
+            <i class="bi bi-diagram-3 me-1"></i>
+            {% trans "Trading desks" %}
+          </div>
+          <div class="filter-pill">
+            <i class="bi bi-calendar-range me-1"></i>
+            {% trans "Rolling 12 months" %}
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <div class="demo-kpi-card">
+            <div class="kpi-label">
+              {% trans "Total market data & tech spend" %}
+            </div>
+            <div class="kpi-value">$113.8M</div>
+            <div class="kpi-subtext text-success">
+              <i class="bi bi-arrow-up-right"></i>
+              {% trans "+4.1% vs. previous 12 months" %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="demo-kpi-card">
+            <div class="kpi-label">
+              {% trans "Identified savings" %}
+            </div>
+            <div class="kpi-value">$8.4M</div>
+            <div class="kpi-subtext text-warning">
+              <i class="bi bi-lightning-charge-fill"></i>
+              {% trans "27 active initiatives" %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="demo-kpi-card">
+            <div class="kpi-label">
+              {% trans "Underused / duplicate licences" %}
+            </div>
+            <div class="kpi-value">19%</div>
+            <div class="kpi-subtext text-muted">
+              {% trans "Across 7 entities, 34 desks" %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="demo-kpi-card">
+            <div class="kpi-label">
+              {% trans "Next 12-month saving potential" %}
+            </div>
+            <div class="kpi-value">$4.1M</div>
+            <div class="kpi-subtext text-info">
+              <i class="bi bi-flag-fill"></i>
+              {% trans "Pipeline + renewals" %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN CHARTS ROW -->
+      <div class="row g-3 mb-3">
+
+        <!-- LINE CHART -->
+        <div class="col-lg-7">
+          <div class="demo-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="small fw-semibold text-light">
+                {% trans "Spend vs. budget by quarter" %}
+              </div>
+              <div class="small text-muted">
+                {% trans "Illustrative values · USD m" %}
+              </div>
+            </div>
+
+            <div class="line-chart">
+              <svg viewBox="0 0 400 190" preserveAspectRatio="none">
+                <!-- Target band (e.g. 100–110m) -->
+                <rect x="0" y="72" width="400" height="40" class="chart-target-band" />
+
+                <!-- grid lines -->
+                <line x1="0" y1="30" x2="400" y2="30" class="chart-grid-line" />
+                <line x1="0" y1="70" x2="400" y2="70" class="chart-grid-line" />
+                <line x1="0" y1="110" x2="400" y2="110" class="chart-grid-line" />
+                <line x1="0" y1="150" x2="400" y2="150" class="chart-grid-line" />
+
+                <!-- Budget line -->
+                <polyline
+                  class="line-budget"
+                  points="40,96 140,88 240,94 340,86"
+                />
+
+                <!-- Actual spend line -->
+                <polyline
+                  class="line-actual"
+                  points="40,98 140,78 240,98 340,74"
+                />
+
+                <!-- points + tooltips -->
+                <!-- Q1 -->
+                <circle cx="40" cy="98" r="3" class="chart-point-actual"
+                        data-tooltip="{% trans 'Q1 · Actual: 112m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+                <circle cx="40" cy="96" r="3" class="chart-point-budget"
+                        data-tooltip="{% trans 'Q1 · Budget: 110m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+
+                <!-- Q2 -->
+                <circle cx="140" cy="78" r="3" class="chart-point-actual"
+                        data-tooltip="{% trans 'Q2 · Actual: 118m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+                <circle cx="140" cy="88" r="3" class="chart-point-budget"
+                        data-tooltip="{% trans 'Q2 · Budget: 115m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+
+                <!-- Q3 -->
+                <circle cx="240" cy="98" r="3" class="chart-point-actual"
+                        data-tooltip="{% trans 'Q3 · Actual: 109m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+                <circle cx="240" cy="94" r="3" class="chart-point-budget"
+                        data-tooltip="{% trans 'Q3 · Budget: 112m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+
+                <!-- Q4 -->
+                <circle cx="340" cy="74" r="3" class="chart-point-actual"
+                        data-tooltip="{% trans 'Q4 · Actual: 121m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+                <circle cx="340" cy="86" r="3" class="chart-point-budget"
+                        data-tooltip="{% trans 'Q4 · Budget: 118m' %}"
+                        onmouseover="showLineTooltip(event)"
+                        onmouseout="hideLineTooltip()"/>
+
+                <!-- quarter labels -->
+                <text x="40"  y="180" class="chart-label">Q1</text>
+                <text x="140" y="180" class="chart-label">Q2</text>
+                <text x="240" y="180" class="chart-label">Q3</text>
+                <text x="340" y="180" class="chart-label">Q4</text>
+
+                <!-- value labels (Actual) -->
+                <text x="40"  y="90" class="chart-value-label">112</text>
+                <text x="140" y="70" class="chart-value-label">118</text>
+                <text x="240" y="90" class="chart-value-label">109</text>
+                <text x="340" y="66" class="chart-value-label">121</text>
+
+                <!-- comment for Q3 -->
+                <text x="240" y="40" class="chart-comment">
+                  {% trans "Under budget · –3.2m" %}
+                </text>
+                <line x1="240" y1="44" x2="240" y2="92" class="chart-comment-line" />
+              </svg>
+
+              <!-- tooltip element -->
+              <div id="lineTooltip" class="line-tooltip"></div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 small mt-2 align-items-center flex-wrap">
+              <span class="legend-dot legend-actual"></span>
+              <span class="text-muted me-2">{% trans "Actual spend" %}</span>
+              <span class="legend-dot legend-budget"></span>
+              <span class="text-muted me-2">{% trans "Budget" %}</span>
+              <span class="legend-dot legend-target"></span>
+              <span class="text-muted">{% trans "Target range" %}</span>
+            </div>
+            <div class="small text-muted mt-1">
+              {% blocktrans trimmed %}
+              The shaded band shows the range where spend is considered “on target”.
+              Moving outside it (Q2/Q4 above, Q3 below) is a trigger for deeper analysis.
+              {% endblocktrans %}
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVINGS PIPELINE -->
+        <div class="col-lg-5">
+          <div class="demo-card h-100">
+            <div class="small fw-semibold text-light mb-1">
+              {% trans "Savings pipeline by stage" %}
+            </div>
+            <div class="small text-muted mb-3">
+              {% trans "Based on current initiatives" %}
+            </div>
+
+            <div class="pipeline-row mb-2">
+              <div class="pipeline-label">
+                {% trans "Identified" %}
+              </div>
+              <div class="pipeline-bar">
+                <div class="pipeline-fill bg-pipeline-1" style="width: 85%;"></div>
+              </div>
+              <div class="pipeline-value">$8.4M</div>
+            </div>
+
+            <div class="pipeline-row mb-2">
+              <div class="pipeline-label">
+                {% trans "In negotiation" %}
+              </div>
+              <div class="pipeline-bar">
+                <div class="pipeline-fill bg-pipeline-2" style="width: 55%;"></div>
+              </div>
+              <div class="pipeline-value">$4.9M</div>
+            </div>
+
+            <div class="pipeline-row mb-3">
+              <div class="pipeline-label">
+                {% trans "Contracted" %}
+              </div>
+              <div class="pipeline-bar">
+                <div class="pipeline-fill bg-pipeline-3" style="width: 34%;"></div>
+              </div>
+              <div class="pipeline-value">$2.3M</div>
+            </div>
+
+            <div class="small text-muted">
+              {% blocktrans trimmed %}
+              DataNaut tracks status by vendor × desk × user and can connect
+              to CRM / PM tools for real pipeline tracking.
+              {% endblocktrans %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE + RENEWALS -->
+      <div class="row g-3">
+        <div class="col-lg-7">
+          <div class="demo-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="small fw-semibold text-light">
+                {% trans "Underused licences by desk (top 6)" %}
+              </div>
+              <div class="small text-muted">
+                {% trans "Dummy data · sorted by saving impact" %}
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-dark align-middle mb-0 demo-table">
+                <thead>
+                  <tr>
+                    <th>{% trans "Desk" %}</th>
+                    <th>{% trans "Vendor" %}</th>
+                    <th class="text-end">{% trans "Licences" %}</th>
+                    <th class="text-end">{% trans "Underuse" %}</th>
+                    <th class="text-end">{% trans "Est. saving" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{% trans "Power trading" %}</td>
+                    <td>EnAppSys</td>
+                    <td class="text-end">21</td>
+                    <td class="text-end text-warning">28%</td>
+                    <td class="text-end">$240k</td>
+                  </tr>
+                  <tr>
+                    <td>{% trans "Macro / rates" %}</td>
+                    <td>Bloomberg</td>
+                    <td class="text-end">26</td>
+                    <td class="text-end text-warning">19%</td>
+                    <td class="text-end">$480k</td>
+                  </tr>
+                  <tr>
+                    <td>{% trans "FX & money markets" %}</td>
+                    <td>Refinitiv</td>
+                    <td class="text-end">18</td>
+                    <td class="text-end text-warning">22%</td>
+                    <td class="text-end">$310k</td>
+                  </tr>
+                  <tr>
+                    <td>{% trans "Struct. products" %}</td>
+                    <td>{% trans "Mixed" %}</td>
+                    <td class="text-end">31</td>
+                    <td class="text-end text-warning">17%</td>
+                    <td class="text-end">$320k</td>
+                  </tr>
+                  <tr>
+                    <td>{% trans "Equities trading" %}</td>
+                    <td>ICE</td>
+                    <td class="text-end">14</td>
+                    <td class="text-end text-warning">21%</td>
+                    <td class="text-end">$190k</td>
+                  </tr>
+                  <tr>
+                    <td>{% trans "Risk / middle office" %}</td>
+                    <td>{% trans "Various" %}</td>
+                    <td class="text-end">23</td>
+                    <td class="text-end text-warning">15%</td>
+                    <td class="text-end">$160k</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="demo-card h-100">
+            <div class="small fw-semibold text-light mb-2">
+              {% trans "Renewal calendar (next 12 months)" %}
+            </div>
+
+            <div class="renewal-item">
+              <div>
+                <div class="small text-light">
+                  {% trans "Bloomberg enterprise licence" %}
+                </div>
+                <div class="tiny text-muted">
+                  {% trans "Entity: London trading · Vendor: Bloomberg" %}
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="tiny text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold text-light">Feb 2026</div>
+              </div>
+            </div>
+
+            <div class="renewal-item">
+              <div>
+                <div class="small text-light">
+                  {% trans "ICE data feeds" %}
+                </div>
+                <div class="tiny text-muted">
+                  {% trans "Entity: EU power · Vendor: ICE" %}
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="tiny text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold text-light">Apr 2026</div>
+              </div>
+            </div>
+
+            <div class="renewal-item mb-3">
+              <div>
+                <div class="small text-light">
+                  {% trans "Refinitiv desktop licences" %}
+                </div>
+                <div class="tiny text-muted">
+                  {% trans "Entity: US commodities · Vendor: Refinitiv" %}
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="tiny text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold text-light">Jun 2026</div>
+              </div>
+            </div>
+
+            <div class="small text-muted">
+              {% blocktrans trimmed %}
+              In a live deployment, DataNaut would allow drill-down into each renewal – which desks /
+              users are in scope, what optimisation options exist and which savings are already planned.
+              {% endblocktrans %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- /demo-shell -->
+  </div>
+</section>
+
+<!-- CTA under dark block -->
+<section class="demo-cta-strip bg-light">
+  <div class="container text-center">
+    <h2 class="h4 fw-bold mb-2">
+      {% trans "Ready to plug in your own contracts & invoices?" %}
+    </h2>
+    <p class="text-muted mb-3">
+      {% blocktrans trimmed %}
+      Start with a focused Data Cost Assessment on a subset of vendors – typically 4–6 weeks from
+      data ingestion to first savings.
+      {% endblocktrans %}
+    </p>
+    <a href="{% url 'contact' %}" class="btn btn-primary btn-lg px-4">
+      {% trans "Book a free assessment" %}
+    </a>
+  </div>
+</section>
+
+<style>
+  /* по-четим текст върху градиента на hero-то */
+  .hero-demo {
+    padding-top: 80px;
+    padding-bottom: 72px;
+    color: #e5e7eb;
+  }
+
+  .hero-demo h1 {
+    color: #f9fafb;
+  }
+
+  .hero-demo .lead {
+    color: #e5e7eb;
+  }
+
+  .hero-demo p,
+  .hero-demo li {
+    color: #d1d5db;
+  }
+
+  .hero-demo .text-muted {
+    color: #9ca3af !important;
+  }
+
+  /* бяла лента с повече въздух преди футъра */
+  .demo-cta-strip {
+    padding: 40px 0 72px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  /* общи цветове вътре в демо панела */
+  .demo-shell {
+    background: radial-gradient(circle at top left, rgba(56,189,248,0.2), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(147,51,234,0.25), transparent 55%),
+                #020617;
+    border-radius: 18px;
+    padding: 20px 22px 22px;
+    border: 1px solid rgba(148,163,184,0.4);
+    box-shadow: 0 22px 60px rgba(15,23,42,0.8);
+    color: #e5e7eb;
+  }
+
+  .demo-shell p,
+  .demo-shell li,
+  .demo-shell .small,
+  .demo-shell .tiny {
+    color: #d1d5db;
+  }
+
+  .demo-shell .text-muted {
+    color: #9ca3af !important;
+  }
+
+  .demo-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    color: #e5e7eb;
+  }
+
+  .demo-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .filter-pill {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid rgba(148,163,184,0.7);
+    color: #e5e7eb;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .demo-kpi-card {
+    background: rgba(15,23,42,0.95);
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(31,41,55,0.95);
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.9);
+    color: #e5e7eb;
+  }
+
+  .kpi-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+
+  .kpi-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f9fafb;
+    margin-bottom: 2px;
+  }
+
+  .kpi-subtext {
+    font-size: 0.75rem;
+  }
+
+  .demo-card {
+    background: rgba(15,23,42,0.96);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(31,41,55,0.95);
+    color: #e5e7eb;
+  }
+
+  .line-chart {
+    width: 100%;
+    height: 200px;
+    position: relative;
+  }
+
+  .line-chart svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-grid-line {
+    stroke: rgba(15,23,42,0.9);
+    stroke-width: 1;
+  }
+
+  .chart-target-band {
+    fill: #22c55e;
+    opacity: 0.05;
+  }
+
+  .line-actual {
+    fill: none;
+    stroke: #22c55e;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 6px rgba(74,222,128,0.4));
+  }
+
+  .line-budget {
+    fill: none;
+    stroke: #60a5fa;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.9;
+  }
+
+  .chart-point-actual {
+    fill: #22c55e;
+    cursor: pointer;
+  }
+
+  .chart-point-budget {
+    fill: #60a5fa;
+    cursor: pointer;
+  }
+
+  .chart-label {
+    font-size: 9px;
+    fill: #9ca3af;
+    text-anchor: middle;
+  }
+
+  .chart-value-label {
+    font-size: 9px;
+    fill: #e5e7eb;
+    text-anchor: middle;
+  }
+
+  .chart-comment {
+    fill: #facc15;
+    font-size: 10px;
+    text-anchor: middle;
+    font-weight: 600;
+  }
+
+  .chart-comment-line {
+    stroke: #facc15;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .legend-actual {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+    box-shadow: 0 0 6px rgba(74,222,128,0.4);
+  }
+  .legend-budget {
+    background: linear-gradient(180deg, #60a5fa, #2563eb);
+  }
+  .legend-target {
+    background: rgba(34,197,94,0.15);
+    border: 1px dashed rgba(52,211,153,0.7);
+  }
+
+  .line-tooltip {
+    position: fixed;
+    display: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(15,23,42,0.95);
+    color: #e5e7eb;
+    font-size: 11px;
+    border: 1px solid rgba(148,163,184,0.6);
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .pipeline-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 70px;
+    align-items: center;
+    gap: 6px;
+   font-size: 0.8rem;
+  }
+
+  .pipeline-label {
+    color: #9ca3af;
+  }
+
+  .pipeline-bar {
+    background: #020617;
+    border-radius: 999px;
+    overflow: hidden;
+    height: 10px;
+  }
+
+  .pipeline-fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .bg-pipeline-1 {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+  }
+  .bg-pipeline-2 {
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+  }
+  .bg-pipeline-3 {
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+  }
+
+  .pipeline-value {
+    text-align: right;
+    color: #e5e7eb;
+  }
+
+  .demo-table thead {
+    background: #020617;
+  }
+
+  .demo-table th,
+  .demo-table td {
+    border-color: #111827 !important;
+    font-size: 0.78rem;
+    color: #e5e7eb;
+  }
+
+  .renewal-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(31,41,55,0.9);
+  }
+
+  .renewal-item:last-of-type {
+    border-bottom: none;
+  }
+
+  .tiny {
+    font-size: 0.7rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .demo-shell {
+      padding: 16px;
+    }
+  }
+</style>
+
+<script>
+  function showLineTooltip(evt) {
+    const tooltip = document.getElementById('lineTooltip');
+    if (!tooltip) return;
+    const text = evt.target.getAttribute('data-tooltip');
+    if (!text) return;
+    tooltip.textContent = text;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (evt.pageX + 10) + 'px';
+    tooltip.style.top  = (evt.pageY - 28) + 'px';
+  }
+  function hideLineTooltip() {
+    const tooltip = document.getElementById('lineTooltip');
+    if (!tooltip) return;
+    tooltip.style.display = 'none';
+  }
+</script>
+
+{% endblock %}

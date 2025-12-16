@@ -1,0 +1,107 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-3">
+    <div class="col-12">
+        <div class="portal-card">
+            <h5 class="mb-1">Usage overview</h5>
+            <p class="portal-card-muted mb-0">
+                Illustrative view of licence usage by desk / user group. Data below is static demo content.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-6">
+        <div class="portal-card h-100">
+            <h6 class="mb-2">Desks with potential optimisation</h6>
+            <div class="table-responsive">
+                <table class="portal-table">
+                    <thead>
+                    <tr>
+                        <th>Desk / team</th>
+                        <th>Vendor</th>
+                        <th>Licences</th>
+                        <th>Usage signal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>EM FX trading</td>
+                        <td>Refinitiv</td>
+                        <td>24</td>
+                        <td class="cell-muted">
+                            <span class="pill-amber pill">7 licences low-usage</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Rates structuring</td>
+                        <td>Bloomberg</td>
+                        <td>18</td>
+                        <td class="cell-muted">
+                            <span class="pill-red pill">3 dormant terminals</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Equity research</td>
+                        <td>Vendor X</td>
+                        <td>12</td>
+                        <td class="cell-muted">
+                            <span class="pill-green pill">Healthy usage</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Middle office</td>
+                        <td>Various</td>
+                        <td>31</td>
+                        <td class="cell-muted">
+                            <span class="pill-amber pill">Overlap across two vendors</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="portal-card-muted mt-3 mb-0">
+                Internally this would link to raw usage exports (terminal logs, SSO, entitlement feeds) and suggested actions.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="portal-card h-100">
+            <h6 class="mb-2">Summary signals</h6>
+            <ul class="mb-3" style="font-size: 0.86rem;">
+                <li class="mb-1">
+                    <span class="pill-green pill">£0.5m</span>
+                    <span class="ms-2">of potential savings from low-usage licences across 3 core vendors.</span>
+                </li>
+                <li class="mb-1">
+                    <span class="pill-amber pill">2 desks</span>
+                    <span class="ms-2">with overlapping products (same feed provided by multiple vendors).</span>
+                </li>
+                <li>
+                    <span class="pill pill-green">80%+</span>
+                    <span class="ms-2">of licences in “healthy usage” band based on last 90 days.</span>
+                </li>
+            </ul>
+
+            <h6 class="mb-2">Next actions</h6>
+            <ul class="mb-0" style="font-size: 0.86rem;">
+                <li class="mb-1">
+                    Share latest usage pack with
+                    <span class="link-inline">Trading desks</span> and finance ahead of renewal meetings.
+                </li>
+                <li class="mb-1">
+                    Confirm decommission plan for dormant desks and recycle licences where possible.
+                </li>
+                <li>
+                    Align usage metrics with internal cost allocation model (GL / desk codes).
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

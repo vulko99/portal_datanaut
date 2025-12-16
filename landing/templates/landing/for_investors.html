@@ -1,0 +1,150 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "For investors & board · DataNaut" %}{% endblock %}
+
+{# Допълнителен CSS само за тази страница #}
+{% block extra_head %}
+<style>
+    .investor-hero-copy p,
+    .investor-hero-copy li {
+        color: #e5e7eb;            /* по-светъл текст върху тъмно */
+    }
+
+    .investor-hero-copy ul {
+        padding-left: 1.1rem;
+        font-size: 0.9rem;
+    }
+
+    .investor-hero-copy li + li {
+        margin-top: 0.25rem;
+    }
+
+    .investor-cta-btn-secondary {
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        color: #e5e7eb;
+        background: transparent;
+        font-size: 0.9rem;
+    }
+
+    .investor-cta-btn-secondary:hover {
+        background: rgba(15, 23, 42, 0.9);
+    }
+
+    .investor-roadmap-section {
+        background: var(--dn-bg-page);
+        padding: 56px 0 80px;
+    }
+
+    .investor-phase-card {
+        background: #ffffff;
+        color: #111827;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 18px 20px;
+        font-size: 0.85rem;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        height: 100%;
+    }
+
+    .investor-phase-card h6 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6b7280;
+        margin-bottom: 0.35rem;
+    }
+
+    .investor-phase-card p {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# HERO – тъмен фон, силен контраст #}
+<section class="hero-section">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7 investor-hero-copy">
+                <p class="eyebrow mb-2">
+                    {% trans "For investors & boards" %}
+                </p>
+                <h1 class="hero-title mb-3">
+                    {% trans "A focused platform with clear ROI levers." %}
+                </h1>
+                <p class="hero-lead mb-3">
+                    {% blocktrans trimmed %}
+                    DataNaut is built for institutions where market data and technology subscriptions
+                    are one of the largest – and least transparent – cost lines.
+                    {% endblocktrans %}
+                </p>
+
+                <ul class="mb-4">
+                    <li>
+                        {% trans "Contracts-first approach – no dependence on reselling data." %}
+                    </li>
+                    <li>
+                        {% trans "Clear value story: subscription as a fraction of realised savings." %}
+                    </li>
+                    <li>
+                        {% trans "Expandable product roadmap from cost visibility to optimisation engine." %}
+                    </li>
+                </ul>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'demo' %}" class="btn btn-cta-secondary px-4 py-2">
+                        {% trans "View demo dashboard" %}
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn investor-cta-btn-secondary px-4 py-2">
+                        {% trans "Discuss investor use cases" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ROADMAP – ясни бели карти, напълно четими #}
+<section class="investor-roadmap-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="investor-phase-card">
+                    <h6>{% trans "Initial wedge" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Data Cost Assessment – focused 4–6 week engagement on a subset of vendors,
+                        validating saving potential and building the normalised data model.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="investor-phase-card">
+                    <h6>{% trans "Platform phase" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Ongoing subscription across entities and desks, with dashboards for trading,
+                        finance and procurement, plus automation of renewal decisions.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="investor-phase-card">
+                    <h6>{% trans "Longer-term upside" %}</h6>
+                    <p>
+                        {% blocktrans trimmed %}
+                        Optimisation engine that can benchmark usage patterns, vendor packages and
+                        internal costs to recommend the most efficient configuration over time.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Contact · DataNaut" %}{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="dn-hero">
+    <div class="container-lg">
+        <h1 class="dn-hero-title mb-3">
+            {% trans "Talk to us about DataNaut" %}
+        </h1>
+        <p class="dn-hero-lead mb-0">
+            {% blocktrans trimmed %}
+            Share a bit about your current market data setup, vendors and pain points and we’ll follow up
+            with a tailored Data Cost Assessment and live demo.
+            {% endblocktrans %}
+        </p>
+    </div>
+</section>
+
+<!-- Form + contact details -->
+<section class="dn-section-light py-5">
+    <div class="container-lg">
+        <div class="row g-4">
+
+            <!-- LEFT: form -->
+            <div class="col-lg-7">
+                <div class="dn-card-light p-4 h-100">
+                    <h2 class="h6 text-uppercase text-light mb-2">
+                        {% trans "Request a demo / assessment" %}
+                    </h2>
+                    <p class="small text-white-50 mb-4">
+                        {% trans "Fill in the form below and we’ll get back to you within one business day." %}
+                    </p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">
+                                    {% trans "Name" %}
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       placeholder="{% trans 'Your name' %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">
+                                    {% trans "Company" %}
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       placeholder="{% trans 'Your company' %}">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">
+                                    {% trans "Role" %}
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-sm"
+                                       placeholder="{% trans 'e.g. Head of Trading, CFO' %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">
+                                    {% trans "Work email" %}
+                                </label>
+                                <input type="email"
+                                       class="form-control form-control-sm"
+                                       placeholder="{% trans 'you@firm.com' %}">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small mb-1">
+                                {% trans "Message / Notes" %}
+                            </label>
+                            <textarea rows="4"
+                                      class="form-control form-control-sm"
+                                      placeholder="{% trans 'Vendors you use today, approximate spend, main challenges…' %}"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary px-4">
+                            {% trans "Send request" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: contact details -->
+            <div class="col-lg-5">
+                <div class="dn-card-light p-4 h-100">
+                    <h2 class="h6 text-uppercase text-light mb-2">
+                        {% trans "Contact details" %}
+                    </h2>
+                    <p class="small text-white-50 mb-3">
+                        {% trans "For general enquiries, partnership discussions or press, you can also reach us at:" %}
+                    </p>
+
+                    <dl class="small mb-0">
+                        <dt class="text-white-50">
+                            {% trans "Email" %}
+                        </dt>
+                        <dd class="mb-3">
+                            <a href="mailto:info@datanaut.com">info@datanaut.com</a>
+                        </dd>
+
+                        <dt class="text-white-50">
+                            {% trans "LinkedIn" %}
+                        </dt>
+                        <dd>
+                            <a href="#" target="_blank" rel="noopener">DataNaut</a>
+                        </dd>
+                    </dl>
+
+                    <p class="small text-white-50 mt-3 mb-0">
+                        {% blocktrans trimmed %}
+                        We typically start with a focused assessment on a subset of contracts and invoices
+                        to estimate savings, then move to a broader rollout if the fit is right.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

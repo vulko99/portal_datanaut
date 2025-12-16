@@ -1,0 +1,139 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "About · DataNaut" %}{% endblock %}
+
+{% block content %}
+
+<section class="dn-hero">
+    <div class="container-lg">
+        <h1 class="dn-hero-title mb-3">
+            {% trans "Why DataNaut exists" %}
+        </h1>
+        <p class="dn-hero-lead mb-3">
+            {% blocktrans trimmed %}
+            Market data and technology subscriptions are one of the largest – and least transparent –
+            cost lines in trading and financial firms. DataNaut was created to bring contract, usage
+            and cost data into a single, trusted view.
+            {% endblocktrans %}
+        </p>
+        <p class="text-white-50 small mb-0">
+            {% blocktrans trimmed %}
+            Our goal is simple: cut waste without slowing down the desks, and give CFOs and investors a
+            clean story on efficiency and control.
+            {% endblocktrans %}
+        </p>
+    </div>
+</section>
+
+<section class="dn-section-light py-5">
+    <div class="container-lg">
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <h2 class="h6 text-uppercase text-light mb-2">
+                    {% trans "The problem" %}
+                </h2>
+                <p class="small mb-0">
+                    {% blocktrans trimmed %}
+                    Trading and market data teams rely on dozens of vendors – Bloomberg, ICE, Refinitiv,
+                    EnAppSys and many more – each with their own contracts, entitlement files and invoices.
+                    Overlapping feeds, unused licences and renewals with little time to analyse options mean
+                    spend keeps rising while transparency lags behind.
+                    {% endblocktrans %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="h6 text-uppercase text-light mb-2">
+                    {% trans "Our approach" %}
+                </h2>
+                <p class="small mb-0">
+                    {% blocktrans trimmed %}
+                    DataNaut is <strong>contract-first</strong>, not a data-reselling platform.
+                    We ingest invoices, contracts, entitlement files and usage data into a single schema,
+                    then normalise it into a single cost &amp; usage repository. Dashboards and alerts sit
+                    on top, giving desks, CFOs and procurement a shared source of truth.
+                    {% endblocktrans %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="h6 text-uppercase text-light mb-2">
+                    {% trans "Why now" %}
+                </h2>
+                <p class="small mb-0">
+                    {% blocktrans trimmed %}
+                    Market data and technology spend keeps growing faster than revenues. At the same time,
+                    regulators and boards expect tighter governance and full auditability. With cloud adoption
+                    and stricter cost discipline, firms need a dedicated system of record for data contracts and
+                    entitlements – not just another Excel file.
+                    {% endblocktrans %}
+                </p>
+            </div>
+        </div>
+
+        <h2 class="h5 text-center mb-4">
+            {% trans "Product roadmap" %}
+        </h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="dn-card-light p-3 h-100">
+                    <p class="dn-pill-badge mb-1">
+                        {% trans "PHASE 1 – MVP" %}
+                    </p>
+                    <h3 class="h6 mb-2">
+                        {% trans "Contract & spend visibility" %}
+                    </h3>
+                    <ul class="small mb-0">
+                        <li>{% trans "Import contracts, invoices and entitlement files." %}</li>
+                        <li>{% trans "Normalised mapping by vendor, desk, user and entity." %}</li>
+                        <li>{% trans "Basic dashboards with spend visibility and quick wins." %}</li>
+                        <li>{% trans "Exports for finance and compliance (Excel / PDF)." %}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="dn-card-light p-3 h-100">
+                    <p class="dn-pill-badge mb-1">
+                        {% trans "PHASE 2" %}
+                    </p>
+                    <h3 class="h6 mb-2">
+                        {% trans "Usage & entitlement analytics" %}
+                    </h3>
+                    <ul class="small mb-0">
+                        <li>{% trans "Deeper duplicate / underuse detection across vendors." %}</li>
+                        <li>{% trans "What-if scenarios for consolidation and renegotiation." %}</li>
+                        <li>{% trans "APIs for integrating with internal BI tools." %}</li>
+                        <li>{% trans "Governance-ready reporting for risk and compliance." %}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="dn-card-light p-3 h-100">
+                    <p class="dn-pill-badge mb-1">
+                        {% trans "PHASE 3" %}
+                    </p>
+                    <h3 class="h6 mb-2">
+                        {% trans "Optimisation engine" %}
+                    </h3>
+                    <ul class="small mb-0">
+                        <li>{% trans "Data-driven recommendations at each renewal." %}</li>
+                        <li>{% trans "Automated alerts for compliance and licence breaches." %}</li>
+                        <li>{% trans "Benchmarking across clients (anonymised)." %}</li>
+                        <li>{% trans "Playbooks for vendor negotiations." %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'home' %}#assessment-form"
+               class="btn btn-primary">
+                {% trans "Talk to us about DataNaut" %}
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
