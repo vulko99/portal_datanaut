@@ -1,0 +1,41 @@
+{% extends "portal/base_portal.html" %}
+{% block content %}
+  <div class="page-title">Invoicing</div>
+  <div class="page-subtitle">Invoice list (number, date, amount, currency). Prepared for future invoice lines and cost splits.</div>
+
+  <div class="cardx">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="muted">Total invoices: <strong style="color:var(--strong)">{{ invoices|length }}</strong></div>
+      <div class="muted">Create/edit via Admin for now.</div>
+    </div>
+
+    {% if invoices %}
+      <table class="tablex">
+        <thead>
+          <tr>
+            <th style="width:20%;">Invoice №</th>
+            <th style="width:16%;">Invoice date</th>
+            <th style="width:24%;">Vendor</th>
+            <th style="width:20%;">Contract</th>
+            <th style="width:20%; text-align:right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in invoices %}
+            <tr>
+              <td><strong>{{ i.invoice_number }}</strong></td>
+              <td class="muted">{{ i.invoice_date }}</td>
+              <td class="muted">{{ i.vendor.name }}</td>
+              <td class="muted">{% if i.contract %}{{ i.contract.contract_name }}{% else %}—{% endif %}</td>
+              <td style="text-align:right;">
+                <strong>{{ i.total_amount }}</strong> <span class="muted">{{ i.currency }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty">No invoices yet. Create invoices from Django admin for now.</div>
+    {% endif %}
+  </div>
+{% endblock %}

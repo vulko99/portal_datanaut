@@ -1,107 +1,49 @@
 {% extends "portal/base_portal.html" %}
-
-{% block title_suffix %} · Usage{% endblock %}
-
 {% block content %}
-<div class="row g-3 mb-3">
-    <div class="col-12">
-        <div class="portal-card">
-            <h5 class="mb-1">Usage overview</h5>
-            <p class="portal-card-muted mb-0">
-                Illustrative view of licence usage by desk / user group. Data below is static demo content.
-            </p>
-        </div>
-    </div>
-</div>
+  <div class="page-title">Usage</div>
+  <div class="page-subtitle">Illustrative view of licence usage signals. Next iteration: ingest from terminal logs / SSO / entitlement feeds.</div>
 
-<div class="row g-3 mb-3">
-    <div class="col-lg-6">
-        <div class="portal-card h-100">
-            <h6 class="mb-2">Desks with potential optimisation</h6>
-            <div class="table-responsive">
-                <table class="portal-table">
-                    <thead>
-                    <tr>
-                        <th>Desk / team</th>
-                        <th>Vendor</th>
-                        <th>Licences</th>
-                        <th>Usage signal</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>EM FX trading</td>
-                        <td>Refinitiv</td>
-                        <td>24</td>
-                        <td class="cell-muted">
-                            <span class="pill-amber pill">7 licences low-usage</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Rates structuring</td>
-                        <td>Bloomberg</td>
-                        <td>18</td>
-                        <td class="cell-muted">
-                            <span class="pill-red pill">3 dormant terminals</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Equity research</td>
-                        <td>Vendor X</td>
-                        <td>12</td>
-                        <td class="cell-muted">
-                            <span class="pill-green pill">Healthy usage</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Middle office</td>
-                        <td>Various</td>
-                        <td>31</td>
-                        <td class="cell-muted">
-                            <span class="pill-amber pill">Overlap across two vendors</span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <p class="portal-card-muted mt-3 mb-0">
-                Internally this would link to raw usage exports (terminal logs, SSO, entitlement feeds) and suggested actions.
-            </p>
-        </div>
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="cardx">
+        <div class="page-title" style="font-size:1.05rem;">Desks with potential optimisation</div>
+        <div class="page-subtitle" style="margin-bottom:10px;">Static demo content.</div>
+
+        <table class="tablex">
+          <thead>
+            <tr>
+              <th style="width:28%;">Desk / team</th>
+              <th style="width:20%;">Vendor</th>
+              <th style="width:14%;">Licences</th>
+              <th style="width:38%;">Usage signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>EM FX trading</strong></td><td class="muted">Refinitiv</td><td class="muted">24</td><td class="muted">7 licences low-usage</td></tr>
+            <tr><td><strong>Rates structuring</strong></td><td class="muted">Bloomberg</td><td class="muted">18</td><td class="muted">3 dormant terminals</td></tr>
+            <tr><td><strong>Equity research</strong></td><td class="muted">Vendor X</td><td class="muted">12</td><td class="muted">Healthy usage</td></tr>
+            <tr><td><strong>Middle office</strong></td><td class="muted">Various</td><td class="muted">31</td><td class="muted">Overlap across two vendors</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="col-lg-6">
-        <div class="portal-card h-100">
-            <h6 class="mb-2">Summary signals</h6>
-            <ul class="mb-3" style="font-size: 0.86rem;">
-                <li class="mb-1">
-                    <span class="pill-green pill">£0.5m</span>
-                    <span class="ms-2">of potential savings from low-usage licences across 3 core vendors.</span>
-                </li>
-                <li class="mb-1">
-                    <span class="pill-amber pill">2 desks</span>
-                    <span class="ms-2">with overlapping products (same feed provided by multiple vendors).</span>
-                </li>
-                <li>
-                    <span class="pill pill-green">80%+</span>
-                    <span class="ms-2">of licences in “healthy usage” band based on last 90 days.</span>
-                </li>
-            </ul>
+    <div class="col-12 col-lg-5">
+      <div class="cardx">
+        <div class="page-title" style="font-size:1.05rem;">Summary signals</div>
+        <ul class="mb-0">
+          <li class="mb-2">£0.5m potential savings from low-usage licences across 3 core vendors.</li>
+          <li class="mb-2">2 desks with overlapping products (same feed provided by multiple vendors).</li>
+          <li class="mb-2">80%+ of licences in “healthy usage” band based on last 90 days.</li>
+        </ul>
 
-            <h6 class="mb-2">Next actions</h6>
-            <ul class="mb-0" style="font-size: 0.86rem;">
-                <li class="mb-1">
-                    Share latest usage pack with
-                    <span class="link-inline">Trading desks</span> and finance ahead of renewal meetings.
-                </li>
-                <li class="mb-1">
-                    Confirm decommission plan for dormant desks and recycle licences where possible.
-                </li>
-                <li>
-                    Align usage metrics with internal cost allocation model (GL / desk codes).
-                </li>
-            </ul>
-        </div>
+        <div class="page-title mt-3" style="font-size:1.05rem;">Next actions</div>
+        <ul class="mb-0">
+          <li class="mb-2">Share latest usage pack with Trading desks and Finance ahead of renewal meetings.</li>
+          <li class="mb-2">Confirm decommission plan for dormant desks and recycle licences where possible.</li>
+          <li class="mb-2">Align usage metrics with internal cost allocation model (GL / desk codes).</li>
+        </ul>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock %}

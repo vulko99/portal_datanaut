@@ -1,118 +1,55 @@
 {% extends "portal/base_portal.html" %}
-
-{% block title_suffix %} · Dashboard{% endblock %}
-
 {% block content %}
-<div class="row g-3 mb-3">
-    <div class="col-12">
-        <div class="portal-card d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-            <div>
-                <h5 class="mb-1">Welcome, {{ request.user.username }}!</h5>
-                <p class="portal-card-muted mb-0">
-                    High-level view of contracts, spend and usage across your vendors.
-                </p>
-            </div>
-            <div class="mt-2 mt-md-0">
-                <span class="badge-demo">Preview environment · demo numbers</span>
-            </div>
-        </div>
+  <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+    <div>
+      <div class="page-title">Welcome, {{ request.user.username }}.</div>
+      <div class="page-subtitle">High-level view of contracts, spend and usage across your vendors.</div>
     </div>
-</div>
-
-<div class="row g-3 mb-3">
-    <div class="col-md-3">
-        <div class="portal-card h-100">
-            <div class="metric-label">Total market data & tech spend</div>
-            <div class="metric-value">4.3m</div>
-            <div class="metric-sub">+3.8% vs previous 12 months</div>
-            <p class="metric-tagline mb-0">
-                Consolidated across all in-scope vendors and entities.
-            </p>
-        </div>
+    <div class="text-end muted" style="font-size:.9rem;">
+      Preview environment · demo numbers
     </div>
+  </div>
 
-    <div class="col-md-3">
-        <div class="portal-card h-100">
-            <div class="metric-label">Identified savings</div>
-            <div class="metric-value">0.9m</div>
-            <div class="metric-sub">27 active initiatives</div>
-            <p class="metric-tagline mb-0">
-                Combination of underuse, duplicate licences and re-pricing.
-            </p>
+  <div class="row g-3 mb-3">
+    {% for k in kpis %}
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="kpi">
+          <div class="label">{{ k.label }}</div>
+          <div class="value">{{ k.value }}</div>
+          <div class="hint">{{ k.hint }}</div>
         </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="cardx">
+        <div class="page-title" style="font-size:1.05rem;">Spend vs budget (illustrative)</div>
+        <div class="page-subtitle" style="margin-bottom:10px;">
+          Placeholder block. Next iteration: chart fed from invoices + GL budget (quarterly).
+        </div>
+        <div class="empty">
+          FY PLAN SNAPSHOT: Q1 112m · Q2 118m · Q3 109m · Q4 121m (budget placeholders)
+          <div class="mt-2" style="color:#86efac;">Under budget by 3.2m vs annual plan.</div>
+        </div>
+      </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="portal-card h-100">
-            <div class="metric-label">Contracts in scope</div>
-            <div class="metric-value">38</div>
-            <div class="metric-sub">12 vendors · 7 entities</div>
-            <p class="metric-tagline mb-0">
-                Based on latest signed contracts in the repository.
-            </p>
+    <div class="col-12 col-lg-5">
+      <div class="cardx">
+        <div class="page-title" style="font-size:1.05rem;">Quick links</div>
+        <div class="page-subtitle" style="margin-bottom:10px;">
+          Common actions and health-checks your team might run every month.
         </div>
+        <ul class="mb-0">
+          {% for q in quick_links %}
+            <li class="mb-2">
+              <a class="link-inline" href="{% url 'portal:'|add:q.url_name %}">{{ q.label }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
-
-    <div class="col-md-3">
-        <div class="portal-card h-100">
-            <div class="metric-label">Renewals next 90 days</div>
-            <div class="metric-value">6</div>
-            <div class="metric-sub">Prioritise high-value negotiations</div>
-            <p class="metric-tagline mb-0">
-                Click <span class="fw-semibold">“Contracts”</span> to see the renewal calendar in detail.
-            </p>
-        </div>
-    </div>
-</div>
-
-<div class="row g-3">
-    <div class="col-lg-7">
-        <div class="portal-card h-100">
-            <h6 class="mb-1">Spend vs budget (illustrative)</h6>
-            <p class="portal-card-muted">
-                Simple view of actual spend vs budget by quarter. In a full deployment this would be fed from your finance / GL data.
-            </p>
-
-            <div class="mt-3 portal-card-muted">
-                <div class="mb-2 fw-semibold text-uppercase" style="letter-spacing: .08em; font-size: .72rem;">
-                    FY plan snapshot
-                </div>
-                <div class="d-flex flex-wrap gap-2" style="font-size: 0.82rem;">
-                    <span class="pill">Q1 · 112m (budget 110m)</span>
-                    <span class="pill">Q2 · 118m (budget 115m)</span>
-                    <span class="pill">Q3 · 109m (budget 112m)</span>
-                    <span class="pill">Q4 · 121m (budget 118m)</span>
-                </div>
-                <div class="mt-3" style="font-size: 0.82rem; color:#4ade80;">
-                    Under budget by 3.2m vs annual plan.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5">
-        <div class="portal-card h-100">
-            <h6 class="mb-1">Quick links</h6>
-            <p class="portal-card-muted mb-2">
-                Common actions and health-checks your team might run every month.
-            </p>
-            <ul class="mb-0" style="font-size: 0.86rem;">
-                <li class="mb-1">
-                    <a class="link-inline" href="{% url 'portal:contracts' %}">
-                        Review upcoming renewals and large contracts
-                    </a>
-                </li>
-                <li class="mb-1">
-                    <a class="link-inline" href="{% url 'portal:usage' %}">
-                        Check desks with underused / duplicate licences
-                    </a>
-                </li>
-                <li>
-                    <span class="link-inline">Export latest snapshot</span>
-                    <span class="portal-card-muted">(placeholder action)</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
+  </div>
 {% endblock %}

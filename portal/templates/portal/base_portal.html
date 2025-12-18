@@ -2,344 +2,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>DataNaut · Portal{% block title_suffix %}{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <title>DataNaut · Client Portal{% block title_suffix %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
 
-    <style>
-        :root {
-            --dn-bg-nav: #020617;
-            --dn-bg-page: #020715;
-            --dn-bg-surface: #050816;
-            --dn-text-main: #e5e7eb;
-            --dn-text-strong: #f9fafb;
-            --dn-text-muted: #9ca3af;
-            --dn-accent-teal: #14f4d4;
-            --dn-accent-green: #22c55e;
-            --dn-accent-blue: #2563eb;
-            --dn-border-subtle: rgba(148, 163, 184, 0.35);
-        }
+  <style>
+    :root{
+      --bg: #070A12;
+      --panel: rgba(10, 15, 25, .85);
+      --panel2: rgba(12, 18, 30, .88);
+      --border: rgba(148, 163, 184, .22);
+      --text: #E5E7EB;
+      --muted: #9CA3AF;
+      --strong: #F9FAFB;
+      --accent: #14F4D4;
+      --accent2:#60A5FA;
+      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --radius: 16px;
+      --sidebar: 280px;
+    }
 
-        html,
-        body {
-            height: 100%;
-        }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(20,244,212,.18), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(96,165,250,.16), transparent 55%),
+        radial-gradient(900px 500px at 50% 100%, rgba(167,139,250,.12), transparent 55%),
+        var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
 
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background:
-                radial-gradient(circle at 0% 0%, #0f766e 0, #020617 30%),
-                radial-gradient(circle at 100% 0%, #4c1d95 0, #020617 40%),
-                radial-gradient(circle at 50% 100%, #1d4ed8 0, #020617 40%);
-            color: var(--dn-text-main);
-        }
+    .layout { min-height:100vh; display:flex; }
 
-        /* ---------- NAVBAR ---------- */
+    /* Sidebar */
+    .sidebar{
+      width: var(--sidebar);
+      background: linear-gradient(180deg, rgba(5,8,18,.92), rgba(5,8,18,.75));
+      border-right: 1px solid var(--border);
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
 
-        .portal-nav {
-            background: var(--dn-bg-nav);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
-            min-height: 56px;
-        }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px 16px;
+      border-bottom:1px solid rgba(148,163,184,.18);
+      margin-bottom: 14px;
+    }
+    .brand img{ height:26px; width:auto; }
+    .brand .t1{ font-weight:700; letter-spacing:.02em; color:var(--strong); line-height:1.1; }
+    .brand .t2{ font-size:.82rem; color:var(--muted); margin-top:2px; }
 
-        .portal-container {
-            max-width: 1240px;
-        }
+    .nav-section{
+      margin-top: 14px;
+      font-size: .72rem;
+      letter-spacing: .10em;
+      color: rgba(156,163,175,.85);
+      text-transform: uppercase;
+      padding: 0 10px;
+    }
 
-        .portal-brand img {
-            height: 26px;
-            width: auto;
-        }
+    .side-nav{ margin-top: 8px; }
+    .side-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      margin: 6px 6px;
+      border-radius: 12px;
+      color: rgba(229,231,235,.86);
+      text-decoration:none;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+    .side-link:hover{
+      border-color: rgba(20,244,212,.35);
+      background: rgba(20,244,212,.08);
+      color: var(--strong);
+    }
+    .side-link.active{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+      color: var(--strong);
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
 
-        .portal-brand-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--dn-text-strong);
-            letter-spacing: 0.02em;
-        }
+    .side-footer{
+      margin-top: 18px;
+      padding: 14px 10px 0;
+      border-top:1px solid rgba(148,163,184,.18);
+      color: var(--muted);
+      font-size:.85rem;
+    }
+    .side-footer a{ color: var(--accent2); text-decoration:none; }
+    .side-footer a:hover{ text-decoration:underline; }
 
-        .portal-brand-sub {
-            font-size: 0.8rem;
-            color: var(--dn-text-muted);
-        }
+    /* Main */
+    .main{ flex:1; min-width:0; }
 
-        .navbar-nav .nav-link {
-            font-size: 0.88rem;
-            color: var(--dn-text-muted);
-        }
+    .topbar{
+      height: 64px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6,10,18,.55);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top:0;
+      z-index: 10;
+    }
 
-        .navbar-nav .nav-link.active,
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link:focus {
-            color: var(--dn-text-strong);
-        }
+    .user-pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .85rem;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--strong);
+      margin-right: 10px;
+    }
 
-        .user-pill {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 0.15rem 0.75rem;
-            font-size: 0.8rem;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            color: var(--dn-text-main);
-        }
+    .btn-ghost{
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.35);
+      color: var(--strong);
+      border-radius: 10px;
+    }
+    .btn-ghost:hover{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+    }
 
-        /* ---------- PAGE LAYOUT ---------- */
+    .content{
+      padding: 22px;
+      max-width: 1280px;
+    }
 
-        .portal-main {
-            min-height: 100vh;
-            padding-top: 64px; /* място за fixed navbar */
-            padding-bottom: 32px;
-        }
+    .page-title{
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--strong);
+      margin-bottom: 2px;
+      letter-spacing: .01em;
+    }
+    .page-subtitle{
+      color: var(--muted);
+      font-size: .95rem;
+      margin-bottom: 18px;
+      max-width: 920px;
+    }
 
-        /* ---------- HEADINGS / TYPOGRAPHY (за всички табове) ---------- */
+    .cardx{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
 
-        .section-header {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-            margin-bottom: 1rem;
-        }
+    .kpi{
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.20);
+      background: linear-gradient(180deg, rgba(12,18,30,.88), rgba(10,15,25,.75));
+      height: 100%;
+    }
+    .kpi .label{ color: var(--muted); font-size: .78rem; letter-spacing:.10em; text-transform:uppercase; }
+    .kpi .value{ font-size: 1.55rem; font-weight: 800; color: var(--strong); margin-top: 6px; }
+    .kpi .hint{ color: rgba(156,163,175,.95); font-size: .88rem; margin-top: 4px; }
 
-        .section-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            color: var(--dn-text-strong);
-        }
+    .tablex{
+      width: 100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.18);
+    }
+    .tablex thead th{
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      font-size: .72rem;
+      color: rgba(156,163,175,.95);
+      background: rgba(6,10,18,.75);
+      border-bottom: 1px solid rgba(148,163,184,.18);
+      padding: 12px 12px;
+    }
+    .tablex tbody td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(148,163,184,.10);
+      color: rgba(229,231,235,.92);
+      font-size: .92rem;
+    }
+    .tablex tbody tr:hover{
+      background: rgba(20,244,212,.06);
+    }
+    .muted{ color: var(--muted); }
 
-        .section-subtitle {
-            font-size: 0.88rem;
-            color: var(--dn-text-muted);
-        }
+    .empty{
+      border: 1px dashed rgba(148,163,184,.30);
+      border-radius: 14px;
+      padding: 18px;
+      background: rgba(15,23,42,.25);
+      color: rgba(229,231,235,.88);
+    }
 
-        .section-eyebrow {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 0.72rem;
-            color: var(--dn-text-muted);
-            font-weight: 500;
-        }
+    @media (max-width: 991px){
+      .sidebar{ display:none; }
+      .content{ padding: 16px; }
+    }
+  </style>
 
-        /* ---------- CARDS / METRICS ---------- */
-
-        .portal-card {
-            background:
-                radial-gradient(circle at 0 0, rgba(20, 244, 212, 0.12), transparent 55%),
-                radial-gradient(circle at 100% 0, rgba(129, 140, 248, 0.16), transparent 60%),
-                rgba(15, 23, 42, 0.96);
-            border-radius: 16px;
-            border: 1px solid var(--dn-border-subtle);
-            padding: 14px 18px;
-            color: var(--dn-text-main);
-        }
-
-        .portal-card h5,
-        .portal-card h6 {
-            color: var(--dn-text-strong);
-            font-size: 0.98rem;
-        }
-
-        .portal-card-muted {
-            font-size: 0.82rem;
-            color: var(--dn-text-muted);
-        }
-
-        .metric-label {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 0.72rem;
-            color: var(--dn-text-muted);
-            margin-bottom: 0.15rem;
-        }
-
-        .metric-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--dn-text-strong);
-        }
-
-        .metric-sub {
-            font-size: 0.8rem;
-            color: #4ade80;
-            margin-bottom: 0.4rem;
-        }
-
-        .metric-tagline {
-            font-size: 0.78rem;
-            color: var(--dn-text-muted);
-        }
-
-        .badge-demo {
-            font-size: 0.78rem;
-            border-radius: 999px;
-            padding: 0.25rem 0.7rem;
-            border: 1px solid rgba(52, 211, 153, 0.7);
-            background: rgba(6, 95, 70, 0.55);
-            color: #bbf7d0;
-        }
-
-        /* ---------- TABLES ---------- */
-
-        .portal-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .portal-table thead th {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--dn-text-muted);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.5);
-            padding: 0.55rem 0.5rem;
-            background: rgba(15, 23, 42, 0.95);
-        }
-
-        .portal-table tbody tr:nth-child(odd) {
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .portal-table tbody tr:nth-child(even) {
-            background: rgba(9, 9, 11, 0.9);
-        }
-
-        .portal-table tbody td {
-            font-size: 0.86rem;
-            color: var(--dn-text-main);
-            padding: 0.45rem 0.5rem;
-            border-bottom: 1px solid rgba(31, 41, 55, 0.8);
-        }
-
-        .portal-table .cell-muted {
-            color: var(--dn-text-muted);
-            font-size: 0.8rem;
-        }
-
-        .table-caption {
-            font-size: 0.8rem;
-            color: var(--dn-text-muted);
-            margin-top: 0.35rem;
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 0.15rem 0.6rem;
-            font-size: 0.78rem;
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            color: var(--dn-text-main);
-        }
-
-        .pill-green {
-            border-color: rgba(52, 211, 153, 0.8);
-            color: #bbf7d0;
-            background: rgba(6, 95, 70, 0.4);
-        }
-
-        .pill-amber {
-            border-color: rgba(251, 191, 36, 0.9);
-            color: #fef9c3;
-            background: rgba(146, 64, 14, 0.6);
-        }
-
-        .pill-red {
-            border-color: rgba(248, 113, 113, 0.9);
-            color: #fee2e2;
-            background: rgba(127, 29, 29, 0.6);
-        }
-
-        .link-inline {
-            color: var(--dn-accent-teal);
-            text-decoration: none;
-        }
-
-        .link-inline:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 991.98px) {
-            .portal-main {
-                padding-top: 72px;
-            }
-        }
-    </style>
-
-    {% block extra_head %}{% endblock %}
+  {% block extra_head %}{% endblock %}
 </head>
+
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark portal-nav fixed-top">
-    <div class="container-fluid portal-container">
-        <a class="navbar-brand d-flex align-items-center portal-brand"
-           href="{% url 'portal:dashboard' %}">
-            <img src="{% static 'landing/logo.png' %}" alt="DataNaut logo">
-            <div class="ms-2">
-                <div class="portal-brand-title">DataNaut</div>
-                <div class="portal-brand-sub">Portal</div>
-            </div>
-        </a>
+<div class="layout">
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#portalNavbar" aria-controls="portalNavbar"
-                aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="portalNavbar">
-            {% if request.user.is_authenticated %}
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                           href="{% url 'portal:dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'contracts' %}active{% endif %}"
-                           href="{% url 'portal:contracts' %}">Contracts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'usage' %}active{% endif %}"
-                           href="{% url 'portal:usage' %}">Usage</a>
-                    </li>
-
-                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
-                        <span class="user-pill">
-                            {{ request.user.username }}
-                        </span>
-                    </li>
-                    <li class="nav-item ms-2 mt-2 mt-lg-0">
-    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-</li>
-                </ul>
-            {% else %}
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                </ul>
-            {% endif %}
-        </div>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{% static 'landing/logo.png' %}" alt="DataNaut">
+      <div>
+        <div class="t1">DataNaut</div>
+        <div class="t2">Client Portal</div>
+      </div>
     </div>
-</nav>
 
-<main class="portal-main">
-    <div class="container-fluid portal-container px-3 px-md-4">
-        {% block content %}{% endblock %}
+    <div class="nav-section">Overview</div>
+    <nav class="side-nav">
+      <a class="side-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+         href="{% url 'portal:dashboard' %}">
+        Dashboard
+      </a>
+    </nav>
+
+    <div class="nav-section">Inventory</div>
+    <nav class="side-nav">
+      <a class="side-link {% if request.resolver_match.url_name == 'vendors' %}active{% endif %}"
+         href="{% url 'portal:vendors' %}">Vendors</a>
+
+      <a class="side-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}"
+         href="{% url 'portal:services' %}">Services</a>
+
+      <a class="side-link {% if request.resolver_match.url_name == 'contracts' %}active{% endif %}"
+         href="{% url 'portal:contracts' %}">Contracts</a>
+
+      <a class="side-link {% if request.resolver_match.url_name == 'invoices' %}active{% endif %}"
+         href="{% url 'portal:invoices' %}">Invoicing</a>
+
+      <a class="side-link {% if request.resolver_match.url_name == 'users' %}active{% endif %}"
+         href="{% url 'portal:users' %}">Users</a>
+
+      <a class="side-link {% if request.resolver_match.url_name == 'cost_centers' %}active{% endif %}"
+         href="{% url 'portal:cost_centers' %}">Cost centers</a>
+    </nav>
+
+    <div class="nav-section">Other</div>
+    <nav class="side-nav">
+      <a class="side-link {% if request.resolver_match.url_name == 'usage' %}active{% endif %}"
+         href="{% url 'portal:usage' %}">Usage</a>
+    </nav>
+
+    <div class="side-footer">
+      <div class="mb-2">
+        <a href="/admin/" target="_blank" rel="noopener">Admin</a>
+      </div>
+      <div class="small">Preview UI · demo content</div>
     </div>
-</main>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      {% if request.user.is_authenticated %}
+        <span class="user-pill">{{ request.user.username }}</span>
+        <form method="post" action="{% url 'portal_logout' %}" class="m-0 p-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
+        </form>
+      {% else %}
+        <a href="{% url 'portal_login' %}" class="btn btn-ghost btn-sm">Login</a>
+      {% endif %}
+    </header>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
 {% block extra_js %}{% endblock %}
 </body>
 </html>

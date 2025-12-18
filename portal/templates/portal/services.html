@@ -1,0 +1,41 @@
+{% extends "portal/base_portal.html" %}
+{% block content %}
+  <div class="page-title">Services</div>
+  <div class="page-subtitle">What each vendor actually sells (datasets, terminals, modules). Prepared for future invoicing splits.</div>
+
+  <div class="cardx">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="muted">Total services: <strong style="color:var(--strong)">{{ services|length }}</strong></div>
+      <div class="muted">Create/edit via Admin for now.</div>
+    </div>
+
+    {% if services %}
+      <table class="tablex">
+        <thead>
+          <tr>
+            <th style="width:28%;">Vendor</th>
+            <th style="width:26%;">Service</th>
+            <th style="width:18%;">Category</th>
+            <th style="width:14%;">SKU</th>
+            <th style="width:14%;">Default billing</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in services %}
+            <tr>
+              <td><strong>{{ s.vendor.name }}</strong></td>
+              <td>{{ s.name }}</td>
+              <td class="muted">{{ s.get_category_display|default:"—" }}</td>
+              <td class="muted">{{ s.service_code|default:"—" }}</td>
+              <td class="muted">
+                {{ s.default_currency|default:"—" }} · {{ s.get_default_billing_frequency_display|default:"—" }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty">No services yet. Create them from the Django admin for now.</div>
+    {% endif %}
+  </div>
+{% endblock %}

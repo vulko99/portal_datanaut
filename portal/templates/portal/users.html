@@ -1,0 +1,39 @@
+{% extends "portal/base_portal.html" %}
+{% block content %}
+  <div class="page-title">Users</div>
+  <div class="page-subtitle">Directory view. Later: request/approval flows and licence allocation.</div>
+
+  <div class="cardx">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="muted">Total users: <strong style="color:var(--strong)">{{ users|length }}</strong></div>
+      <div class="muted">Profiles (cost center, manager) are stored in UserProfile.</div>
+    </div>
+
+    <table class="tablex">
+      <thead>
+        <tr>
+          <th style="width:20%;">Username</th>
+          <th style="width:26%;">Full name</th>
+          <th style="width:26%;">Email</th>
+          <th style="width:28%;">Cost center</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          {% with p=profiles|get_item:u.id %}
+          <tr>
+            <td><strong>{{ u.username }}</strong></td>
+            <td class="muted">
+              {% if p and p.full_name %}{{ p.full_name }}{% else %}{{ u.get_full_name|default:"—" }}{% endif %}
+            </td>
+            <td class="muted">{{ u.email|default:"—" }}</td>
+            <td class="muted">
+              {% if p and p.cost_center %}{{ p.cost_center }}{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
