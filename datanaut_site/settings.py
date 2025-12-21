@@ -146,9 +146,9 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # ВАЖНО: ползваме името "login" (без namespace)
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "portal:dashboard"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_REDIRECT_URL = 'portal:dashboard'
+LOGIN_URL = 'portal_login'          # име на view-то, което ползваш за login
+LOGOUT_REDIRECT_URL = 'portal_login'
 
 # Настройки на allauth (development-friendly)
 ACCOUNT_LOGIN_METHODS = {"email", "username"}

@@ -1,39 +1,194 @@
 {% extends "portal/base_portal.html" %}
-{% block content %}
-  <div class="page-title">Cost centers</div>
-  <div class="page-subtitle">Cost allocation layer (approvals and reporting). You can later merge this into Users if you prefer.</div>
 
-  <div class="cardx">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="muted">Total cost centers: <strong style="color:var(--strong)">{{ cost_centers|length }}</strong></div>
-      <div class="muted">Create/edit via Admin for now.</div>
+{% block title_suffix %} · Cost centers{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- HEADER / SUMMARY -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="section-header mb-2">
+                <div class="section-eyebrow">Inventory</div>
+                <h1 class="section-title mb-0">Cost centers</h1>
+                <p class="section-subtitle mb-0">
+                    Basic allocation model for contracts, invoices and licences – by desk, business unit or region.
+                    Used as a backbone for approvals, chargebacks and reporting.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-3">
+                <div class="d-flex flex-wrap gap-4">
+                    <div>
+                        <div class="metric-label">Total cost centers</div>
+                        <div class="metric-value">
+                            {{ cost_centers|length }}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end small text-muted">
+                    In later releases, approvals and licence requests will route via these cost centers,
+                    with automatic mapping to GL and management reports.
+                </div>
+            </div>
+        </div>
     </div>
 
-    {% if cost_centers %}
-      <table class="tablex">
-        <thead>
-          <tr>
-            <th style="width:18%;">Code</th>
-            <th style="width:38%;">Name</th>
-            <th style="width:18%;">Region</th>
-            <th style="width:16%;">Users</th>
-            <th style="width:10%;">Approver</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for cc in cost_centers %}
-            <tr>
-              <td><strong>{{ cc.code }}</strong></td>
-              <td>{{ cc.name }}</td>
-              <td class="muted">{{ cc.region|default:"—" }}</td>
-              <td class="muted">{{ cc.user_count }}</td>
-              <td class="muted">{% if cc.default_approver %}{{ cc.default_approver.username }}{% else %}—{% endif %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <div class="empty">No cost centers yet. Create them from Django admin for now.</div>
-    {% endif %}
-  </div>
+    <!-- LIST + FILTERS -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="mb-1">Cost center list</h6>
+                    <p class="portal-card-muted mb-0">
+                        High-level structure only. Codes can be aligned with your GL, internal reporting model
+                        or trading desk hierarchy.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Search</span>
+                        <input
+                            type="search"
+                            id="ccSearch"
+                            class="form-control"
+                            placeholder="Code, name, BU, region, approver…">
+                    </div>
+                    <select id="buFilter" class="form-select form-select-sm" style="min-width: 160px;">
+                        <option value="">All business units</option>
+                    </select>
+                    <select id="regionFilter" class="form-select form-select-sm" style="min-width: 140px;">
+                        <option value="">All regions</option>
+                    </select>
+                </div>
+            </div>
+
+            {% if cost_centers %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 14%;">Code</th>
+                                <th style="width: 30%;">Name</th>
+                                <th style="width: 22%;">Business unit</th>
+                                <th style="width: 14%;">Region</th>
+                                <th style="width: 20%;">Default approver</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ccTableBody">
+                            {% for cc in cost_centers %}
+                                <tr
+                                    data-code="{{ cc.code|default_if_none:'' }}"
+                                    data-name="{{ cc.name|default_if_none:'' }}"
+                                    data-bu="{{ cc.business_unit|default_if_none:'' }}"
+                                    data-region="{{ cc.region|default_if_none:'' }}"
+                                    data-approver="{% if cc.default_approver %}{{ cc.default_approver.get_full_name|default:cc.default_approver.username }}{% endif %}"
+                                >
+                                    <td>{{ cc.code }}</td>
+                                    <td class="cell-muted">{{ cc.name }}</td>
+                                    <td class="cell-muted" data-role="bu">
+                                        {{ cc.business_unit|default:"—" }}
+                                    </td>
+                                    <td class="cell-muted" data-role="region">
+                                        {{ cc.region|default:"—" }}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {% if cc.default_approver %}
+                                            {{ cc.default_approver.get_full_name|default:cc.default_approver.username }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="portal-card-muted mb-0 mt-2">
+                    This model can be further enriched with cost centre hierarchies, internal IDs and linkage to HR or
+                    finance master data for fully automated allocations.
+                </p>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No cost centers configured yet. You can add them in the Django admin and they will appear here.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const searchInput = document.getElementById('ccSearch');
+    const buSelect = document.getElementById('buFilter');
+    const regionSelect = document.getElementById('regionFilter');
+    const tableBody = document.getElementById('ccTableBody');
+
+    if (!tableBody || !buSelect || !regionSelect) return;
+
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    const buSet = new Set();
+    const regionSet = new Set();
+
+    // Collect distinct BUs and regions
+    rows.forEach(row => {
+        const bu = (row.dataset.bu || '').trim();
+        const region = (row.dataset.region || '').trim();
+        if (bu) buSet.add(bu);
+        if (region) regionSet.add(region);
+    });
+
+    Array.from(buSet).sort().forEach(bu => {
+        const opt = document.createElement('option');
+        opt.value = bu;
+        opt.textContent = bu;
+        buSelect.appendChild(opt);
+    });
+
+    Array.from(regionSet).sort().forEach(region => {
+        const opt = document.createElement('option');
+        opt.value = region;
+        opt.textContent = region;
+        regionSelect.appendChild(opt);
+    });
+
+    function applyFilters() {
+        const query = (searchInput ? searchInput.value : '').toLowerCase();
+        const buFilter = buSelect.value;
+        const regionFilter = regionSelect.value;
+
+        rows.forEach(row => {
+            const code = (row.dataset.code || '').toLowerCase();
+            const name = (row.dataset.name || '').toLowerCase();
+            const bu = (row.dataset.bu || '');
+            const region = (row.dataset.region || '');
+            const approver = (row.dataset.approver || '').toLowerCase();
+            const fullText = (row.textContent || '').toLowerCase();
+
+            const matchesText =
+                !query ||
+                code.includes(query) ||
+                name.includes(query) ||
+                approver.includes(query) ||
+                fullText.includes(query);
+
+            const matchesBu =
+                !buFilter || bu === buFilter;
+
+            const matchesRegion =
+                !regionFilter || region === regionFilter;
+
+            row.style.display = (matchesText && matchesBu && matchesRegion) ? '' : 'none';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+    }
+    buSelect.addEventListener('change', applyFilters);
+    regionSelect.addEventListener('change', applyFilters);
+})();
+</script>
 {% endblock %}

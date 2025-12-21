@@ -10,41 +10,177 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
 
+  {# Shared UI tokens/components (used by landing demo + portal) #}
+  <link rel="stylesheet" href="{% static 'shared/dn-ui.css' %}">
+
   <style>
+    /*
+      ------------------------------------------------------------
+      Shared DataNaut UI tokens (aligned with landing demo)
+      ------------------------------------------------------------
+      Strategy:
+      - Define --dn-* as the single source of truth.
+      - Keep existing --bg/--panel/... as aliases to avoid template churn.
+    */
     :root{
-      --bg: #070A12;
-      --panel: rgba(10, 15, 25, .85);
-      --panel2: rgba(12, 18, 30, .88);
-      --border: rgba(148, 163, 184, .22);
-      --text: #E5E7EB;
-      --muted: #9CA3AF;
-      --strong: #F9FAFB;
-      --accent: #14F4D4;
-      --accent2:#60A5FA;
-      --shadow: 0 18px 45px rgba(0,0,0,.35);
-      --radius: 16px;
-      --sidebar: 280px;
+      /* core */
+      --dn-bg: #070A12;
+      --dn-surface: rgba(15, 23, 42, .92);     /* demo-card */
+      --dn-surface-2: rgba(10, 15, 25, .85);   /* softer panel */
+      --dn-border: rgba(148,163,184,.22);
+      --dn-border-strong: rgba(148,163,184,.40);
+
+      /* text */
+      --dn-text: #E5E7EB;
+      --dn-muted: #9CA3AF;
+      --dn-strong: #F9FAFB;
+
+      /* accents */
+      --dn-accent: #14F4D4;
+      --dn-accent-2: #60A5FA;
+      --dn-violet: rgba(147,51,234,0.25);
+
+      /* radii/shadows */
+      --dn-radius-lg: 18px;
+      --dn-radius-md: 12px;
+      --dn-radius-sm: 10px;
+      --dn-shadow: 0 22px 60px rgba(15,23,42,.65);
+
+      /* layout */
+      --dn-sidebar: 260px;
+
+      /* legacy aliases (keep existing portal styles working) */
+      --bg: var(--dn-bg);
+      --panel: var(--dn-surface-2);
+      --panel2: var(--dn-surface);
+      --border: var(--dn-border);
+      --text: var(--dn-text);
+      --muted: var(--dn-muted);
+      --strong: var(--dn-strong);
+      --accent: var(--dn-accent);
+      --accent2: var(--dn-accent-2);
+      --shadow: var(--dn-shadow);
+      --radius: var(--dn-radius-lg);
+      --sidebar: var(--dn-sidebar);
     }
 
     html, body { height: 100%; }
+
     body{
       margin:0;
-      color: var(--text);
+      color: var(--dn-text);
       background:
         radial-gradient(1200px 600px at 0% 0%, rgba(20,244,212,.18), transparent 60%),
         radial-gradient(1200px 600px at 100% 0%, rgba(96,165,250,.16), transparent 55%),
-        radial-gradient(900px 500px at 50% 100%, rgba(167,139,250,.12), transparent 55%),
-        var(--bg);
+        radial-gradient(900px 500px at 50% 100%, rgba(147,51,234,.12), transparent 55%),
+        var(--dn-bg);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     .layout { min-height:100vh; display:flex; }
 
-    /* Sidebar */
+    /* ------------------------------------------------------------
+       DataNaut primitives (dn-*)
+       These mirror the demo page building blocks.
+       ------------------------------------------------------------ */
+    .dn-shell{
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(147,51,234,0.18), transparent 55%),
+        rgba(2,6,23,.55);
+      border: 1px solid var(--dn-border-strong);
+      border-radius: var(--dn-radius-lg);
+      box-shadow: var(--dn-shadow);
+    }
+
+    .dn-card{
+      background: var(--dn-surface);
+      border: 1px solid rgba(31,41,55,.95);
+      border-radius: var(--dn-radius-md);
+      color: var(--dn-text);
+    }
+
+    .dn-pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .85rem;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--dn-strong);
+    }
+
+    .dn-btn-primary{
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .86rem;
+      border: none;
+      background: linear-gradient(135deg, var(--dn-accent-2), var(--dn-accent));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(15,23,42,.6);
+      white-space: nowrap;
+    }
+    .dn-btn-primary:hover{
+      filter: brightness(1.05);
+      box-shadow: 0 12px 35px rgba(15,23,42,.8);
+    }
+    .dn-btn-primary:disabled,
+    .dn-btn-primary[disabled]{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .dn-btn-ghost{
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.35);
+      color: var(--dn-strong);
+      border-radius: var(--dn-radius-sm);
+      font-size:.86rem;
+    }
+    .dn-btn-ghost:hover{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+    }
+
+    .dn-table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius: var(--dn-radius-md);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.35);
+    }
+    .dn-table thead th{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      padding:10px 12px;
+      background: rgba(2,6,23,.85);
+      color: rgba(156,163,175,.95);
+      border-bottom: 1px solid rgba(148,163,184,.25);
+      white-space:nowrap;
+    }
+    .dn-table tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      font-size:.9rem;
+      color: rgba(229,231,235,.92);
+    }
+    .dn-table tbody tr:hover{
+      background: rgba(20,244,212,.06);
+    }
+
+    /* ------------------------------------------------------------
+       Sidebar
+       ------------------------------------------------------------ */
     .sidebar{
-      width: var(--sidebar);
+      width: var(--dn-sidebar);
       background: linear-gradient(180deg, rgba(5,8,18,.92), rgba(5,8,18,.75));
-      border-right: 1px solid var(--border);
+      border-right: 1px solid var(--dn-border);
       padding: 18px 14px;
       position: sticky;
       top: 0;
@@ -60,8 +196,8 @@
       margin-bottom: 14px;
     }
     .brand img{ height:26px; width:auto; }
-    .brand .t1{ font-weight:700; letter-spacing:.02em; color:var(--strong); line-height:1.1; }
-    .brand .t2{ font-size:.82rem; color:var(--muted); margin-top:2px; }
+    .brand .t1{ font-weight:700; letter-spacing:.02em; }
+    .brand .t2{ font-size:.82rem; color:var(--dn-muted); margin-top:2px; }
 
     .nav-section{
       margin-top: 14px;
@@ -85,16 +221,17 @@
       text-decoration:none;
       border: 1px solid transparent;
       background: transparent;
+      font-size:.9rem;
     }
     .side-link:hover{
       border-color: rgba(20,244,212,.35);
       background: rgba(20,244,212,.08);
-      color: var(--strong);
+      color: var(--dn-strong);
     }
     .side-link.active{
       border-color: rgba(20,244,212,.55);
       background: rgba(20,244,212,.10);
-      color: var(--strong);
+      color: var(--dn-strong);
       box-shadow: 0 10px 25px rgba(0,0,0,.18);
     }
 
@@ -102,13 +239,15 @@
       margin-top: 18px;
       padding: 14px 10px 0;
       border-top:1px solid rgba(148,163,184,.18);
-      color: var(--muted);
+      color: var(--dn-muted);
       font-size:.85rem;
     }
-    .side-footer a{ color: var(--accent2); text-decoration:none; }
+    .side-footer a{ color: var(--dn-accent-2); text-decoration:none; }
     .side-footer a:hover{ text-decoration:underline; }
 
-    /* Main */
+    /* ------------------------------------------------------------
+       Main
+       ------------------------------------------------------------ */
     .main{ flex:1; min-width:0; }
 
     .topbar{
@@ -116,8 +255,9 @@
       display:flex;
       align-items:center;
       justify-content:flex-end;
+      gap: 10px;
       padding: 0 22px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--dn-border);
       background: rgba(6,10,18,.55);
       backdrop-filter: blur(10px);
       position: sticky;
@@ -125,7 +265,35 @@
       z-index: 10;
     }
 
-    .user-pill{
+    /* Buttons: alias to dn- buttons */
+    .btn-add{ /* legacy name */
+      composes: dn-btn-primary;
+    }
+    /* composes не работи в plain CSS — затова дублираме реалните стилове */
+    .btn-add{
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .86rem;
+      border: none;
+      background: linear-gradient(135deg, var(--dn-accent-2), var(--dn-accent));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(15,23,42,.6);
+      white-space: nowrap;
+    }
+    .btn-add:hover{
+      filter: brightness(1.05);
+      box-shadow: 0 12px 35px rgba(15,23,42,.8);
+    }
+    .btn-add:disabled,
+    .btn-add[disabled]{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .user-pill{ /* legacy name -> dn-pill */
       display:inline-flex;
       align-items:center;
       border-radius: 999px;
@@ -133,15 +301,15 @@
       font-size: .85rem;
       border: 1px solid rgba(148,163,184,.30);
       background: rgba(15,23,42,.55);
-      color: var(--strong);
-      margin-right: 10px;
+      color: var(--dn-strong);
     }
 
-    .btn-ghost{
+    .btn-ghost{ /* legacy name -> dn-btn-ghost */
       border: 1px solid rgba(148,163,184,.30);
       background: rgba(15,23,42,.35);
-      color: var(--strong);
-      border-radius: 10px;
+      color: var(--dn-strong);
+      border-radius: var(--dn-radius-sm);
+      font-size:.86rem;
     }
     .btn-ghost:hover{
       border-color: rgba(20,244,212,.55);
@@ -150,75 +318,138 @@
 
     .content{
       padding: 22px;
-      max-width: 1280px;
+      max-width: 1440px;
+      margin: 0 auto;
     }
 
+    /* Flash messages */
+    .alert-stack{ margin-bottom: 14px; }
+    .alert-portal{
+      border-radius: 12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:
+        radial-gradient(220% 220% at 0% 0%, rgba(20,244,212,.18), rgba(15,23,42,.96));
+      color: var(--dn-strong);
+      font-size:.9rem;
+      padding:10px 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.4);
+    }
+    .alert-portal.alert-success,
+    .alert-portal.success{ border-color: rgba(34,197,94,.7); }
+    .alert-portal.alert-error,
+    .alert-portal.error,
+    .alert-portal.alert-danger{ border-color: rgba(248,113,113,.8); }
+    .alert-portal.alert-info,
+    .alert-portal.info{ border-color: rgba(56,189,248,.7); }
+    .alert-portal.alert-warning,
+    .alert-portal.warning{ border-color: rgba(250,204,21,.8); }
+
+    /* Shared typographic helpers */
     .page-title{
       font-size: 1.35rem;
       font-weight: 700;
-      color: var(--strong);
+      color: var(--dn-strong);
       margin-bottom: 2px;
       letter-spacing: .01em;
     }
     .page-subtitle{
-      color: var(--muted);
+      color: var(--dn-muted);
       font-size: .95rem;
       margin-bottom: 18px;
       max-width: 920px;
     }
 
-    .cardx{
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
+    /* Portal components -> dn components (aliases) */
+    .portal-card{
+      background: var(--dn-surface);
+      border: 1px solid rgba(31,41,55,.95);
+      border-radius: var(--dn-radius-md);
+      box-shadow: var(--dn-shadow);
+      padding: 18px 18px 16px;
+      color: var(--dn-text);
+    }
+    .portal-card-muted{
+      color: var(--dn-muted);
+      font-size:.9rem;
     }
 
-    .kpi{
-      padding: 14px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,.20);
-      background: linear-gradient(180deg, rgba(12,18,30,.88), rgba(10,15,25,.75));
-      height: 100%;
+    .section-eyebrow{
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:rgba(156,163,175,.9);
     }
-    .kpi .label{ color: var(--muted); font-size: .78rem; letter-spacing:.10em; text-transform:uppercase; }
-    .kpi .value{ font-size: 1.55rem; font-weight: 800; color: var(--strong); margin-top: 6px; }
-    .kpi .hint{ color: rgba(156,163,175,.95); font-size: .88rem; margin-top: 4px; }
+    .section-title{
+      font-size:1.35rem;
+      font-weight:700;
+      color:var(--dn-strong);
+    }
+    .section-subtitle{
+      color:var(--dn-muted);
+      font-size:.92rem;
+    }
 
-    .tablex{
-      width: 100%;
-      border-collapse: collapse;
+    .metric-label{
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:rgba(156,163,175,.95);
+    }
+    .metric-value{
+      font-size:1.3rem;
+      font-weight:700;
+      color:var(--dn-strong);
+    }
+
+    .portal-table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius: var(--dn-radius-md);
       overflow:hidden;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,.18);
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.35);
     }
-    .tablex thead th{
-      text-transform: uppercase;
-      letter-spacing: .10em;
-      font-size: .72rem;
-      color: rgba(156,163,175,.95);
-      background: rgba(6,10,18,.75);
-      border-bottom: 1px solid rgba(148,163,184,.18);
-      padding: 12px 12px;
+    .portal-table thead th{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      padding:10px 12px;
+      background: rgba(2,6,23,.85);
+      color:rgba(156,163,175,.95);
+      border-bottom:1px solid rgba(148,163,184,.25);
+      white-space:nowrap;
     }
-    .tablex tbody td{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(148,163,184,.10);
-      color: rgba(229,231,235,.92);
-      font-size: .92rem;
+    .portal-table tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      font-size:.9rem;
+      color:rgba(229,231,235,.92);
     }
-    .tablex tbody tr:hover{
-      background: rgba(20,244,212,.06);
+    .portal-table tbody tr:hover{
+      background:rgba(20,244,212,.06);
     }
-    .muted{ color: var(--muted); }
+
+    .cell-muted{ color: var(--dn-muted); }
 
     .empty{
       border: 1px dashed rgba(148,163,184,.30);
-      border-radius: 14px;
+      border-radius: var(--dn-radius-md);
       padding: 18px;
       background: rgba(15,23,42,.25);
       color: rgba(229,231,235,.88);
+    }
+
+    .link-inline{
+      color:var(--dn-accent-2);
+      text-decoration:none;
+    }
+    .link-inline:hover{ text-decoration:underline; }
+
+    .portal-modal{
+      background: radial-gradient(160% 200% at 0% 0%, rgba(20,244,212,.12), #020617);
+      border-radius: var(--dn-radius-lg);
+      border:1px solid rgba(148,163,184,.35);
+      color:var(--dn-text);
     }
 
     @media (max-width: 991px){
@@ -288,6 +519,58 @@
   <div class="main">
     <header class="topbar">
       {% if request.user.is_authenticated %}
+
+        <a href="{% url 'portal:data_hub' %}" class="btn btn-ghost btn-sm">
+          Data Hub
+        </a>
+
+        {% with request.resolver_match.url_name as current_view %}
+          {% if current_view == 'users' %}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addUserModal">
+              + Add
+            </button>
+          {% elif current_view == 'vendors' %}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addVendorModal">
+              + Add
+            </button>
+          {% elif current_view == 'services' %}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addServiceModal">
+              + Add
+            </button>
+          {% elif current_view == 'contracts' %}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addContractModal">
+              + Add
+            </button>
+          {% elif current_view == 'invoices' %}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addInvoiceModal">
+              + Add
+            </button>
+          {% elif current_view == 'usage' %}
+            {# само визуален бутон – няма modal / action #}
+            <button type="button"
+                    class="btn-add btn-sm"
+                    disabled
+                    title="Usage optimisation workflows – coming soon">
+              + Add
+            </button>
+          {% endif %}
+        {% endwith %}
+
         <span class="user-pill">{{ request.user.username }}</span>
         <form method="post" action="{% url 'portal_logout' %}" class="m-0 p-0">
           {% csrf_token %}
@@ -299,6 +582,16 @@
     </header>
 
     <main class="content">
+      {% if messages %}
+        <div class="alert-stack">
+          {% for message in messages %}
+            <div class="alert alert-portal {{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       {% block content %}{% endblock %}
     </main>
   </div>

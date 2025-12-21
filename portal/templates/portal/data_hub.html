@@ -1,0 +1,76 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Data Hub{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="section-eyebrow mb-1">Data</div>
+          <h1 class="section-title mb-1">Data Hub</h1>
+          <p class="section-subtitle mb-0">
+            Bulk interface for importing and exporting inventory datasets (CSV / Excel).
+          </p>
+        </div>
+        <div class="text-end portal-card-muted small">
+          <div>Tip: Use templates to keep column names consistent.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Datasets</h6>
+      <p class="portal-card-muted mb-3">
+        Choose a dataset to import new data, export current data, or download a template.
+      </p>
+
+      <div class="table-responsive">
+        <table class="portal-table align-middle">
+          <thead>
+            <tr>
+              <th style="width:30%;">Dataset</th>
+              <th style="width:10%;">Rows</th>
+              <th style="width:20%;">Import</th>
+              <th style="width:20%;">Export</th>
+              <th style="width:20%;">Template</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %}
+              <tr>
+                <td class="cell-muted">
+                  <span class="fw-semibold" style="color: rgba(229,231,235,.92);">{{ it.label }}</span>
+                </td>
+                <td class="cell-muted">
+                  {{ it.count }}
+                </td>
+                <td class="cell-muted">
+                  <a class="link-inline" href="{% url 'portal:data_import' it.key %}">Open import</a>
+                </td>
+                <td class="cell-muted">
+                  <a class="link-inline" href="{% url 'portal:data_export' it.key %}?format=csv">CSV</a>
+                  <span class="cell-muted">·</span>
+                  <a class="link-inline" href="{% url 'portal:data_export' it.key %}?format=xlsx">Excel</a>
+                </td>
+                <td class="cell-muted">
+                  <a class="link-inline" href="{% url 'portal:data_template' it.key %}?format=csv">CSV</a>
+                  <span class="cell-muted">·</span>
+                  <a class="link-inline" href="{% url 'portal:data_template' it.key %}?format=xlsx">Excel</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="portal-card-muted mt-2 mb-0">
+        Notes: contracts/invoices are scoped to your portal account (owner). Vendors/services/cost centers are global.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

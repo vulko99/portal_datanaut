@@ -1,55 +1,460 @@
 {% extends "portal/base_portal.html" %}
+{% load static %}
+
+{% block title_suffix %} · Dashboard{% endblock %}
+
 {% block content %}
-  <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
-    <div>
-      <div class="page-title">Welcome, {{ request.user.username }}.</div>
-      <div class="page-subtitle">High-level view of contracts, spend and usage across your vendors.</div>
-    </div>
-    <div class="text-end muted" style="font-size:.9rem;">
-      Preview environment · demo numbers
-    </div>
-  </div>
+<div class="row g-4">
+    <!-- HERO / OVERVIEW -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex flex-column flex-xl-row justify-content-between">
+                <div class="me-xl-4">
+                    <div class="section-eyebrow mb-1">DataNaut Portal</div>
+                    <h1 class="section-title mb-2">Welcome, {{ request.user.username }}.</h1>
+                    <p class="section-subtitle mb-0">
+                        Executive overview of your market data, contracts and vendor spend –
+                        designed for management, procurement and finance teams.
+                    </p>
+                </div>
 
-  <div class="row g-3 mb-3">
-    {% for k in kpis %}
-      <div class="col-12 col-md-6 col-xl-3">
-        <div class="kpi">
-          <div class="label">{{ k.label }}</div>
-          <div class="value">{{ k.value }}</div>
-          <div class="hint">{{ k.hint }}</div>
+                <div class="d-flex flex-wrap gap-4 mt-4 mt-xl-0">
+                    <div>
+                        <div class="metric-label">Total market data &amp; tech spend</div>
+                        <div class="metric-value">USD 4.3m</div>
+                        <div class="metric-sub">+3.8% vs previous 12 months</div>
+                        <div class="metric-tagline">
+                            Consolidated view across all in-scope vendors and entities.
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-label">Contracts in scope</div>
+                        <div class="metric-value">38</div>
+                        <div class="metric-sub">12 vendors · 7 entities</div>
+                        <div class="metric-tagline">
+                            Based on latest signed contracts in the repository.
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-label">Renewals next 90 days</div>
+                        <div class="metric-value">6</div>
+                        <div class="metric-sub">High-value negotiations ahead</div>
+                        <div class="metric-tagline">
+                            Use the <span class="fw-semibold">Contracts</span> view to analyse impact and options.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+    </div>
+</div>
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-7">
-      <div class="cardx">
-        <div class="page-title" style="font-size:1.05rem;">Spend vs budget (illustrative)</div>
-        <div class="page-subtitle" style="margin-bottom:10px;">
-          Placeholder block. Next iteration: chart fed from invoices + GL budget (quarterly).
+<!-- ROW 2: Spend vs budget + Quick links -->
+<div class="row g-4 mt-1">
+    <div class="col-xl-8">
+        <div class="portal-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <div class="section-eyebrow">Spend vs budget (illustrative)</div>
+                    <h5 class="section-title mb-1">Plan vs actual – demo snapshot</h5>
+                </div>
+                <span class="badge-demo d-none d-md-inline-flex">Preview data · not production figures</span>
+            </div>
+
+            <p class="section-subtitle mb-2">
+                High-level view of actual spend vs annual plan. In a full deployment this is populated
+                automatically from invoices and GL data.
+            </p>
+
+            <div class="small text-muted mb-1">
+                FY snapshot:&nbsp;
+                Q1 1.12m (budget 1.10m) ·
+                Q2 1.18m (budget 1.15m) ·
+                Q3 1.09m (budget 1.12m) ·
+                Q4 1.21m (budget 1.18m)
+            </div>
+            <div class="text-success small mb-3">
+                Currently tracking <span class="fw-semibold">USD 3.2m under</span> annual plan.
+            </div>
+
+            <div style="height: 220px;">
+                <canvas id="quarterSpendChart"></canvas>
+            </div>
         </div>
-        <div class="empty">
-          FY PLAN SNAPSHOT: Q1 112m · Q2 118m · Q3 109m · Q4 121m (budget placeholders)
-          <div class="mt-2" style="color:#86efac;">Under budget by 3.2m vs annual plan.</div>
-        </div>
-      </div>
     </div>
 
-    <div class="col-12 col-lg-5">
-      <div class="cardx">
-        <div class="page-title" style="font-size:1.05rem;">Quick links</div>
-        <div class="page-subtitle" style="margin-bottom:10px;">
-          Common actions and health-checks your team might run every month.
+    <div class="col-xl-4">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Quick links</div>
+            <h5 class="section-title mb-2">Actions for this month</h5>
+            <p class="section-subtitle">
+                Typical checks a data management team would run every month.
+            </p>
+            <ul class="small mb-3">
+                <li>
+                    <a href="{% url 'portal:contracts' %}" class="link-inline">
+                        Review upcoming renewals and high-value contracts
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'portal:usage' %}" class="link-inline">
+                        Identify desks with underused or duplicate licences
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'portal:invoices' %}" class="link-inline">
+                        Export latest spend snapshot for finance / GL
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'portal:vendors' %}" class="link-inline">
+                        Validate vendor coverage and legal entities in scope
+                    </a>
+                </li>
+            </ul>
+
+            <div class="small text-muted">
+                In a live instance these actions can be turned into saved reports and scheduled exports
+                to stakeholders.
+            </div>
         </div>
-        <ul class="mb-0">
-          {% for q in quick_links %}
-            <li class="mb-2">
-              <a class="link-inline" href="{% url 'portal:'|add:q.url_name %}">{{ q.label }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
     </div>
-  </div>
+</div>
+
+<!-- ROW 3: Pie / doughnut charts -->
+<div class="row g-4 mt-1">
+    <!-- Spend by vendor -->
+    <div class="col-lg-6">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Spend</div>
+            <h5 class="section-title mb-1">Spend by top vendors</h5>
+            <p class="section-subtitle mb-3">
+                Illustrative allocation of annual run-rate across key market data providers.
+            </p>
+
+            <div class="d-flex justify-content-center align-items-center" style="height: 260px;">
+                <canvas id="spendByVendorChart"></canvas>
+            </div>
+
+            <p class="table-caption mb-0">
+                Example split only. In production this chart is fed directly from contract and invoice data.
+            </p>
+        </div>
+    </div>
+
+    <!-- Contracts by status -->
+    <div class="col-lg-6">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Contracts</div>
+            <h5 class="section-title mb-1">Contracts by status</h5>
+            <p class="section-subtitle mb-3">
+                Snapshot of how many contracts are active, pending renewal or expired.
+            </p>
+
+            <div class="d-flex justify-content-center align-items-center" style="height: 260px;">
+                <canvas id="contractsByStatusChart"></canvas>
+            </div>
+
+            <p class="table-caption mb-0">
+                Demo numbers today; later this will read directly from your contract repository.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ROW 4: Upcoming renewals & vendor summary tables -->
+<div class="row g-4 mt-1">
+    <div class="col-xl-7">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Renewals</div>
+            <h5 class="section-title mb-2">Upcoming renewals (next 90 days)</h5>
+            <p class="section-subtitle mb-2">
+                Example pipeline of renewal events. In a live setup this table is fully data-driven.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Vendor</th>
+                            <th scope="col">Contract</th>
+                            <th scope="col">Entity</th>
+                            <th scope="col">Renewal date</th>
+                            <th scope="col">Annual value</th>
+                            <th scope="col" class="text-end">Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        <tr>
+                            <td>Refinitiv</td>
+                            <td>Core desktop &amp; feeds</td>
+                            <td>Example Trading</td>
+                            <td>12 Feb</td>
+                            <td>USD 820k</td>
+                            <td class="text-end"><span class="badge bg-danger-subtle text-danger">High</span></td>
+                        </tr>
+                        <tr>
+                            <td>Bloomberg</td>
+                            <td>Terminal enterprise licence</td>
+                            <td>Example Group</td>
+                            <td>05 Mar</td>
+                            <td>USD 540k</td>
+                            <td class="text-end"><span class="badge bg-warning-subtle text-warning">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td>ICE</td>
+                            <td>Market data &amp; curves</td>
+                            <td>Example Trading</td>
+                            <td>18 Mar</td>
+                            <td>USD 390k</td>
+                            <td class="text-end"><span class="badge bg-warning-subtle text-warning">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td>MSCI</td>
+                            <td>Index data</td>
+                            <td>Example Asset Mgmt</td>
+                            <td>02 Apr</td>
+                            <td>USD 210k</td>
+                            <td class="text-end"><span class="badge bg-success-subtle text-success">Low</span></td>
+                        </tr>
+                        <tr>
+                            <td>Other vendors</td>
+                            <td>Various contracts</td>
+                            <td>Group</td>
+                            <td>Rolling</td>
+                            <td>USD 160k</td>
+                            <td class="text-end"><span class="badge bg-success-subtle text-success">Low</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="table-caption mb-0 mt-2">
+                In production, this widget can be filtered by entity, vendor category or contract owner.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-xl-5">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Vendors</div>
+            <h5 class="section-title mb-2">Top vendors by annual spend</h5>
+            <p class="section-subtitle mb-2">
+                Simple ranking of key vendors for quick context during negotiations.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Vendor</th>
+                            <th scope="col">Category</th>
+                            <th scope="col" class="text-end">Annual spend</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        <tr>
+                            <td>Refinitiv</td>
+                            <td>Market data / feeds</td>
+                            <td class="text-end">USD 1.2m</td>
+                        </tr>
+                        <tr>
+                            <td>Bloomberg</td>
+                            <td>Desktop / analytics</td>
+                            <td class="text-end">USD 1.0m</td>
+                        </tr>
+                        <tr>
+                            <td>ICE</td>
+                            <td>Exchange / curves</td>
+                            <td class="text-end">USD 0.9m</td>
+                        </tr>
+                        <tr>
+                            <td>MSCI</td>
+                            <td>Indices</td>
+                            <td class="text-end">USD 0.6m</td>
+                        </tr>
+                        <tr>
+                            <td>Other vendors</td>
+                            <td>Specialised data</td>
+                            <td class="text-end">USD 0.6m</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="table-caption mb-0 mt-2">
+                Numbers above are demo only. Live data would be calculated from your invoice history.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Chart.js от CDN – само за Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Общи настройки за по-добра четимост на тъмен фон
+        const baseTextColor = 'rgba(229, 231, 235, 0.9)'; // светло сиво
+        const mutedTextColor = 'rgba(148, 163, 184, 0.9)';
+        const gridColor = 'rgba(55, 65, 81, 0.6)';
+
+        Chart.defaults.color = baseTextColor;
+        Chart.defaults.font.family = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        Chart.defaults.plugins.legend.labels.color = baseTextColor;
+        Chart.defaults.plugins.tooltip.bodyColor = baseTextColor;
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+
+        // ---------- Q1–Q4 bar chart ----------
+        const quarterSpendCtx = document.getElementById('quarterSpendChart');
+        if (quarterSpendCtx) {
+            new Chart(quarterSpendCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [
+                        {
+                            label: 'Actual',
+                            data: [1.12, 1.18, 1.09, 1.21],
+                            borderRadius: 6,
+                            backgroundColor: 'rgba(56, 189, 248, 0.85)',  // blue-cyan
+                        },
+                        {
+                            label: 'Budget',
+                            data: [1.10, 1.15, 1.12, 1.18],
+                            borderRadius: 6,
+                            backgroundColor: 'rgba(129, 140, 248, 0.85)', // indigo
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 14,
+                                font: { size: 11 },
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: USD ${value.toFixed(2)}m`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: mutedTextColor }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: {
+                                color: mutedTextColor,
+                                callback: value => 'USD ' + value + 'm'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Палитра за pie / doughnut – меки, професионални цветове
+        const segmentColors = [
+            'rgba(56, 189, 248, 0.9)',   // cyan
+            'rgba(34, 197, 94, 0.9)',    // green
+            'rgba(249, 115, 22, 0.9)',   // orange
+            'rgba(244, 114, 182, 0.9)',  // pink
+            'rgba(148, 163, 184, 0.9)',  // grey
+        ];
+
+        // ---------- Spend by vendor doughnut ----------
+        const spendByVendorCtx = document.getElementById('spendByVendorChart');
+        if (spendByVendorCtx) {
+            new Chart(spendByVendorCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Refinitiv', 'Bloomberg', 'ICE', 'MSCI', 'Other'],
+                    datasets: [{
+                        // values in USD millions, sum = 4.3
+                        data: [1.2, 1.0, 0.9, 0.6, 0.6],
+                        backgroundColor: segmentColors,
+                        borderWidth: 1,
+                        borderColor: '#020617',
+                    }]
+                },
+                options: {
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 14,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const data = context.dataset.data;
+                                    const total = data.reduce((a, b) => a + b, 0);
+                                    const value = context.parsed;
+                                    const pct = total ? (value / total * 100).toFixed(1) : 0;
+                                    return `${context.label}: USD ${value.toFixed(1)}m (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ---------- Contracts by status pie ----------
+        const contractsByStatusCtx = document.getElementById('contractsByStatusChart');
+        if (contractsByStatusCtx) {
+            new Chart(contractsByStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Active', 'Pending renewal', 'Expired', 'Cancelled'],
+                    datasets: [{
+                        data: [24, 6, 3, 1],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.9)',   // green
+                            'rgba(250, 204, 21, 0.9)',  // amber
+                            'rgba(248, 113, 113, 0.9)', // red
+                            'rgba(148, 163, 184, 0.9)', // grey
+                        ],
+                        borderWidth: 1,
+                        borderColor: '#020617',
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 14,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    return `${label}: ${value} contracts`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 {% endblock %}

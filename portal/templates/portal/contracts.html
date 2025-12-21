@@ -1,46 +1,280 @@
 {% extends "portal/base_portal.html" %}
-{% block content %}
-  <div class="page-title">Contracts</div>
-  <div class="page-subtitle">Signed agreements and order forms. Filtered to your portal account (owner).</div>
 
-  <div class="cardx">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="muted">Total contracts: <strong style="color:var(--strong)">{{ contracts|length }}</strong></div>
-      <div class="muted">Upload workflow can be added next (portal upload + approvals).</div>
+{% block title_suffix %} · Contracts{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="section-eyebrow mb-1">Inventory</div>
+                    <h1 class="section-title mb-1">Contracts</h1>
+                    <p class="section-subtitle mb-0">
+                        Signed agreements and order forms, filtered to your portal account (owner). This view
+                        underpins renewal planning, spend analysis and compliance checks.
+                    </p>
+                </div>
+                <div class="text-end portal-card-muted small">
+                    <div>Total contracts: <span class="fw-semibold">{{ total_contracts }}</span></div>
+                    <div>Creation and editing currently managed via Django admin or the upload workflow.</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    {% if contracts %}
-      <table class="tablex">
-        <thead>
-          <tr>
-            <th style="width:28%;">Contract</th>
-            <th style="width:20%;">Vendor</th>
-            <th style="width:14%;">Start</th>
-            <th style="width:14%;">End</th>
-            <th style="width:12%;">Status</th>
-            <th style="width:12%;">Annual value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in contracts %}
-            <tr>
-              <td>
-                <strong>{{ c.contract_name }}</strong>
-                {% if c.contract_id %}<div class="muted">ID: {{ c.contract_id }}</div>{% endif %}
-              </td>
-              <td class="muted">{{ c.vendor.name }}</td>
-              <td class="muted">{{ c.start_date|default:"—" }}</td>
-              <td class="muted">{{ c.end_date|default:"—" }}</td>
-              <td class="muted">{{ c.get_status_display }}</td>
-              <td class="muted" style="text-align:right;">
-                {% if c.annual_value %}{{ c.annual_value }} {{ c.currency }}{% else %}—{% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <div class="empty">No contracts yet for this user.</div>
-    {% endif %}
-  </div>
+    <!-- Филтри + таблица -->
+    <div class="col-12">
+        <div class="portal-card">
+            <form method="get" class="row g-2 align-items-end mb-3">
+                <div class="col-md-6 col-lg-5">
+                    <label class="form-label text-uppercase text-muted mb-1"
+                           style="font-size:.72rem; letter-spacing:.12em;">
+                        Search
+                    </label>
+                    <input type="text"
+                           name="q"
+                           class="form-control form-control-sm"
+                           placeholder="Contract, vendor, ID, notes..."
+                           value="{{ filter_q }}">
+                </div>
+                <div class="col-md-3 col-lg-3">
+                    <label class="form-label text-uppercase text-muted mb-1"
+                           style="font-size:.72rem; letter-spacing:.12em;">
+                        Status
+                    </label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All statuses</option>
+                        {% for key, label in status_choices %}
+                            <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-ghost btn-sm w-100">
+                        Apply
+                    </button>
+                    <a href="{% url 'portal:contracts' %}" class="btn btn-outline-secondary btn-sm w-100">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
+            {% if contracts %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:22%;">Contract</th>
+                                <th style="width:14%;">Vendor</th>
+                                <th style="width:9%;">Start</th>
+                                <th style="width:9%;">End</th>
+
+                                {# NEW #}
+                                <th style="width:9%;">Notice period</th>
+                                <th style="width:10%;">Notice date</th>
+
+                                <th style="width:9%;">Status</th>
+                                <th style="width:10%;">Annual value</th>
+                                <th style="width:8%;">Currency</th>
+                                <th style="width:10%;">Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contracts %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'portal:contract_detail' c.id %}" class="link-inline fw-semibold">
+                                            {{ c.contract_name }}
+                                        </a>
+                                        {% if c.contract_id %}
+                                            <div class="cell-muted small">ID: {{ c.contract_id }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {{ c.vendor.name }}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {{ c.start_date|default:"—" }}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {{ c.end_date|default:"—" }}
+                                    </td>
+
+                                    {# NEW #}
+                                    <td class="cell-muted">
+                                        {% if c.notice_period_days %}
+                                            {{ c.notice_period_days }} days
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {% if c.notice_date %}
+                                            {{ c.notice_date }}
+                                        {% else %}
+                                            {{ c.effective_notice_date|default:"—" }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {{ c.get_status_display }}
+                                    </td>
+                                    <td class="cell-muted text-end">
+                                        {% if c.annual_value %}
+                                            {{ c.annual_value }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {{ c.currency|default:"—" }}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {% if c.file %}
+                                            <a href="{{ c.file.url }}" target="_blank" rel="noopener" class="link-inline">
+                                                Open
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="portal-card-muted mt-2 mb-0">
+                    In a full deployment this grid can be extended with contract owners, renewal alerts, linked
+                    cost centres and workflow status.
+                </p>
+            {% else %}
+                <div class="empty">
+                    No contracts yet for this user. Use the global
+                    <span class="fw-semibold">Add</span> button in the top bar to upload signed agreements.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# --------- ADD CONTRACT MODAL --------- #}
+<div class="modal fade" id="addContractModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+            <div class="modal-header border-0 pt-3 pb-1 px-4">
+                <div>
+                    <h5 class="modal-title">Add contract</h5>
+                    <div class="small text-muted">
+                        Upload a signed contract and capture key metadata (term, value, renewal).
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body px-4 pb-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.vendor.label_tag }}
+                            {{ form.vendor }}
+                            {{ form.vendor.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.contract_name.label_tag }}
+                            {{ form.contract_name }}
+                            {{ form.contract_name.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.contract_id.label_tag }}
+                            {{ form.contract_id }}
+                            {{ form.contract_id.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.contract_type.label_tag }}
+                            {{ form.contract_type }}
+                            {{ form.contract_type.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.entity.label_tag }}
+                            {{ form.entity }}
+                            {{ form.entity.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-2">
+                            {{ form.annual_value.label_tag }}
+                            {{ form.annual_value }}
+                            {{ form.annual_value.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-2">
+                            {{ form.currency.label_tag }}
+                            {{ form.currency }}
+                            {{ form.currency.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.start_date.label_tag }}
+                            {{ form.start_date }}
+                            {{ form.start_date.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.end_date.label_tag }}
+                            {{ form.end_date }}
+                            {{ form.end_date.errors }}
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.renewal_date.label_tag }}
+                            {{ form.renewal_date }}
+                            {{ form.renewal_date.errors }}
+                        </div>
+                    </div>
+
+                    {# --- NEW: Notice fields --- #}
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.notice_period_days.label_tag }}
+                            {{ form.notice_period_days }}
+                            {{ form.notice_period_days.errors }}
+                            <div class="form-text text-muted">
+                                Optional. If set and Notice date is empty, the system will derive it from End date.
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-4">
+                            {{ form.notice_date.label_tag }}
+                            {{ form.notice_date }}
+                            {{ form.notice_date.errors }}
+                            <div class="form-text text-muted">
+                                Optional manual override (must be on/before End date).
+                            </div>
+                        </div>
+                        <div class="col-xl-4 d-none d-xl-block"></div>
+                    </div>
+
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-12 col-xl-6">
+                            {{ form.file.label_tag }}
+                            {{ form.file }}
+                            {{ form.file.errors }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-add btn-sm">Save and close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

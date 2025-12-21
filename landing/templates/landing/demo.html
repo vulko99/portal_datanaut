@@ -46,28 +46,28 @@
     </div>
 
     <!-- APP SHELL -->
-    <div class="demo-shell">
+    <div class="dn-shell demo-shell">
 
       <!-- Header / filters -->
-      <div class="demo-header mb-3">
+      <div class="dn-header demo-header mb-3">
         <div>
-          <div class="demo-title">
+          <div class="dn-title demo-title">
             {% trans "Market data & tech spend cockpit" %}
           </div>
-          <div class="small text-muted">
+          <div class="small dn-muted text-muted">
             {% trans "Last updated: 04 Nov 2025 · Dummy data for illustration" %}
           </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-          <div class="filter-pill">
+          <div class="dn-pill filter-pill">
             <i class="bi bi-building me-1"></i>
             {% trans "All entities" %}
           </div>
-          <div class="filter-pill">
+          <div class="dn-pill filter-pill">
             <i class="bi bi-diagram-3 me-1"></i>
             {% trans "Trading desks" %}
           </div>
-          <div class="filter-pill">
+          <div class="dn-pill filter-pill">
             <i class="bi bi-calendar-range me-1"></i>
             {% trans "Rolling 12 months" %}
           </div>
@@ -77,8 +77,8 @@
       <!-- KPI CARDS -->
       <div class="row g-3 mb-3">
         <div class="col-md-3">
-          <div class="demo-kpi-card">
-            <div class="kpi-label">
+          <div class="dn-kpi-card demo-kpi-card">
+            <div class="kpi-label dn-muted">
               {% trans "Total market data & tech spend" %}
             </div>
             <div class="kpi-value">$113.8M</div>
@@ -89,8 +89,8 @@
           </div>
         </div>
         <div class="col-md-3">
-          <div class="demo-kpi-card">
-            <div class="kpi-label">
+          <div class="dn-kpi-card demo-kpi-card">
+            <div class="kpi-label dn-muted">
               {% trans "Identified savings" %}
             </div>
             <div class="kpi-value">$8.4M</div>
@@ -101,19 +101,19 @@
           </div>
         </div>
         <div class="col-md-3">
-          <div class="demo-kpi-card">
-            <div class="kpi-label">
+          <div class="dn-kpi-card demo-kpi-card">
+            <div class="kpi-label dn-muted">
               {% trans "Underused / duplicate licences" %}
             </div>
             <div class="kpi-value">19%</div>
-            <div class="kpi-subtext text-muted">
+            <div class="kpi-subtext dn-muted text-muted">
               {% trans "Across 7 entities, 34 desks" %}
             </div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="demo-kpi-card">
-            <div class="kpi-label">
+          <div class="dn-kpi-card demo-kpi-card">
+            <div class="kpi-label dn-muted">
               {% trans "Next 12-month saving potential" %}
             </div>
             <div class="kpi-value">$4.1M</div>
@@ -130,12 +130,12 @@
 
         <!-- LINE CHART -->
         <div class="col-lg-7">
-          <div class="demo-card h-100">
+          <div class="dn-card demo-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <div class="small fw-semibold text-light">
+              <div class="small fw-semibold dn-text-strong">
                 {% trans "Spend vs. budget by quarter" %}
               </div>
-              <div class="small text-muted">
+              <div class="small dn-muted text-muted">
                 {% trans "Illustrative values · USD m" %}
               </div>
             </div>
@@ -229,13 +229,13 @@
 
             <div class="d-flex justify-content-end gap-3 small mt-2 align-items-center flex-wrap">
               <span class="legend-dot legend-actual"></span>
-              <span class="text-muted me-2">{% trans "Actual spend" %}</span>
+              <span class="dn-muted text-muted me-2">{% trans "Actual spend" %}</span>
               <span class="legend-dot legend-budget"></span>
-              <span class="text-muted me-2">{% trans "Budget" %}</span>
+              <span class="dn-muted text-muted me-2">{% trans "Budget" %}</span>
               <span class="legend-dot legend-target"></span>
-              <span class="text-muted">{% trans "Target range" %}</span>
+              <span class="dn-muted text-muted">{% trans "Target range" %}</span>
             </div>
-            <div class="small text-muted mt-1">
+            <div class="small dn-muted text-muted mt-1">
               {% blocktrans trimmed %}
               The shaded band shows the range where spend is considered “on target”.
               Moving outside it (Q2/Q4 above, Q3 below) is a trigger for deeper analysis.
@@ -246,16 +246,16 @@
 
         <!-- SAVINGS PIPELINE -->
         <div class="col-lg-5">
-          <div class="demo-card h-100">
-            <div class="small fw-semibold text-light mb-1">
+          <div class="dn-card demo-card h-100">
+            <div class="small fw-semibold dn-text-strong mb-1">
               {% trans "Savings pipeline by stage" %}
             </div>
-            <div class="small text-muted mb-3">
+            <div class="small dn-muted text-muted mb-3">
               {% trans "Based on current initiatives" %}
             </div>
 
             <div class="pipeline-row mb-2">
-              <div class="pipeline-label">
+              <div class="pipeline-label dn-muted">
                 {% trans "Identified" %}
               </div>
               <div class="pipeline-bar">
@@ -265,7 +265,7 @@
             </div>
 
             <div class="pipeline-row mb-2">
-              <div class="pipeline-label">
+              <div class="pipeline-label dn-muted">
                 {% trans "In negotiation" %}
               </div>
               <div class="pipeline-bar">
@@ -275,7 +275,7 @@
             </div>
 
             <div class="pipeline-row mb-3">
-              <div class="pipeline-label">
+              <div class="pipeline-label dn-muted">
                 {% trans "Contracted" %}
               </div>
               <div class="pipeline-bar">
@@ -284,7 +284,7 @@
               <div class="pipeline-value">$2.3M</div>
             </div>
 
-            <div class="small text-muted">
+            <div class="small dn-muted text-muted">
               {% blocktrans trimmed %}
               DataNaut tracks status by vendor × desk × user and can connect
               to CRM / PM tools for real pipeline tracking.
@@ -297,17 +297,17 @@
       <!-- TABLE + RENEWALS -->
       <div class="row g-3">
         <div class="col-lg-7">
-          <div class="demo-card h-100">
+          <div class="dn-card demo-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <div class="small fw-semibold text-light">
+              <div class="small fw-semibold dn-text-strong">
                 {% trans "Underused licences by desk (top 6)" %}
               </div>
-              <div class="small text-muted">
+              <div class="small dn-muted text-muted">
                 {% trans "Dummy data · sorted by saving impact" %}
               </div>
             </div>
             <div class="table-responsive">
-              <table class="table table-sm table-dark align-middle mb-0 demo-table">
+              <table class="dn-table table table-sm table-dark align-middle mb-0 demo-table">
                 <thead>
                   <tr>
                     <th>{% trans "Desk" %}</th>
@@ -367,57 +367,57 @@
         </div>
 
         <div class="col-lg-5">
-          <div class="demo-card h-100">
-            <div class="small fw-semibold text-light mb-2">
+          <div class="dn-card demo-card h-100">
+            <div class="small fw-semibold dn-text-strong mb-2">
               {% trans "Renewal calendar (next 12 months)" %}
             </div>
 
             <div class="renewal-item">
               <div>
-                <div class="small text-light">
+                <div class="small dn-text-strong">
                   {% trans "Bloomberg enterprise licence" %}
                 </div>
-                <div class="tiny text-muted">
+                <div class="tiny dn-muted text-muted">
                   {% trans "Entity: London trading · Vendor: Bloomberg" %}
                 </div>
               </div>
               <div class="text-end">
-                <div class="tiny text-muted">{% trans "Renewal" %}</div>
-                <div class="small fw-semibold text-light">Feb 2026</div>
+                <div class="tiny dn-muted text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold dn-text-strong">Feb 2026</div>
               </div>
             </div>
 
             <div class="renewal-item">
               <div>
-                <div class="small text-light">
+                <div class="small dn-text-strong">
                   {% trans "ICE data feeds" %}
                 </div>
-                <div class="tiny text-muted">
+                <div class="tiny dn-muted text-muted">
                   {% trans "Entity: EU power · Vendor: ICE" %}
                 </div>
               </div>
               <div class="text-end">
-                <div class="tiny text-muted">{% trans "Renewal" %}</div>
-                <div class="small fw-semibold text-light">Apr 2026</div>
+                <div class="tiny dn-muted text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold dn-text-strong">Apr 2026</div>
               </div>
             </div>
 
             <div class="renewal-item mb-3">
               <div>
-                <div class="small text-light">
+                <div class="small dn-text-strong">
                   {% trans "Refinitiv desktop licences" %}
                 </div>
-                <div class="tiny text-muted">
+                <div class="tiny dn-muted text-muted">
                   {% trans "Entity: US commodities · Vendor: Refinitiv" %}
                 </div>
               </div>
               <div class="text-end">
-                <div class="tiny text-muted">{% trans "Renewal" %}</div>
-                <div class="small fw-semibold text-light">Jun 2026</div>
+                <div class="tiny dn-muted text-muted">{% trans "Renewal" %}</div>
+                <div class="small fw-semibold dn-text-strong">Jun 2026</div>
               </div>
             </div>
 
-            <div class="small text-muted">
+            <div class="small dn-muted text-muted">
               {% blocktrans trimmed %}
               In a live deployment, DataNaut would allow drill-down into each renewal – which desks /
               users are in scope, what optimisation options exist and which savings are already planned.
@@ -427,7 +427,7 @@
         </div>
       </div>
 
-    </div> <!-- /demo-shell -->
+    </div> <!-- /dn-shell -->
   </div>
 </section>
 
@@ -450,192 +450,193 @@
 </section>
 
 <style>
-  /* по-четим текст върху градиента на hero-то */
+  /*
+    DataNaut UI tokens (shared layer)
+    Цел: тези tokens и dn-* компоненти да се копират 1:1 в портала, за да изглеждат “една марка”.
+  */
+  :root {
+    --dn-text: #e5e7eb;
+    --dn-text-strong: #f9fafb;
+    --dn-muted: #9ca3af;
+
+    --dn-bg-0: #020617;
+    --dn-surface: rgba(15,23,42,0.96);
+    --dn-surface-strong: rgba(15,23,42,0.95);
+
+    --dn-border: rgba(148,163,184,0.40);
+    --dn-border-strong: rgba(31,41,55,0.95);
+
+    --dn-radius-lg: 18px;
+    --dn-radius-md: 12px;
+
+    --dn-shadow-shell: 0 22px 60px rgba(15,23,42,0.8);
+
+    --dn-accent-cyan: rgba(56,189,248,0.20);
+    --dn-accent-purple: rgba(147,51,234,0.25);
+
+    --dn-green: #22c55e;
+    --dn-blue: #60a5fa;
+    --dn-yellow: #facc15;
+  }
+
+  /* Hero readability */
   .hero-demo {
     padding-top: 80px;
     padding-bottom: 72px;
-    color: #e5e7eb;
+    color: var(--dn-text);
   }
-
-  .hero-demo h1 {
-    color: #f9fafb;
-  }
-
-  .hero-demo .lead {
-    color: #e5e7eb;
-  }
-
+  .hero-demo h1 { color: var(--dn-text-strong); }
+  .hero-demo .lead { color: var(--dn-text); }
   .hero-demo p,
-  .hero-demo li {
-    color: #d1d5db;
-  }
+  .hero-demo li { color: #d1d5db; }
+  .hero-demo .text-muted { color: var(--dn-muted) !important; }
 
-  .hero-demo .text-muted {
-    color: #9ca3af !important;
-  }
-
-  /* бяла лента с повече въздух преди футъра */
+  /* CTA strip */
   .demo-cta-strip {
     padding: 40px 0 72px;
     border-top: 1px solid #e5e7eb;
   }
 
-  /* общи цветове вътре в демо панела */
-  .demo-shell {
-    background: radial-gradient(circle at top left, rgba(56,189,248,0.2), transparent 55%),
-                radial-gradient(circle at bottom right, rgba(147,51,234,0.25), transparent 55%),
-                #020617;
-    border-radius: 18px;
+  /* Shared shell / card components */
+  .dn-shell {
+    background:
+      radial-gradient(circle at top left, var(--dn-accent-cyan), transparent 55%),
+      radial-gradient(circle at bottom right, var(--dn-accent-purple), transparent 55%),
+      var(--dn-bg-0);
+    border-radius: var(--dn-radius-lg);
     padding: 20px 22px 22px;
-    border: 1px solid rgba(148,163,184,0.4);
-    box-shadow: 0 22px 60px rgba(15,23,42,0.8);
-    color: #e5e7eb;
+    border: 1px solid var(--dn-border);
+    box-shadow: var(--dn-shadow-shell);
+    color: var(--dn-text);
   }
-
-  .demo-shell p,
-  .demo-shell li,
-  .demo-shell .small,
-  .demo-shell .tiny {
-    color: #d1d5db;
-  }
-
-  .demo-shell .text-muted {
-    color: #9ca3af !important;
-  }
-
-  .demo-header {
+  .dn-header {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
-    color: #e5e7eb;
+    color: var(--dn-text);
   }
-
-  .demo-title {
+  .dn-title {
     font-size: 0.95rem;
     font-weight: 600;
+    color: var(--dn-text-strong);
   }
+  .dn-muted { color: var(--dn-muted); }
+  .dn-text-strong { color: var(--dn-text-strong); }
 
-  .filter-pill {
+  .dn-pill {
     font-size: 0.8rem;
     padding: 4px 10px;
     border-radius: 999px;
     background: rgba(15,23,42,0.9);
     border: 1px solid rgba(148,163,184,0.7);
-    color: #e5e7eb;
+    color: var(--dn-text);
     display: inline-flex;
     align-items: center;
   }
 
-  .demo-kpi-card {
-    background: rgba(15,23,42,0.95);
-    border-radius: 12px;
+  .dn-kpi-card {
+    background: var(--dn-surface-strong);
+    border-radius: var(--dn-radius-md);
     padding: 10px 12px;
-    border: 1px solid rgba(31,41,55,0.95);
+    border: 1px solid var(--dn-border-strong);
     box-shadow: inset 0 0 0 1px rgba(15,23,42,0.9);
-    color: #e5e7eb;
+    color: var(--dn-text);
   }
 
+  .dn-card {
+    background: var(--dn-surface);
+    border-radius: var(--dn-radius-md);
+    padding: 12px 14px;
+    border: 1px solid var(--dn-border-strong);
+    color: var(--dn-text);
+  }
+
+  .dn-table th,
+  .dn-table td { border-color: #111827 !important; }
+
+  /* Backward compatibility: keep demo-* classes as aliases */
+  .demo-shell { /* alias */ }
+  .demo-header { /* alias */ }
+  .demo-title { /* alias */ }
+  .filter-pill { /* alias */ }
+  .demo-kpi-card { /* alias */ }
+  .demo-card { /* alias */ }
+  .demo-table { /* alias */ }
+
+  /* KPI details */
   .kpi-label {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--dn-muted);
     margin-bottom: 4px;
   }
-
   .kpi-value {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #f9fafb;
+    color: var(--dn-text-strong);
     margin-bottom: 2px;
   }
+  .kpi-subtext { font-size: 0.75rem; }
 
-  .kpi-subtext {
-    font-size: 0.75rem;
-  }
-
-  .demo-card {
-    background: rgba(15,23,42,0.96);
-    border-radius: 12px;
-    padding: 12px 14px;
-    border: 1px solid rgba(31,41,55,0.95);
-    color: #e5e7eb;
-  }
-
+  /* Chart */
   .line-chart {
     width: 100%;
     height: 200px;
     position: relative;
   }
-
-  .line-chart svg {
-    width: 100%;
-    height: 100%;
-  }
+  .line-chart svg { width: 100%; height: 100%; }
 
   .chart-grid-line {
     stroke: rgba(15,23,42,0.9);
     stroke-width: 1;
   }
-
   .chart-target-band {
-    fill: #22c55e;
+    fill: var(--dn-green);
     opacity: 0.05;
   }
-
   .line-actual {
     fill: none;
-    stroke: #22c55e;
+    stroke: var(--dn-green);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
     filter: drop-shadow(0 0 6px rgba(74,222,128,0.4));
   }
-
   .line-budget {
     fill: none;
-    stroke: #60a5fa;
+    stroke: var(--dn-blue);
     stroke-width: 2.4;
     stroke-linecap: round;
     stroke-linejoin: round;
     opacity: 0.9;
   }
-
-  .chart-point-actual {
-    fill: #22c55e;
-    cursor: pointer;
-  }
-
-  .chart-point-budget {
-    fill: #60a5fa;
-    cursor: pointer;
-  }
+  .chart-point-actual { fill: var(--dn-green); cursor: pointer; }
+  .chart-point-budget { fill: var(--dn-blue); cursor: pointer; }
 
   .chart-label {
     font-size: 9px;
-    fill: #9ca3af;
+    fill: var(--dn-muted);
     text-anchor: middle;
   }
-
   .chart-value-label {
     font-size: 9px;
-    fill: #e5e7eb;
+    fill: var(--dn-text);
     text-anchor: middle;
   }
-
   .chart-comment {
-    fill: #facc15;
+    fill: var(--dn-yellow);
     font-size: 10px;
     text-anchor: middle;
     font-weight: 600;
   }
-
   .chart-comment-line {
-    stroke: #facc15;
+    stroke: var(--dn-yellow);
     stroke-width: 1;
     stroke-dasharray: 3 3;
   }
 
+  /* Legend */
   .legend-dot {
     width: 8px;
     height: 8px;
@@ -654,13 +655,14 @@
     border: 1px dashed rgba(52,211,153,0.7);
   }
 
+  /* Tooltip */
   .line-tooltip {
     position: fixed;
     display: none;
     padding: 4px 8px;
     border-radius: 6px;
     background: rgba(15,23,42,0.95);
-    color: #e5e7eb;
+    color: var(--dn-text);
     font-size: 11px;
     border: 1px solid rgba(148,163,184,0.6);
     z-index: 9999;
@@ -668,56 +670,37 @@
     white-space: nowrap;
   }
 
+  /* Pipeline */
   .pipeline-row {
     display: grid;
     grid-template-columns: 90px 1fr 70px;
     align-items: center;
     gap: 6px;
-   font-size: 0.8rem;
+    font-size: 0.8rem;
   }
-
-  .pipeline-label {
-    color: #9ca3af;
-  }
-
+  .pipeline-label { color: var(--dn-muted); }
   .pipeline-bar {
-    background: #020617;
+    background: var(--dn-bg-0);
     border-radius: 999px;
     overflow: hidden;
     height: 10px;
   }
+  .pipeline-fill { height: 100%; border-radius: 999px; }
+  .bg-pipeline-1 { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .bg-pipeline-2 { background: linear-gradient(90deg, #f59e0b, #f97316); }
+  .bg-pipeline-3 { background: linear-gradient(90deg, #2563eb, #7c3aed); }
+  .pipeline-value { text-align: right; color: var(--dn-text); }
 
-  .pipeline-fill {
-    height: 100%;
-    border-radius: 999px;
-  }
-
-  .bg-pipeline-1 {
-    background: linear-gradient(90deg, #22c55e, #4ade80);
-  }
-  .bg-pipeline-2 {
-    background: linear-gradient(90deg, #f59e0b, #f97316);
-  }
-  .bg-pipeline-3 {
-    background: linear-gradient(90deg, #2563eb, #7c3aed);
-  }
-
-  .pipeline-value {
-    text-align: right;
-    color: #e5e7eb;
-  }
-
-  .demo-table thead {
-    background: #020617;
-  }
-
+  /* Demo table */
+  .demo-table thead { background: var(--dn-bg-0); }
   .demo-table th,
   .demo-table td {
     border-color: #111827 !important;
     font-size: 0.78rem;
-    color: #e5e7eb;
+    color: var(--dn-text);
   }
 
+  /* Renewals */
   .renewal-item {
     display: flex;
     justify-content: space-between;
@@ -725,19 +708,11 @@
     padding: 8px 0;
     border-bottom: 1px dashed rgba(31,41,55,0.9);
   }
-
-  .renewal-item:last-of-type {
-    border-bottom: none;
-  }
-
-  .tiny {
-    font-size: 0.7rem;
-  }
+  .renewal-item:last-of-type { border-bottom: none; }
+  .tiny { font-size: 0.7rem; }
 
   @media (max-width: 991.98px) {
-    .demo-shell {
-      padding: 16px;
-    }
+    .dn-shell { padding: 16px; }
   }
 </style>
 

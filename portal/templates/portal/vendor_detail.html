@@ -1,0 +1,253 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Vendor · {{ vendor.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    <!-- HEADER -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                <div>
+                    <div class="section-eyebrow mb-1">Vendors · Detail</div>
+                    <h1 class="section-title mb-1">{{ vendor.name }}</h1>
+                    <p class="section-subtitle mb-0">
+                        {{ vendor.get_vendor_type_display|default:"Vendor" }}
+                        {% if vendor.tags %}
+                            · Tags: {{ vendor.tags }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="text-end">
+                    <div class="metric-label mb-1">Aggregated values (this portal)</div>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        <div class="small text-muted">
+                            Contracted run-rate:
+                        </div>
+                        <div class="metric-value" style="font-size:1.1rem;">
+                            {% if total_contract_value %}
+                                {{ total_contract_value }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </div>
+                        <div class="small text-muted">
+                            Invoiced to date:
+                        </div>
+                        <div class="metric-value" style="font-size:1.1rem;">
+                            {% if total_invoiced %}
+                                {{ total_invoiced }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="portal-card-muted small mt-3">
+                        Primary contact:
+                        {% if vendor.primary_contact_name or vendor.primary_contact_email %}
+                            {{ vendor.primary_contact_name|default_if_none:"" }}
+                            {% if vendor.primary_contact_email %}
+                                ·
+                                <a href="mailto:{{ vendor.primary_contact_email }}" class="link-inline">
+                                    {{ vendor.primary_contact_email }}
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            —
+                        {% endif %}
+                        {% if vendor.website %}
+                            <br>
+                            Website:
+                            <a href="{{ vendor.website }}" target="_blank" rel="noopener" class="link-inline">
+                                {{ vendor.website }}
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a href="{% url 'portal:vendors' %}" class="btn btn-ghost btn-sm">
+                            Back to vendors
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LEFT: CONTRACTS -->
+    <div class="col-lg-7">
+        <div class="portal-card h-100">
+            <h6 class="mb-2">Contracts with this vendor</h6>
+            <p class="portal-card-muted mb-3">
+                Contracts visible in this portal (owner = current account). Click a contract for full detail.
+            </p>
+
+            {% if contracts %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:36%;">Contract</th>
+                                <th style="width:18%;">Entity</th>
+                                <th style="width:14%;">Start</th>
+                                <th style="width:14%;">End</th>
+                                <th style="width:18%;">Annual value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contracts %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'portal:contract_detail' c.pk %}"
+                                           class="link-inline">
+                                            {{ c.contract_name }}
+                                        </a>
+                                        {% if c.contract_id %}
+                                            <div class="cell-muted">ID: {{ c.contract_id }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {% if c.entity %}
+                                            {{ c.entity }}
+                                        {% elif c.owning_cost_center %}
+                                            {{ c.owning_cost_center.code }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted">{{ c.start_date|default:"—" }}</td>
+                                    <td class="cell-muted">{{ c.end_date|default:"—" }}</td>
+                                    <td class="cell-muted text-end">
+                                        {% if c.annual_value %}
+                                            {{ c.annual_value }} {{ c.currency }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No contracts for this vendor in the current portal account.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT: SERVICES + INVOICES -->
+    <div class="col-lg-5 d-flex flex-column gap-3">
+
+        <div class="portal-card">
+            <h6 class="mb-2">Services from this vendor</h6>
+            <p class="portal-card-muted mb-3">
+                Products / services configured under this vendor – data feeds, terminals, analytics, index licences.
+            </p>
+
+            {% if services %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:42%;">Service</th>
+                                <th style="width:28%;">Category</th>
+                                <th style="width:30%;">Billing / currency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in services %}
+                                <tr>
+                                    <td>{{ s.name }}</td>
+                                    <td class="cell-muted">
+                                        {{ s.get_category_display|default:"—" }}
+                                    </td>
+                                    <td class="cell-muted">
+                                        {% if s.default_billing_frequency %}
+                                            {{ s.get_default_billing_frequency_display }}
+                                        {% endif %}
+                                        {% if s.default_currency %}
+                                            · {{ s.default_currency }}
+                                        {% endif %}
+                                        {% if not s.default_billing_frequency and not s.default_currency %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No services configured yet for this vendor.
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="portal-card">
+            <h6 class="mb-2">Invoices from this vendor</h6>
+            <p class="portal-card-muted mb-3">
+                Invoices in this portal that relate to this vendor. In a full deployment this will link to GL / AP data.
+            </p>
+
+            {% if invoices %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:24%;">Invoice №</th>
+                                <th style="width:18%;">Date</th>
+                                <th style="width:22%;">Contract</th>
+                                <th style="width:18%;">Amount</th>
+                                <th style="width:8%;">Curr.</th>
+                                <th style="width:10%;">Doc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in invoices %}
+                                <tr>
+                                    <td><strong>{{ i.invoice_number }}</strong></td>
+                                    <td class="cell-muted">{{ i.invoice_date }}</td>
+                                    <td class="cell-muted">
+                                        {% if i.contract %}
+                                            <a href="{% url 'portal:contract_detail' i.contract.pk %}"
+                                               class="link-inline">
+                                                {{ i.contract.contract_name }}
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="cell-muted text-end">{{ i.total_amount }}</td>
+                                    <td class="cell-muted">{{ i.currency }}</td>
+                                    <td class="cell-muted">
+                                        {% if i.file %}
+                                            <a href="{{ i.file.url }}" target="_blank" rel="noopener" class="link-inline">
+                                                Open
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No invoices for this vendor in the current portal account.
+                </p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

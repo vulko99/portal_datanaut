@@ -1,39 +1,346 @@
 {% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Users{% endblock %}
+
 {% block content %}
-  <div class="page-title">Users</div>
-  <div class="page-subtitle">Directory view. Later: request/approval flows and licence allocation.</div>
+<div class="row g-3">
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="section-header mb-2">
+                <div class="section-eyebrow">Inventory</div>
+                <h1 class="section-title mb-0">Users</h1>
+                <p class="section-subtitle mb-0">
+                    View of portal and internal users. Profile fields (cost center, manager, phone, location,
+                    legal entity) support licence requests, approvals and cost allocation.
+                </p>
+            </div>
 
-  <div class="cardx">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="muted">Total users: <strong style="color:var(--strong)">{{ users|length }}</strong></div>
-      <div class="muted">Profiles (cost center, manager) are stored in UserProfile.</div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-2">
+                <div class="d-flex flex-wrap gap-4">
+                    <div>
+                        <div class="metric-label">Total users</div>
+                        <div class="metric-value">
+                            {{ users|length }}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end small text-muted">
+                    Use the global <strong>Add</strong> button in the top bar to register a new user record.
+                </div>
+            </div>
+
+            <!-- Toolbar: search + filters -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="input-group input-group-sm" style="max-width: 320px;">
+                        <span class="input-group-text">Search</span>
+                        <input
+                            type="search"
+                            id="userSearch"
+                            class="form-control"
+                            placeholder="Username, name, email, cost center…">
+                    </div>
+
+                    <select id="statusFilter" class="form-select form-select-sm" style="min-width: 150px;">
+                        <option value="">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+
+                    <select id="costCenterFilter" class="form-select form-select-sm" style="min-width: 180px;">
+                        <option value="">All cost centers</option>
+                    </select>
+
+                    <select id="managerFilter" class="form-select form-select-sm" style="min-width: 180px;">
+                        <option value="">All managers</option>
+                    </select>
+                </div>
+            </div>
+
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 11%;">Username</th>
+                                <th style="width: 14%;">Full name</th>
+                                <th style="width: 18%;">Email</th>
+                                <th style="width: 11%;">Phone</th>
+                                <th style="width: 14%;">Cost center</th>
+                                <th style="width: 14%;">Manager</th>
+                                <th style="width: 9%;">Location</th>
+                                <th style="width: 7%;">Entity</th>
+                                <th style="width: 6%;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            {% for user in users %}
+                                {% with profile=user.profile %}
+                                    <tr
+                                        data-username="{{ user.username|default_if_none:'' }}"
+                                        data-full-name="{% if profile.full_name %}{{ profile.full_name }}{% else %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                                        data-email="{{ user.email|default_if_none:'' }}"
+                                        data-cost-center="{% if profile.cost_center %}{{ profile.cost_center.code }}{% endif %}"
+                                        data-manager="{% if profile.manager %}{{ profile.manager.username }}{% endif %}"
+                                        data-status="{% if user.is_active %}active{% else %}inactive{% endif %}"
+                                    >
+                                        <td>{{ user.username }}</td>
+                                        <td class="cell-muted">
+                                            {% if profile.full_name %}
+                                                {{ profile.full_name }}
+                                            {% else %}
+                                                {{ user.get_full_name|default:user.username }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if user.email %}
+                                                <a href="mailto:{{ user.email }}" class="link-inline">
+                                                    {{ user.email }}
+                                                </a>
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {{ profile.phone_number|default:"—" }}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if profile.cost_center %}
+                                                {{ profile.cost_center.code }} – {{ profile.cost_center.name }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if profile.manager %}
+                                                {{ profile.manager.get_full_name|default:profile.manager.username }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {{ profile.location|default:"—" }}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {{ profile.legal_entity|default:"—" }}
+                                        </td>
+                                        <td>
+                                            {% if user.is_active %}
+                                                <span class="badge bg-success-subtle text-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="portal-card-muted mb-0 mt-2">
+                    In a full implementation this view can be extended with roles, application access,
+                    licence holdings and approval responsibilities.
+                </p>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No users found. Once users log in or are created via admin / portal, they will appear here.
+                </p>
+            {% endif %}
+        </div>
     </div>
+</div>
 
-    <table class="tablex">
-      <thead>
-        <tr>
-          <th style="width:20%;">Username</th>
-          <th style="width:26%;">Full name</th>
-          <th style="width:26%;">Email</th>
-          <th style="width:28%;">Cost center</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in users %}
-          {% with p=profiles|get_item:u.id %}
-          <tr>
-            <td><strong>{{ u.username }}</strong></td>
-            <td class="muted">
-              {% if p and p.full_name %}{{ p.full_name }}{% else %}{{ u.get_full_name|default:"—" }}{% endif %}
-            </td>
-            <td class="muted">{{ u.email|default:"—" }}</td>
-            <td class="muted">
-              {% if p and p.cost_center %}{{ p.cost_center }}{% else %}—{% endif %}
-            </td>
-          </tr>
-          {% endwith %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<!-- ADD USER MODAL (глобален Add на тази страница) -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="background:#020617; border:1px solid rgba(148,163,184,.35);">
+            <div class="modal-header" style="border-bottom-color:rgba(148,163,184,.25);">
+                <div>
+                    <h5 class="modal-title">Add new user</h5>
+                    <div class="small text-muted">
+                        Create a basic user record with optional profile fields.
+                        Password is managed separately (SSO / admin).
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Username</label>
+                            <input type="text" name="username" class="form-control form-control-sm"
+                                   placeholder="Portal / network username">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Email</label>
+                            <input type="email" name="email" class="form-control form-control-sm"
+                                   placeholder="user@client.com">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Status</label>
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="userIsActive" checked>
+                                <label class="form-check-label small" for="userIsActive">
+                                    Active user
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm mb-1">First name</label>
+                            <input type="text" name="first_name" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm mb-1">Last name</label>
+                            <input type="text" name="last_name" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm mb-1">Full name (display)</label>
+                            <input type="text" name="full_name" class="form-control form-control-sm"
+                                   placeholder="Overrides first + last name in lists (optional)">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Phone</label>
+                            <input type="text" name="phone_number" class="form-control form-control-sm"
+                                   placeholder="+44 20 ... / ext 1234">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Location</label>
+                            <input type="text" name="location" class="form-control form-control-sm"
+                                   placeholder="City / office">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Legal entity</label>
+                            <input type="text" name="legal_entity" class="form-control form-control-sm"
+                                   placeholder="Client legal entity">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Cost center code</label>
+                            <input type="text" name="cost_center_code" class="form-control form-control-sm"
+                                   placeholder="Must match existing code">
+                            <div class="form-text text-muted">
+                                No auto-create – must exist in Cost centers.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label form-label-sm mb-1">Manager username</label>
+                            <input type="text" name="manager_username" class="form-control form-control-sm"
+                                   placeholder="Manager's username (optional)">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Save and close
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const searchInput = document.getElementById('userSearch');
+    const statusSelect = document.getElementById('statusFilter');
+    const costCenterSelect = document.getElementById('costCenterFilter');
+    const managerSelect = document.getElementById('managerFilter');
+    const tableBody = document.getElementById('usersTableBody');
+    const globalAddBtn = document.getElementById('globalAddButton');
+    const addUserModalEl = document.getElementById('addUserModal');
+
+    let rows = [];
+    const costCenters = new Set();
+    const managers = new Set();
+
+    if (tableBody) {
+        rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // попълваме cost center / manager филтрите
+        rows.forEach(row => {
+            const cc = (row.dataset.costCenter || '').trim();
+            const mgr = (row.dataset.manager || '').trim();
+            if (cc) costCenters.add(cc);
+            if (mgr) managers.add(mgr);
+        });
+
+        if (costCenterSelect) {
+            Array.from(costCenters).sort().forEach(cc => {
+                const opt = document.createElement('option');
+                opt.value = cc;
+                opt.textContent = cc;
+                costCenterSelect.appendChild(opt);
+            });
+        }
+
+        if (managerSelect) {
+            Array.from(managers).sort().forEach(mgr => {
+                const opt = document.createElement('option');
+                opt.value = mgr;
+                opt.textContent = mgr;
+                managerSelect.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const query = (searchInput ? searchInput.value : '').toLowerCase();
+            const statusFilter = statusSelect ? statusSelect.value : '';
+            const ccFilter = costCenterSelect ? costCenterSelect.value : '';
+            const mgrFilter = managerSelect ? managerSelect.value : '';
+
+            rows.forEach(row => {
+                const username = (row.dataset.username || '').toLowerCase();
+                const fullName = (row.dataset.fullName || '').toLowerCase();
+                const email = (row.dataset.email || '').toLowerCase();
+                const cc = (row.dataset.costCenter || '');
+                const mgr = (row.dataset.manager || '');
+                const status = (row.dataset.status || '');
+                const fullText = (row.textContent || '').toLowerCase();
+
+                const matchesText =
+                    !query ||
+                    username.includes(query) ||
+                    fullName.includes(query) ||
+                    email.includes(query) ||
+                    fullText.includes(query);
+
+                const matchesStatus =
+                    !statusFilter || status === statusFilter;
+
+                const matchesCC =
+                    !ccFilter || cc === ccFilter;
+
+                const matchesMgr =
+                    !mgrFilter || mgr === mgrFilter;
+
+                row.style.display = (matchesText && matchesStatus && matchesCC && matchesMgr) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', applyFilters);
+        if (statusSelect) statusSelect.addEventListener('change', applyFilters);
+        if (costCenterSelect) costCenterSelect.addEventListener('change', applyFilters);
+        if (managerSelect) managerSelect.addEventListener('change', applyFilters);
+    }
+
+    // Глобален Add бутон -> отваря user модала на тази страница
+    if (globalAddBtn && addUserModalEl && window.bootstrap) {
+        const modalInstance = new bootstrap.Modal(addUserModalEl);
+        globalAddBtn.addEventListener('click', function () {
+            modalInstance.show();
+        });
+    }
+})();
+</script>
 {% endblock %}

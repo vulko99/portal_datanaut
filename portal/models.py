@@ -1,6 +1,9 @@
 # portal/models.py
+from datetime import timedelta
+
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -53,6 +56,9 @@ class Vendor(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:vendor_detail", kwargs={"pk": self.pk})
 
 
 # ---------- COST CENTER ----------
@@ -119,6 +125,11 @@ class UserProfile(models.Model):
         blank=True,
         help_text="Legal entity this user belongs to.",
     )
+    phone_number = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Work phone, extension or mobile.",
+    )
 
     def __str__(self) -> str:
         return self.full_name or self.user.get_username()
@@ -180,6 +191,33 @@ class Service(models.Model):
         blank=True,
     )
 
+    # допълнителни полета за портала
+    owner_display = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Business owner / accountable person for this service.",
+    )
+    list_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Indicative annual price or unit price for this service.",
+    )
+    allocation_split = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="High-level split, e.g. 60% Trading / 40% Research.",
+    )
+    primary_contract = models.ForeignKey(
+        "Contract",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="primary_services",
+        help_text="Primary contract under which this service is provided.",
+    )
+
     class Meta:
         ordering = ["vendor__name", "name"]
         unique_together = [("vendor", "name")]
@@ -213,6 +251,18 @@ class Contract(models.Model):
         (STATUS_EXPIRED, "Expired"),
         (STATUS_PENDING, "Pending"),
         (STATUS_CANCELLED, "Cancelled"),
+    ]
+
+    NOTICE_30 = 30
+    NOTICE_60 = 60
+    NOTICE_90 = 90
+    NOTICE_120 = 120
+
+    NOTICE_PERIOD_CHOICES = [
+        (NOTICE_30, "30 days"),
+        (NOTICE_60, "60 days"),
+        (NOTICE_90, "90 days"),
+        (NOTICE_120, "120 days"),
     ]
 
     vendor = models.ForeignKey(
@@ -260,6 +310,19 @@ class Contract(models.Model):
     end_date = models.DateField(null=True, blank=True)
     renewal_date = models.DateField(null=True, blank=True)
 
+    # --- NEW: Notice / Termination controls ---
+    notice_period_days = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        choices=NOTICE_PERIOD_CHOICES,
+        help_text="Notice period in days (e.g. 30/60/90/120). Used to calculate notice date.",
+    )
+    notice_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date by which notice must be given. If blank, it can be derived from end_date - notice_period_days.",
+    )
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -290,6 +353,11 @@ class Contract(models.Model):
         null=True,
     )
 
+    notes = models.TextField(
+        blank=True,
+        help_text="Internal notes / scope / renewal terms.",
+    )
+
     uploaded_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -313,6 +381,23 @@ class Contract(models.Model):
 
     def __str__(self) -> str:
         return self.contract_name
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:contract_detail", kwargs={"pk": self.pk})
+
+    @property
+    def effective_notice_date(self):
+        """
+        Returns:
+          - notice_date if set (manual override)
+          - else end_date - notice_period_days if possible
+          - else None
+        """
+        if self.notice_date:
+            return self.notice_date
+        if self.end_date and self.notice_period_days:
+            return self.end_date - timedelta(days=int(self.notice_period_days))
+        return None
 
 
 # ---------- INVOICE ----------
@@ -370,6 +455,11 @@ class Invoice(models.Model):
         help_text="Uploaded PDF of the invoice.",
     )
 
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes to Finance / GL / tax.",
+    )
+
     # За multi-tenant портал – кой клиент да я вижда
     owner = models.ForeignKey(
         User,
@@ -387,6 +477,31 @@ class Invoice(models.Model):
 
     def __str__(self) -> str:
         return f"{self.vendor.name} – {self.invoice_number}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:invoice_detail", kwargs={"pk": self.pk})
+
+    @property
+    def period_label(self) -> str:
+        """
+        Render a human-friendly billed period label for templates.
+        Does not affect schema.
+        """
+        if self.period_start and self.period_end:
+            return f"{self.period_start} → {self.period_end}"
+        if self.period_start and not self.period_end:
+            return f"From {self.period_start}"
+        if self.period_end and not self.period_start:
+            return f"Until {self.period_end}"
+        return "—"
+
+    @property
+    def tax_label(self) -> str:
+        """
+        Render a human-friendly tax label for templates.
+        Does not affect schema.
+        """
+        return str(self.tax_amount) if self.tax_amount is not None else "—"
 
 
 # ---------- INVOICE LINE (където правим split към cost centers / users) ----------

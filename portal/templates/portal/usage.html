@@ -1,49 +1,341 @@
 {% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage{% endblock %}
+
 {% block content %}
-  <div class="page-title">Usage</div>
-  <div class="page-subtitle">Illustrative view of licence usage signals. Next iteration: ingest from terminal logs / SSO / entitlement feeds.</div>
+<div class="row g-3">
+    <!-- ROW 1: OVERVIEW + KPIs -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+                <div class="me-lg-4 mb-3 mb-lg-0">
+                    <div class="section-eyebrow mb-1">Usage</div>
+                    <h1 class="section-title mb-1">Licence usage overview</h1>
+                    <p class="section-subtitle mb-0">
+                        Demo snapshot highlighting low-usage, dormant users and overlapping products.
+                        In production this view would be fed from terminal logs, SSO and entitlement feeds.
+                    </p>
+                </div>
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-7">
-      <div class="cardx">
-        <div class="page-title" style="font-size:1.05rem;">Desks with potential optimisation</div>
-        <div class="page-subtitle" style="margin-bottom:10px;">Static demo content.</div>
-
-        <table class="tablex">
-          <thead>
-            <tr>
-              <th style="width:28%;">Desk / team</th>
-              <th style="width:20%;">Vendor</th>
-              <th style="width:14%;">Licences</th>
-              <th style="width:38%;">Usage signal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>EM FX trading</strong></td><td class="muted">Refinitiv</td><td class="muted">24</td><td class="muted">7 licences low-usage</td></tr>
-            <tr><td><strong>Rates structuring</strong></td><td class="muted">Bloomberg</td><td class="muted">18</td><td class="muted">3 dormant terminals</td></tr>
-            <tr><td><strong>Equity research</strong></td><td class="muted">Vendor X</td><td class="muted">12</td><td class="muted">Healthy usage</td></tr>
-            <tr><td><strong>Middle office</strong></td><td class="muted">Various</td><td class="muted">31</td><td class="muted">Overlap across two vendors</td></tr>
-          </tbody>
-        </table>
-      </div>
+                <div class="row g-3 flex-grow-1" style="max-width: 520px;">
+                    <div class="col-6">
+                        <div class="metric-label">Licences monitored</div>
+                        <div class="metric-value">186</div>
+                        <div class="portal-card-muted small">
+                            Across 4 vendors and 9 desks.
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-label">Potential savings</div>
+                        <div class="metric-value">0.5m</div>
+                        <div class="portal-card-muted small">
+                            From low-usage &amp; dormant licences (illustrative).
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-label">Healthy usage</div>
+                        <div class="metric-value">82%</div>
+                        <div class="portal-card-muted small">
+                            Seats in the “healthy” band (last 90 days).
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-label">Overlapping desks</div>
+                        <div class="metric-value">3</div>
+                        <div class="portal-card-muted small">
+                            Same dataset delivered by multiple vendors.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-12 col-lg-5">
-      <div class="cardx">
-        <div class="page-title" style="font-size:1.05rem;">Summary signals</div>
-        <ul class="mb-0">
-          <li class="mb-2">£0.5m potential savings from low-usage licences across 3 core vendors.</li>
-          <li class="mb-2">2 desks with overlapping products (same feed provided by multiple vendors).</li>
-          <li class="mb-2">80%+ of licences in “healthy usage” band based on last 90 days.</li>
-        </ul>
+    <!-- ROW 2: MAIN GRID + SIDE CARDS -->
+    <div class="col-12 col-xl-8">
+        <div class="portal-card h-100">
+            <div class="section-eyebrow mb-1">Signals</div>
+            <h5 class="section-title mb-1">Desks with potential optimisation</h5>
+            <p class="portal-card-muted mb-3">
+                Grid-style view of desks and usage signals – близо до MDM / Calero grid, но с нашия UI.
+            </p>
 
-        <div class="page-title mt-3" style="font-size:1.05rem;">Next actions</div>
-        <ul class="mb-0">
-          <li class="mb-2">Share latest usage pack with Trading desks and Finance ahead of renewal meetings.</li>
-          <li class="mb-2">Confirm decommission plan for dormant desks and recycle licences where possible.</li>
-          <li class="mb-2">Align usage metrics with internal cost allocation model (GL / desk codes).</li>
-        </ul>
-      </div>
+            <!-- TOOLBAR: SEARCH + FILTER -->
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                <div class="input-group input-group-sm" style="max-width: 320px;">
+                    <span class="input-group-text">Search</span>
+                    <input
+                        type="search"
+                        id="usageDeskSearch"
+                        class="form-control"
+                        placeholder="Desk, vendor, signal…">
+                </div>
+                <select id="usageSeverityFilter" class="form-select form-select-sm" style="max-width: 180px;">
+                    <option value="">All severities</option>
+                    <option value="high">High impact</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+
+            <!-- MAIN TABLE -->
+            <div class="table-responsive">
+                <table class="portal-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 22%;">Desk / team</th>
+                            <th style="width: 16%;">Vendor</th>
+                            <th style="width: 12%;">Licences</th>
+                            <th style="width: 20%;">Usage signal</th>
+                            <th style="width: 16%;">Last 90 days</th>
+                            <th style="width: 14%;">Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usageDesksTableBody">
+                        <tr
+                            data-desk="EM FX trading"
+                            data-vendor="Refinitiv"
+                            data-severity="high"
+                        >
+                            <td><strong>EM FX trading</strong></td>
+                            <td class="cell-muted">Refinitiv</td>
+                            <td class="cell-muted">24</td>
+                            <td class="cell-muted">7 licences in low-usage band</td>
+                            <td class="cell-muted">Usage trending down −15%</td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger">High impact</span>
+                            </td>
+                        </tr>
+                        <tr
+                            data-desk="Rates structuring"
+                            data-vendor="Bloomberg"
+                            data-severity="high"
+                        >
+                            <td><strong>Rates structuring</strong></td>
+                            <td class="cell-muted">Bloomberg</td>
+                            <td class="cell-muted">18</td>
+                            <td class="cell-muted">3 dormant terminals</td>
+                            <td class="cell-muted">No logins in last 60 days</td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger">High impact</span>
+                            </td>
+                        </tr>
+                        <tr
+                            data-desk="Equity research"
+                            data-vendor="Vendor X"
+                            data-severity="low"
+                        >
+                            <td><strong>Equity research</strong></td>
+                            <td class="cell-muted">Vendor X</td>
+                            <td class="cell-muted">12</td>
+                            <td class="cell-muted">Healthy usage</td>
+                            <td class="cell-muted">Stable, &gt;90% active users</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success">Healthy</span>
+                            </td>
+                        </tr>
+                        <tr
+                            data-desk="Middle office"
+                            data-vendor="Mixed vendors"
+                            data-severity="medium"
+                        >
+                            <td><strong>Middle office</strong></td>
+                            <td class="cell-muted">Mixed vendors</td>
+                            <td class="cell-muted">31</td>
+                            <td class="cell-muted">Overlap across two vendors</td>
+                            <td class="cell-muted">Two feeds with identical coverage</td>
+                            <td>
+                                <span class="badge bg-warning-subtle text-warning">Medium</span>
+                            </td>
+                        </tr>
+                        <tr
+                            data-desk="Index trading"
+                            data-vendor="MSCI"
+                            data-severity="medium"
+                        >
+                            <td><strong>Index trading</strong></td>
+                            <td class="cell-muted">MSCI</td>
+                            <td class="cell-muted">9</td>
+                            <td class="cell-muted">2 low-usage licences</td>
+                            <td class="cell-muted">Usage concentrated on 3 power users</td>
+                            <td>
+                                <span class="badge bg-warning-subtle text-warning">Medium</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="portal-card-muted mb-0 mt-2">
+                In a live deployment this table would be populated automatically and drilled-down by user, licence and contract.
+            </p>
+        </div>
     </div>
-  </div>
+
+    <!-- SIDE CARDS -->
+    <div class="col-12 col-xl-4">
+        <!-- Dormant licences -->
+        <div class="portal-card mb-3">
+            <div class="section-eyebrow mb-1">Dormant licences</div>
+            <h5 class="section-title mb-1">Users with no recent activity</h5>
+            <p class="portal-card-muted mb-2">
+                Subset with &gt;60 days without any login. Candidates for decommissioning or licence recycling.
+            </p>
+
+            <div class="table-responsive">
+                <table class="portal-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">User</th>
+                            <th style="width: 32%;">Desk</th>
+                            <th style="width: 18%;">Vendor</th>
+                            <th style="width: 20%;">Last login</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cell-muted">j.smith</td>
+                            <td class="cell-muted">Rates structuring</td>
+                            <td class="cell-muted">Bloomberg</td>
+                            <td class="cell-muted">&gt;90 days</td>
+                        </tr>
+                        <tr>
+                            <td class="cell-muted">a.ivanov</td>
+                            <td class="cell-muted">EM FX trading</td>
+                            <td class="cell-muted">Refinitiv</td>
+                            <td class="cell-muted">75 days</td>
+                        </tr>
+                        <tr>
+                            <td class="cell-muted">m.lee</td>
+                            <td class="cell-muted">Middle office</td>
+                            <td class="cell-muted">Vendor X</td>
+                            <td class="cell-muted">68 days</td>
+                        </tr>
+                        <tr>
+                            <td class="cell-muted">k.petrov</td>
+                            <td class="cell-muted">Index trading</td>
+                            <td class="cell-muted">MSCI</td>
+                            <td class="cell-muted">61 days</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Overlapping products -->
+        <div class="portal-card">
+            <div class="section-eyebrow mb-1">Overlapping products</div>
+            <h5 class="section-title mb-1">Desks with duplicate coverage</h5>
+            <p class="portal-card-muted mb-2">
+                Examples where the same data set or functionality is supplied by multiple vendors.
+            </p>
+
+            <div class="table-responsive">
+                <table class="portal-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 32%;">Desk</th>
+                            <th style="width: 30%;">Vendors</th>
+                            <th style="width: 38%;">Opportunity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cell-muted">Middle office</td>
+                            <td class="cell-muted">Vendor X / Vendor Y</td>
+                            <td class="cell-muted">Same real-time futures feed – consolidate to one provider.</td>
+                        </tr>
+                        <tr>
+                            <td class="cell-muted">EM FX trading</td>
+                            <td class="cell-muted">Refinitiv / Bloomberg</td>
+                            <td class="cell-muted">Duplicated news &amp; macro coverage – rationalise bundles.</td>
+                        </tr>
+                        <tr>
+                            <td class="cell-muted">Index trading</td>
+                            <td class="cell-muted">MSCI / Vendor Z</td>
+                            <td class="cell-muted">Index analytics doubled for 3 indices – review pricing.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: SUMMARY / NEXT ACTIONS -->
+    <div class="col-12 col-xl-6">
+        <div class="portal-card">
+            <div class="section-eyebrow mb-1">Summary</div>
+            <h5 class="section-title mb-2">What this view is for</h5>
+            <ul class="portal-card-muted mb-0">
+                <li class="mb-2">
+                    Gives Trading, Market Data and Finance a single view of where licences are under-used or dormant.
+                </li>
+                <li class="mb-2">
+                    Highlights desks with overlapping vendor coverage ahead of contract renewals.
+                </li>
+                <li class="mb-2">
+                    Connects usage signals directly into contract and invoice data in the rest of the portal.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="portal-card">
+            <div class="section-eyebrow mb-1">Next actions</div>
+            <h5 class="section-title mb-2">How clients typically use this</h5>
+            <ul class="portal-card-muted mb-0">
+                <li class="mb-2">
+                    Export a short usage pack per vendor to use in commercial discussions.
+                </li>
+                <li class="mb-2">
+                    Agree decommission / recycle plan per desk and track progress month-on-month.
+                </li>
+                <li class="mb-2">
+                    Tie confirmed optimisation items back into cost centre allocation and budget planning.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const searchInput = document.getElementById('usageDeskSearch');
+    const severitySelect = document.getElementById('usageSeverityFilter');
+    const tableBody = document.getElementById('usageDesksTableBody');
+
+    if (!tableBody) return;
+
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    function applyFilters() {
+        const query = (searchInput ? searchInput.value : '').toLowerCase();
+        const severity = severitySelect ? severitySelect.value : '';
+
+        rows.forEach(row => {
+            const desk = (row.dataset.desk || '').toLowerCase();
+            const vendor = (row.dataset.vendor || '').toLowerCase();
+            const fullText = (row.textContent || '').toLowerCase();
+            const rowSeverity = (row.dataset.severity || '').toLowerCase();
+
+            const matchesText =
+                !query ||
+                desk.includes(query) ||
+                vendor.includes(query) ||
+                fullText.includes(query);
+
+            const matchesSeverity =
+                !severity || rowSeverity === severity;
+
+            row.style.display = (matchesText && matchesSeverity) ? '' : 'none';
+        });
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (severitySelect) severitySelect.addEventListener('change', applyFilters);
+})();
+</script>
 {% endblock %}

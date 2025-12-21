@@ -1,0 +1,208 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Contract · {{ contract.contract_name }}{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    <!-- HEADER -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                <div>
+                    <div class="section-eyebrow mb-1">Contracts · Detail</div>
+                    <h1 class="section-title mb-1">
+                        {{ contract.contract_name }}
+                    </h1>
+                    <p class="section-subtitle mb-0">
+                        Vendor: {{ contract.vendor.name }}
+                        {% if contract.contract_id %} · ID: {{ contract.contract_id }}{% endif %}
+                        {% if contract.entity %} · Entity: {{ contract.entity }}{% endif %}
+                    </p>
+                </div>
+
+                <div class="text-end">
+                    <div class="text-uppercase text-muted mb-1" style="font-size:.72rem; letter-spacing:.12em;">
+                        Status
+                    </div>
+                    <div class="metric-value mb-2" style="font-size:1rem;">
+                        {{ contract.get_status_display }}
+                    </div>
+
+                    <div class="portal-card-muted small">
+                        Owner: {{ contract.owner.username }}<br>
+                        {% if contract.owning_cost_center %}
+                            Cost centre:
+                            {{ contract.owning_cost_center.code }} – {{ contract.owning_cost_center.name }}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a href="{% url 'portal:contracts' %}" class="btn btn-ghost btn-sm">
+                            Back to contracts
+                        </a>
+                        {% if contract.file %}
+                            <a href="{{ contract.file.url }}" target="_blank" rel="noopener"
+                               class="btn btn-add btn-sm">
+                                Open contract document
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LEFT: KEY TERMS -->
+    <div class="col-lg-6">
+        <div class="portal-card h-100">
+            <h6 class="mb-2">Contract details</h6>
+            <p class="portal-card-muted mb-3">
+                Core terms and allocation information used for renewals, approvals and reporting.
+            </p>
+
+            <div class="table-responsive">
+                <table class="portal-table align-middle">
+                    <tbody>
+                        <tr>
+                            <th style="width:28%;">Vendor</th>
+                            <td class="cell-muted">{{ contract.vendor.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td class="cell-muted">{{ contract.get_contract_type_display|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Entity</th>
+                            <td class="cell-muted">{{ contract.entity|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cost centre</th>
+                            <td class="cell-muted">
+                                {% if contract.owning_cost_center %}
+                                    {{ contract.owning_cost_center.code }} – {{ contract.owning_cost_center.name }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Start date</th>
+                            <td class="cell-muted">{{ contract.start_date|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>End date</th>
+                            <td class="cell-muted">{{ contract.end_date|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Renewal date</th>
+                            <td class="cell-muted">{{ contract.renewal_date|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Annual value</th>
+                            <td class="cell-muted">
+                                {% if contract.annual_value %}
+                                    {{ contract.annual_value }} {{ contract.currency }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created / updated</th>
+                            <td class="cell-muted">
+                                {{ contract.created_at|date:"Y-m-d" }} · {{ contract.updated_at|date:"Y-m-d" }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RIGHT: SERVICES + INVOICES -->
+    <div class="col-lg-6 d-flex flex-column gap-3">
+
+        <!-- Related services -->
+        <div class="portal-card">
+            <h6 class="mb-2">Related services</h6>
+            <p class="portal-card-muted mb-3">
+                Services linked to this contract (data feeds, terminals, analytics, index licences).
+            </p>
+
+            {% with services=contract.related_services.all %}
+                {% if services|length %}
+                    <ul class="small mb-0">
+                        {% for s in services %}
+                            <li>
+                                {{ s.name }}
+                                <span class="portal-card-muted">
+                                    · {{ s.vendor.name }}
+                                    {% if s.category %}
+                                        · {{ s.get_category_display }}
+                                    {% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="portal-card-muted mb-0">No services linked yet.</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Invoices -->
+        <div class="portal-card">
+            <h6 class="mb-2">Invoices under this contract</h6>
+            <p class="portal-card-muted mb-3">
+                All invoices explicitly linked to this contract.
+            </p>
+
+            {% if invoices %}
+                <div class="table-responsive">
+                    <table class="portal-table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:20%;">Invoice №</th>
+                                <th style="width:18%;">Date</th>
+                                <th style="width:22%;">Vendor</th>
+                                <th style="width:20%;">Amount</th>
+                                <th style="width:10%;">Curr.</th>
+                                <th style="width:10%;">Doc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in invoices %}
+                                <tr>
+                                    <td><strong>{{ i.invoice_number }}</strong></td>
+                                    <td class="cell-muted">{{ i.invoice_date }}</td>
+                                    <td class="cell-muted">{{ i.vendor.name }}</td>
+                                    <td class="cell-muted text-end">{{ i.total_amount }}</td>
+                                    <td class="cell-muted">{{ i.currency }}</td>
+                                    <td class="cell-muted">
+                                        {% if i.file %}
+                                            <a href="{{ i.file.url }}" target="_blank" rel="noopener" class="link-inline">
+                                                Open
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="portal-card-muted mb-0">
+                    No invoices linked to this contract yet.
+                </p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
