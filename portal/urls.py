@@ -12,7 +12,11 @@ urlpatterns = [
     path("vendors/", views.vendor_list, name="vendors"),
     path("vendors/<int:pk>/", views.vendor_detail, name="vendor_detail"),
 
+    # Services (additive)
     path("services/", views.service_list, name="services"),
+    path("services/add/", views.service_create, name="service_create"),
+    path("services/<int:pk>/", views.service_detail, name="service_detail"),
+    path("services/<int:pk>/edit/", views.service_edit, name="service_edit"),
 
     path("contracts/", views.contract_list, name="contracts"),
     path("contracts/<int:pk>/", views.contract_detail, name="contract_detail"),

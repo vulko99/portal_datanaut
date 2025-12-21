@@ -1,0 +1,131 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · User · {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+    <!-- HEADER -->
+    <div class="col-12">
+        <div class="portal-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <div class="section-eyebrow mb-1">Users · Detail</div>
+                    <h1 class="section-title mb-1">{{ user_obj.username }}</h1>
+                    <p class="section-subtitle mb-0">
+                        {{ user_obj.get_full_name|default:user_obj.username }}
+                        {% if user_obj.email %} · {{ user_obj.email }}{% endif %}
+                    </p>
+                </div>
+
+                <div class="text-end">
+                    <div class="metric-label mb-1">Status</div>
+                    <div class="metric-value" style="font-size:1rem;">
+                        {% if user_obj.is_active %}
+                            Active
+                        {% else %}
+                            Inactive
+                        {% endif %}
+                    </div>
+                    <div class="portal-card-muted small mt-2">
+                        Cost center:
+                        {% if user_obj.profile.cost_center %}
+                            {{ user_obj.profile.cost_center.code }} – {{ user_obj.profile.cost_center.name }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-3">
+                        <a href="{% url 'portal:users' %}" class="btn btn-ghost btn-sm">
+                            Back to users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMS -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="portal-card h-100">
+                    <h6 class="mb-2">Account</h6>
+                    <p class="portal-card-muted mb-3">
+                        Core Django user fields. Username cannot be blank; status controls login availability.
+                    </p>
+
+                    <div class="row g-3 small">
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Username</label>
+                            {{ account_form.username }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Email</label>
+                            {{ account_form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">First name</label>
+                            {{ account_form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Last name</label>
+                            {{ account_form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                {{ account_form.is_active }}
+                                <label class="form-check-label small">Active user</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="portal-card h-100">
+                    <h6 class="mb-2">Profile</h6>
+                    <p class="portal-card-muted mb-3">
+                        Extended attributes for approvals, allocation and directory information.
+                    </p>
+
+                    <div class="row g-3 small">
+                        <div class="col-md-12">
+                            <label class="form-label form-label-sm">Display name</label>
+                            {{ profile_form.full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Cost center</label>
+                            {{ profile_form.cost_center }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Manager</label>
+                            {{ profile_form.manager }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Location</label>
+                            {{ profile_form.location }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Legal entity</label>
+                            {{ profile_form.legal_entity }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm">Phone</label>
+                            {{ profile_form.phone_number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-add btn-sm">
+                    Save changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

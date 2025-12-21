@@ -852,6 +852,225 @@ def service_list(request):
     return render(request, "portal/services.html", {"services": services})
 
 
+@login_required
+def service_detail(request, pk: int):
+    """
+    Additive: service detail page.
+    No ownership filter (services are global in your current model usage).
+    """
+    service = get_object_or_404(Service.objects.select_related("vendor"), pk=pk)
+
+    context = {
+        "service": service,
+    }
+    return render(request, "portal/service_detail.html", context)
+
+
+@login_required
+def service_create(request):
+    """
+    Additive: create service via portal without touching admin.
+    Uses a simple POST parser so we don't need to change your existing forms.py right now.
+    """
+    vendors = Vendor.objects.all().order_by("name")
+
+    if request.method == "POST":
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        name = _as_str(request.POST.get("name"))
+        category = _as_str(request.POST.get("category"))
+        service_code = _as_str(request.POST.get("service_code"))
+        default_currency = _as_str(request.POST.get("default_currency"))
+        default_billing_frequency = _as_str(request.POST.get("default_billing_frequency"))
+        owner_display = _as_str(request.POST.get("owner_display"))
+        allocation_split = _as_str(request.POST.get("allocation_split"))
+        list_price_raw = _as_str(request.POST.get("list_price"))
+
+        errors: list[str] = []
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        if not name:
+            errors.append("Service name is required.")
+
+        list_price = None
+        if list_price_raw:
+            try:
+                list_price = _parse_decimal(list_price_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        # Uniqueness heuristic (matches importer behavior): (vendor, name case-insensitive)
+        if vendor and name:
+            exists = Service.objects.filter(vendor=vendor, name__iexact=name).exists()
+            if exists:
+                errors.append("A service with this name already exists for the selected vendor.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+
+            return render(
+                request,
+                "portal/service_form.html",
+                {
+                    "mode": "create",
+                    "vendors": vendors,
+                    "form_data": {
+                        "vendor_id": vendor_id,
+                        "name": name,
+                        "category": category,
+                        "service_code": service_code,
+                        "default_currency": default_currency,
+                        "default_billing_frequency": default_billing_frequency,
+                        "owner_display": owner_display,
+                        "allocation_split": allocation_split,
+                        "list_price": list_price_raw,
+                    },
+                },
+            )
+
+        service = Service.objects.create(
+            vendor=vendor,
+            name=name,
+            category=category or "",
+            service_code=service_code or "",
+            default_currency=default_currency or "",
+            default_billing_frequency=default_billing_frequency or "",
+            owner_display=owner_display or "",
+            allocation_split=allocation_split or "",
+            list_price=list_price,
+        )
+
+        messages.success(request, "Service created successfully.")
+        return redirect("portal:service_detail", pk=service.pk)
+
+    return render(
+        request,
+        "portal/service_form.html",
+        {
+            "mode": "create",
+            "vendors": vendors,
+            "form_data": {},
+        },
+    )
+
+
+@login_required
+def service_edit(request, pk: int):
+    """
+    Additive: edit service via portal.
+    """
+    service = get_object_or_404(Service.objects.select_related("vendor"), pk=pk)
+    vendors = Vendor.objects.all().order_by("name")
+
+    if request.method == "POST":
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        name = _as_str(request.POST.get("name"))
+        category = _as_str(request.POST.get("category"))
+        service_code = _as_str(request.POST.get("service_code"))
+        default_currency = _as_str(request.POST.get("default_currency"))
+        default_billing_frequency = _as_str(request.POST.get("default_billing_frequency"))
+        owner_display = _as_str(request.POST.get("owner_display"))
+        allocation_split = _as_str(request.POST.get("allocation_split"))
+        list_price_raw = _as_str(request.POST.get("list_price"))
+
+        errors: list[str] = []
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        if not name:
+            errors.append("Service name is required.")
+
+        list_price = None
+        if list_price_raw:
+            try:
+                list_price = _parse_decimal(list_price_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        # Uniqueness check (vendor, name) excluding current
+        if vendor and name:
+            exists = Service.objects.filter(vendor=vendor, name__iexact=name).exclude(pk=service.pk).exists()
+            if exists:
+                errors.append("A service with this name already exists for the selected vendor.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+
+            return render(
+                request,
+                "portal/service_form.html",
+                {
+                    "mode": "edit",
+                    "service": service,
+                    "vendors": vendors,
+                    "form_data": {
+                        "vendor_id": vendor_id,
+                        "name": name,
+                        "category": category,
+                        "service_code": service_code,
+                        "default_currency": default_currency,
+                        "default_billing_frequency": default_billing_frequency,
+                        "owner_display": owner_display,
+                        "allocation_split": allocation_split,
+                        "list_price": list_price_raw,
+                    },
+                },
+            )
+
+        # Apply updates
+        service.vendor = vendor
+        service.name = name
+        service.category = category or ""
+        service.service_code = service_code or ""
+        service.default_currency = default_currency or ""
+        service.default_billing_frequency = default_billing_frequency or ""
+        service.owner_display = owner_display or ""
+        service.allocation_split = allocation_split or ""
+        service.list_price = list_price
+        service.save()
+
+        messages.success(request, "Service updated successfully.")
+        return redirect("portal:service_detail", pk=service.pk)
+
+    # GET: prefill with existing
+    form_data = {
+        "vendor_id": str(service.vendor_id) if service.vendor_id else "",
+        "name": service.name or "",
+        "category": service.category or "",
+        "service_code": getattr(service, "service_code", "") or "",
+        "default_currency": getattr(service, "default_currency", "") or "",
+        "default_billing_frequency": getattr(service, "default_billing_frequency", "") or "",
+        "owner_display": getattr(service, "owner_display", "") or "",
+        "allocation_split": getattr(service, "allocation_split", "") or "",
+        "list_price": _as_str(service.list_price) if service.list_price is not None else "",
+    }
+
+    return render(
+        request,
+        "portal/service_form.html",
+        {
+            "mode": "edit",
+            "service": service,
+            "vendors": vendors,
+            "form_data": form_data,
+        },
+    )
+
+
 # ----------
 # COST CENTERS
 # ----------
