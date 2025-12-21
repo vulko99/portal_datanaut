@@ -10,12 +10,11 @@
                 <div class="section-eyebrow">Inventory</div>
                 <h1 class="section-title mb-0">Vendors</h1>
                 <p class="section-subtitle mb-0">
-                    Basic vendor inventory – market data, reference data, indexes, connectivity and other providers.
-                    Click a vendor to see related contracts, invoices and services.
+                    Your vendor catalogue with contact details, contracts and services.
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-2">
                 <div class="d-flex flex-wrap gap-3">
                     <div>
                         <div class="metric-label">Total vendors</div>
@@ -24,87 +23,72 @@
                         </div>
                     </div>
                 </div>
-                <div class="text-end small text-muted">
-                    Vendors can be created from the portal.
+                <div class="text-end small portal-card-muted">
+                    Use the <strong>Add</strong> button in the top bar to register a new vendor.
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="col-12">
-        <div class="portal-card">
-            <h6 class="mb-2">Vendor list</h6>
-            <p class="portal-card-muted mb-3">
-                Overview of all vendors in scope. Later this will power contract, invoice and license analytics.
-            </p>
 
             {% if vendors %}
                 <div class="table-responsive">
                     <table class="portal-table align-middle">
                         <thead>
-                            <tr>
-                                <th style="width: 24%;">Vendor</th>
-                                <th style="width: 16%;">Type</th>
-                                <th style="width: 10%;">Contracts</th>
-                                <th style="width: 10%;">Invoices</th>
-                                <th style="width: 20%;">Primary contact</th>
-                                <th style="width: 20%;">Website</th>
-                                <th style="width: 10%;">Tags</th>
-                            </tr>
+                        <tr>
+                            <th style="width: 26%;">Vendor</th>
+                            <th style="width: 16%;">Type</th>
+                            <th style="width: 20%;">Tags</th>
+                            <th style="width: 10%;">Contracts</th>
+                            <th style="width: 10%;">Invoices</th>
+                            <th style="width: 18%;">Website</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for vendor in vendors %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'portal:vendor_detail' vendor.pk %}"
-                                           class="link-inline">
-                                            {{ vendor.name }}
+                        {% for vendor in vendors %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'portal:vendor_detail' vendor.pk %}" class="link-inline">
+                                        {{ vendor.name }}
+                                    </a>
+                                </td>
+                                <td class="cell-muted">
+                                    {{ vendor.vendor_type|default:"—" }}
+                                </td>
+                                <td class="cell-muted">
+                                    {{ vendor.tags|default:"—" }}
+                                </td>
+                                <td class="cell-muted">
+                                    {{ vendor.contract_count|default:0 }}
+                                </td>
+                                <td class="cell-muted">
+                                    {{ vendor.invoice_count|default:0 }}
+                                </td>
+                                <td class="cell-muted">
+                                    {% if vendor.website %}
+                                        <a href="{{ vendor.website }}" target="_blank" rel="noopener" class="link-inline">
+                                            {{ vendor.website }}
                                         </a>
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ vendor.get_vendor_type_display|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ vendor.contract_count|default:"0" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ vendor.invoice_count|default:"0" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if vendor.primary_contact_name or vendor.primary_contact_email %}
-                                            {{ vendor.primary_contact_name|default_if_none:"" }}
-                                            {% if vendor.primary_contact_email %}
-                                                <br>
-                                                <a href="mailto:{{ vendor.primary_contact_email }}" class="link-inline">
-                                                    {{ vendor.primary_contact_email }}
-                                                </a>
-                                            {% endif %}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if vendor.website %}
-                                            <a href="{{ vendor.website }}" target="_blank"
-                                               rel="noopener" class="link-inline">
-                                                {{ vendor.website }}
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ vendor.tags|default:"—" }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
             {% else %}
-                <p class="portal-card-muted mb-0">
-                    No vendors yet. Use the + Add button to create the first one.
-                </p>
+                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        No vendors yet. Add vendors to start linking contracts, invoices and services.
+                    </div>
+                    <div class="mt-2 mt-sm-0">
+                        <button type="button"
+                                class="btn btn-add btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addVendorModal">
+                            + Add vendor
+                        </button>
+                    </div>
+                </div>
             {% endif %}
         </div>
     </div>
@@ -113,7 +97,8 @@
 {# --------- ADD VENDOR MODAL --------- #}
 <div class="modal fade" id="addVendorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+        <div class="modal-content"
+             style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
             <div class="modal-header border-0 pt-3 pb-1 px-4">
                 <div>
                     <h5 class="modal-title">Add new vendor</h5>
@@ -121,7 +106,8 @@
                         Create a new vendor in the inventory.
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
             </div>
 
             <div class="modal-body px-4 pb-4">
@@ -130,45 +116,45 @@
 
                     {{ form.non_field_errors }}
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-3 small">
                         <div class="col-md-6 col-xl-4">
-                            <label class="form-label">Vendor name</label>
+                            <label class="form-label form-label-sm">Vendor name</label>
                             {{ form.name }}
                             {{ form.name.errors }}
                         </div>
                         <div class="col-md-6 col-xl-4">
-                            <label class="form-label">Type</label>
+                            <label class="form-label form-label-sm">Type</label>
                             {{ form.vendor_type }}
                             {{ form.vendor_type.errors }}
                         </div>
                         <div class="col-md-12 col-xl-4">
-                            <label class="form-label">Tags</label>
+                            <label class="form-label form-label-sm">Tags</label>
                             {{ form.tags }}
                             {{ form.tags.errors }}
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-3 small">
                         <div class="col-md-6">
-                            <label class="form-label">Primary contact name</label>
+                            <label class="form-label form-label-sm">Primary contact name</label>
                             {{ form.primary_contact_name }}
                             {{ form.primary_contact_name.errors }}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Primary contact email</label>
+                            <label class="form-label form-label-sm">Primary contact email</label>
                             {{ form.primary_contact_email }}
                             {{ form.primary_contact_email.errors }}
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-4 small">
                         <div class="col-md-6">
-                            <label class="form-label">Website</label>
+                            <label class="form-label form-label-sm">Website</label>
                             {{ form.website }}
                             {{ form.website.errors }}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Internal notes</label>
+                            <label class="form-label form-label-sm">Internal notes</label>
                             {{ form.notes }}
                             {{ form.notes.errors }}
                         </div>
@@ -191,9 +177,8 @@
 {{ block.super }}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Ако има грешки във формата след POST, отваряме модала автоматично
-    const hasErrors =
-        document.querySelector("#addVendorModal .errorlist") !== null;
+    // If there are form errors after POST, auto-open the modal
+    const hasErrors = document.querySelector("#addVendorModal .errorlist") !== null;
 
     if (hasErrors) {
         const modalEl = document.getElementById("addVendorModal");

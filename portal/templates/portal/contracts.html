@@ -6,143 +6,101 @@
 <div class="row g-3">
     <div class="col-12">
         <div class="portal-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="section-eyebrow mb-1">Inventory</div>
-                    <h1 class="section-title mb-1">Contracts</h1>
-                    <p class="section-subtitle mb-0">
-                        Signed agreements and order forms, filtered to your portal account (owner). This view
-                        underpins renewal planning, spend analysis and compliance checks.
-                    </p>
+            <div class="section-header mb-2">
+                <div class="section-eyebrow">Inventory</div>
+                <h1 class="section-title mb-0">Contracts</h1>
+                <p class="section-subtitle mb-0">
+                    Signed agreements with vendors. Use this view to upload new contracts and track renewal dates.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-3">
+                <div class="d-flex flex-wrap gap-3">
+                    <div>
+                        <div class="metric-label">Total contracts</div>
+                        <div class="metric-value">
+                            {{ contracts|length }}
+                        </div>
+                    </div>
                 </div>
-                <div class="text-end portal-card-muted small">
-                    <div>Total contracts: <span class="fw-semibold">{{ total_contracts }}</span></div>
-                    <div>Creation and editing currently managed via Django admin or the upload workflow.</div>
+                <div class="text-end small portal-card-muted">
+                    Use the <strong>Add</strong> button in the top bar to upload a new contract.
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Филтри + таблица -->
-    <div class="col-12">
-        <div class="portal-card">
-            <form method="get" class="row g-2 align-items-end mb-3">
-                <div class="col-md-6 col-lg-5">
-                    <label class="form-label text-uppercase text-muted mb-1"
-                           style="font-size:.72rem; letter-spacing:.12em;">
-                        Search
-                    </label>
-                    <input type="text"
-                           name="q"
-                           class="form-control form-control-sm"
-                           placeholder="Contract, vendor, ID, notes..."
-                           value="{{ filter_q }}">
+            {# TOOLBAR: search + filters #}
+            {% if contracts %}
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="input-group input-group-sm" style="max-width: 320px;">
+                            <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
+                                Search
+                            </span>
+                            <input
+                                type="search"
+                                id="contractSearch"
+                                class="form-control"
+                                placeholder="Contract, vendor, ID…">
+                        </div>
+
+                        <select id="contractVendorFilter" class="form-select form-select-sm" style="min-width: 180px;">
+                            <option value="">All vendors</option>
+                        </select>
+
+                        <select id="contractStatusFilter" class="form-select form-select-sm" style="min-width: 160px;">
+                            <option value="">All statuses</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-3 col-lg-3">
-                    <label class="form-label text-uppercase text-muted mb-1"
-                           style="font-size:.72rem; letter-spacing:.12em;">
-                        Status
-                    </label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">All statuses</option>
-                        {% for key, label in status_choices %}
-                            <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-ghost btn-sm w-100">
-                        Apply
-                    </button>
-                    <a href="{% url 'portal:contracts' %}" class="btn btn-outline-secondary btn-sm w-100">
-                        Reset
-                    </a>
-                </div>
-            </form>
+            {% endif %}
 
             {% if contracts %}
                 <div class="table-responsive">
                     <table class="portal-table align-middle">
                         <thead>
-                            <tr>
-                                <th style="width:22%;">Contract</th>
-                                <th style="width:14%;">Vendor</th>
-                                <th style="width:9%;">Start</th>
-                                <th style="width:9%;">End</th>
-
-                                {# NEW #}
-                                <th style="width:9%;">Notice period</th>
-                                <th style="width:10%;">Notice date</th>
-
-                                <th style="width:9%;">Status</th>
-                                <th style="width:10%;">Annual value</th>
-                                <th style="width:8%;">Currency</th>
-                                <th style="width:10%;">Document</th>
-                            </tr>
+                        <tr>
+                            <th style="width: 20%;">Contract</th>
+                            <th style="width: 18%;">Vendor</th>
+                            <th style="width: 12%;">Type</th>
+                            <th style="width: 10%;">Currency</th>
+                            <th style="width: 12%; text-align:right;">Annual value</th>
+                            <th style="width: 12%;">Start</th>
+                            <th style="width: 12%;">End</th>
+                            <th style="width: 12%;">Renewal</th>
+                        </tr>
                         </thead>
-                        <tbody>
-                            {% for c in contracts %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'portal:contract_detail' c.id %}" class="link-inline fw-semibold">
-                                            {{ c.contract_name }}
-                                        </a>
-                                        {% if c.contract_id %}
-                                            <div class="cell-muted small">ID: {{ c.contract_id }}</div>
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ c.vendor.name }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ c.start_date|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ c.end_date|default:"—" }}
-                                    </td>
-
-                                    {# NEW #}
-                                    <td class="cell-muted">
-                                        {% if c.notice_period_days %}
-                                            {{ c.notice_period_days }} days
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if c.notice_date %}
-                                            {{ c.notice_date }}
-                                        {% else %}
-                                            {{ c.effective_notice_date|default:"—" }}
-                                        {% endif %}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {{ c.get_status_display }}
-                                    </td>
-                                    <td class="cell-muted text-end">
-                                        {% if c.annual_value %}
-                                            {{ c.annual_value }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ c.currency|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if c.file %}
-                                            <a href="{{ c.file.url }}" target="_blank" rel="noopener" class="link-inline">
-                                                Open
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                        <tbody id="contractsTableBody">
+                        {% for c in contracts %}
+                            <tr
+                                data-contract-name="{{ c.contract_name|default_if_none:'' }}"
+                                data-vendor="{{ c.vendor.name|default_if_none:'' }}"
+                                data-status="{{ c.status|default_if_none:'' }}"
+                            >
+                                <td>
+                                    <a href="{% url 'portal:contract_detail' c.pk %}" class="link-inline">
+                                        {{ c.contract_name }}
+                                    </a>
+                                    {% if c.contract_id %}
+                                        <div class="cell-muted small">Vendor ID: {{ c.contract_id }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="cell-muted">{{ c.vendor.name }}</td>
+                                <td class="cell-muted">{{ c.get_contract_type_display|default:"—" }}</td>
+                                <td class="cell-muted">{{ c.currency|default:"—" }}</td>
+                                <td class="cell-muted" style="text-align:right;">
+                                    {% if c.annual_value %}{{ c.annual_value }}{% else %}—{% endif %}
+                                </td>
+                                <td class="cell-muted">
+                                    {% if c.start_date %}{{ c.start_date }}{% else %}—{% endif %}
+                                </td>
+                                <td class="cell-muted">
+                                    {% if c.end_date %}{{ c.end_date }}{% else %}—{% endif %}
+                                </td>
+                                <td class="cell-muted">
+                                    {% if c.renewal_date %}{{ c.renewal_date }}{% else %}—{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -152,9 +110,19 @@
                     cost centres and workflow status.
                 </p>
             {% else %}
-                <div class="empty">
-                    No contracts yet for this user. Use the global
-                    <span class="fw-semibold">Add</span> button in the top bar to upload signed agreements.
+                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        No contracts yet for this user. Use the
+                        <span class="fw-semibold">Add</span> button in the top bar to upload signed agreements.
+                    </div>
+                    <div class="mt-2 mt-sm-0">
+                        <button type="button"
+                                class="btn btn-add btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addContractModal">
+                            + Add contract
+                        </button>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -239,7 +207,7 @@
                         </div>
                     </div>
 
-                    {# --- NEW: Notice fields --- #}
+                    {# Notice fields #}
                     <div class="row g-3 mb-3">
                         <div class="col-md-6 col-xl-4">
                             {{ form.notice_period_days.label_tag }}
@@ -277,4 +245,106 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+    const tableBody = document.getElementById('contractsTableBody');
+    const searchInput = document.getElementById('contractSearch');
+    const vendorSelect = document.getElementById('contractVendorFilter');
+    const statusSelect = document.getElementById('contractStatusFilter');
+    const globalAddBtn = document.getElementById('globalAddButton');
+    const modalEl = document.getElementById('addContractModal');
+    const modal =
+        modalEl && window.bootstrap
+            ? new bootstrap.Modal(modalEl)
+            : null;
+
+    let rows = [];
+    const vendors = new Set();
+    const statuses = new Set();
+
+    if (tableBody) {
+        rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Populate filters from existing rows
+        rows.forEach(row => {
+            const v = (row.dataset.vendor || '').trim();
+            const s = (row.dataset.status || '').trim();
+            if (v) vendors.add(v);
+            if (s) statuses.add(s);
+        });
+
+        if (vendorSelect) {
+            Array.from(vendors).sort().forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                vendorSelect.appendChild(opt);
+            });
+        }
+
+        if (statusSelect) {
+            Array.from(statuses).sort().forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                statusSelect.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const query = (searchInput ? searchInput.value : '').toLowerCase();
+            const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
+            const statusFilter = statusSelect ? statusSelect.value.toLowerCase() : '';
+
+            rows.forEach(row => {
+                const contractName = (row.dataset.contractName || '').toLowerCase();
+                const vendor = (row.dataset.vendor || '').toLowerCase();
+                const status = (row.dataset.status || '').toLowerCase();
+                const fullText = (row.textContent || '').toLowerCase();
+
+                const matchesText =
+                    !query ||
+                    contractName.includes(query) ||
+                    vendor.includes(query) ||
+                    fullText.includes(query);
+
+                const matchesVendor =
+                    !vendorFilter || vendor === vendorFilter;
+
+                const matchesStatus =
+                    !statusFilter || status === statusFilter;
+
+                row.style.display = (matchesText && matchesVendor && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
+        if (vendorSelect) {
+            vendorSelect.addEventListener('change', applyFilters);
+        }
+        if (statusSelect) {
+            statusSelect.addEventListener('change', applyFilters);
+        }
+    }
+
+    // Global "Add" button in topbar -> open this page's contract modal
+    if (globalAddBtn && modal) {
+        globalAddBtn.addEventListener('click', function () {
+            modal.show();
+        });
+    }
+
+    // Auto-open modal if the POSTed form returned errors
+    const hasErrors = document.querySelector('#addContractModal .errorlist') !== null;
+    if (hasErrors && modal) {
+        modal.show();
+    }
+})();
+</script>
 {% endblock %}

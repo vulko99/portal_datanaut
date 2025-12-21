@@ -12,7 +12,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
+from django.db.models.deletion import ProtectedError
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -699,7 +700,8 @@ def contract_list(request):
     if request.method == "POST":
         form = ContractUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save(owner=request.user, uploaded_by=request.user)
+            contract = form.save(owner=request.user, uploaded_by=request.user)
+            messages.success(request, f"Contract '{contract.contract_name}' saved successfully.")
             return redirect("portal:contracts")
     else:
         form = ContractUploadForm()
@@ -710,6 +712,9 @@ def contract_list(request):
 
 @login_required
 def contract_detail(request, pk):
+    """
+    Detail + inline edit / delete for a single contract.
+    """
     contract = get_object_or_404(
         Contract.objects.select_related("vendor", "owning_cost_center", "owner"),
         pk=pk,
@@ -722,7 +727,120 @@ def contract_detail(request, pk):
         .order_by("-invoice_date", "-id")
     )
 
-    context = {"contract": contract, "invoices": invoices}
+    vendors = Vendor.objects.all().order_by("name")
+    cost_centers = CostCenter.objects.all().order_by("code")
+
+    if request.method == "POST":
+        action = _as_str(request.POST.get("action")) or "update"
+
+        if action == "delete":
+            name = contract.contract_name
+            contract.delete()
+            messages.success(request, f"Contract '{name}' was deleted.")
+            return redirect("portal:contracts")
+
+        # UPDATE
+        errors: list[str] = []
+
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        contract_name = _as_str(request.POST.get("contract_name"))
+        contract_id = _as_str(request.POST.get("contract_id"))
+        contract_type = _as_str(request.POST.get("contract_type"))
+        entity = _as_str(request.POST.get("entity"))
+        cost_center_id = _as_str(request.POST.get("cost_center_id"))
+        currency = _as_str(request.POST.get("currency"))
+        status = _as_str(request.POST.get("status"))
+        annual_value_raw = _as_str(request.POST.get("annual_value"))
+        start_date_raw = _as_str(request.POST.get("start_date"))
+        end_date_raw = _as_str(request.POST.get("end_date"))
+        renewal_date_raw = _as_str(request.POST.get("renewal_date"))
+        notice_period_raw = _as_str(request.POST.get("notice_period_days"))
+        notice_date_raw = _as_str(request.POST.get("notice_date"))
+        notes = _as_str(request.POST.get("notes"))
+
+        if not contract_name:
+            errors.append("Contract name is required.")
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        owning_cost_center = None
+        if cost_center_id:
+            owning_cost_center = CostCenter.objects.filter(pk=cost_center_id).first()
+            if not owning_cost_center:
+                errors.append("Selected cost centre does not exist.")
+
+        annual_value = None
+        if annual_value_raw:
+            try:
+                annual_value = _parse_decimal(annual_value_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        start_date = None
+        end_date = None
+        renewal_date = None
+        notice_date = None
+        try:
+            if start_date_raw:
+                start_date = _parse_date(start_date_raw)
+            if end_date_raw:
+                end_date = _parse_date(end_date_raw)
+            if renewal_date_raw:
+                renewal_date = _parse_date(renewal_date_raw)
+            if notice_date_raw:
+                notice_date = _parse_date(notice_date_raw)
+        except Exception as e:
+            errors.append(str(e))
+
+        notice_period_days = None
+        if notice_period_raw:
+            try:
+                notice_period_days = _parse_int(notice_period_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        # simple validation for notice vs end_date
+        if notice_date and not end_date:
+            errors.append("If a notice date is set, end date is required.")
+        if notice_date and end_date and notice_date > end_date:
+            errors.append("Notice date must be on or before contract end date.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            contract.vendor = vendor
+            contract.contract_name = contract_name
+            contract.contract_id = contract_id
+            contract.contract_type = contract_type
+            contract.entity = entity
+            contract.owning_cost_center = owning_cost_center
+            contract.currency = currency
+            contract.status = status or contract.status
+            contract.annual_value = annual_value
+            contract.start_date = start_date
+            contract.end_date = end_date
+            contract.renewal_date = renewal_date
+            contract.notice_period_days = notice_period_days
+            contract.notice_date = notice_date
+            contract.notes = notes
+            contract.save()
+
+            messages.success(request, "Contract updated successfully.")
+            return redirect("portal:contract_detail", pk=contract.pk)
+
+    context = {
+        "contract": contract,
+        "invoices": invoices,
+        "vendors": vendors,
+        "cost_centers": cost_centers,
+    }
     return render(request, "portal/contract_detail.html", context)
 
 
@@ -742,7 +860,13 @@ def invoice_list(request):
     if request.method == "POST":
         form = InvoiceUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save(owner=request.user)
+            invoice = form.save(owner=request.user)
+            messages.success(
+                request,
+                f"Invoice '{invoice.invoice_number}' saved for vendor {invoice.vendor.name}.",
+            )
+            if invoice.contract is None:
+                messages.warning(request, "Invoice saved, but no matching contract was linked.")
             return redirect("portal:invoices")
     else:
         form = InvoiceUploadForm()
@@ -753,6 +877,9 @@ def invoice_list(request):
 
 @login_required
 def invoice_detail(request, pk):
+    """
+    Detail + inline edit / delete for single invoice.
+    """
     invoice = get_object_or_404(
         Invoice.objects.select_related("vendor", "contract", "owner"),
         pk=pk,
@@ -776,11 +903,105 @@ def invoice_detail(request, pk):
         .order_by("service__vendor__name", "service__name")
     )
 
+    vendors = Vendor.objects.all().order_by("name")
+    contracts = Contract.objects.filter(owner=request.user).select_related("vendor").order_by("vendor__name", "contract_name")
+
+    if request.method == "POST":
+        action = _as_str(request.POST.get("action")) or "update"
+
+        if action == "delete":
+            number = invoice.invoice_number
+            invoice.delete()
+            messages.success(request, f"Invoice '{number}' was deleted.")
+            return redirect("portal:invoices")
+
+        errors: list[str] = []
+
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        contract_id = _as_str(request.POST.get("contract_id"))
+        invoice_number = _as_str(request.POST.get("invoice_number"))
+        invoice_date_raw = _as_str(request.POST.get("invoice_date"))
+        currency = _as_str(request.POST.get("currency"))
+        total_amount_raw = _as_str(request.POST.get("total_amount"))
+        tax_amount_raw = _as_str(request.POST.get("tax_amount"))
+        period_start_raw = _as_str(request.POST.get("period_start"))
+        period_end_raw = _as_str(request.POST.get("period_end"))
+        notes = _as_str(request.POST.get("notes"))
+
+        if not invoice_number:
+            errors.append("Invoice number is required.")
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        contract = None
+        if contract_id:
+            contract = Contract.objects.filter(owner=request.user, pk=contract_id).first()
+            if not contract:
+                errors.append("Selected contract does not exist.")
+
+        try:
+            invoice_date = _parse_date(invoice_date_raw) if invoice_date_raw else None
+        except Exception as e:
+            errors.append(str(e))
+
+        total_amount = None
+        if total_amount_raw:
+            try:
+                total_amount = _parse_decimal(total_amount_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        tax_amount = None
+        if tax_amount_raw:
+            try:
+                tax_amount = _parse_decimal(tax_amount_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        try:
+            period_start = _parse_date(period_start_raw) if period_start_raw else None
+            period_end = _parse_date(period_end_raw) if period_end_raw else None
+        except Exception as e:
+            errors.append(str(e))
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            invoice.vendor = vendor
+            invoice.contract = contract
+            invoice.invoice_number = invoice_number
+            if invoice_date:
+                invoice.invoice_date = invoice_date
+            invoice.currency = currency or invoice.currency
+            if total_amount is not None:
+                invoice.total_amount = total_amount
+            invoice.tax_amount = tax_amount
+            invoice.period_start = period_start
+            invoice.period_end = period_end
+            invoice.notes = notes
+
+            upload_file = request.FILES.get("file")
+            if upload_file:
+                invoice.file = upload_file
+
+            invoice.save()
+            messages.success(request, "Invoice updated successfully.")
+            return redirect("portal:invoice_detail", pk=invoice.pk)
+
     context = {
         "invoice": invoice,
         "lines": lines,
         "allocation_by_cost_center": allocation_by_cost_center,
         "service_breakdown": service_breakdown,
+        "vendors": vendors,
+        "contracts": contracts,
     }
     return render(request, "portal/invoice_detail.html", context)
 
@@ -794,7 +1015,8 @@ def vendor_list(request):
     if request.method == "POST":
         form = VendorCreateForm(request.POST)
         if form.is_valid():
-            form.save()
+            vendor = form.save()
+            messages.success(request, f"Vendor '{vendor.name}' created successfully.")
             return redirect("portal:vendors")
     else:
         form = VendorCreateForm()
@@ -812,6 +1034,9 @@ def vendor_list(request):
 
 @login_required
 def vendor_detail(request, pk):
+    """
+    Detail + inline edit / delete for vendor.
+    """
     vendor = get_object_or_404(Vendor, pk=pk)
 
     contracts = (
@@ -831,6 +1056,55 @@ def vendor_detail(request, pk):
     total_contract_value = contracts.aggregate(total=Sum("annual_value"))["total"] or 0
     total_invoiced = invoices.aggregate(total=Sum("total_amount"))["total"] or 0
 
+    if request.method == "POST":
+        action = _as_str(request.POST.get("action")) or "update"
+
+        if action == "delete":
+            name = vendor.name
+            try:
+                vendor.delete()
+                messages.success(request, f"Vendor '{name}' was deleted.")
+                return redirect("portal:vendors")
+            except ProtectedError:
+                messages.error(
+                    request,
+                    "This vendor cannot be deleted because there are related contracts or invoices.",
+                )
+
+        else:
+            errors: list[str] = []
+
+            name = _as_str(request.POST.get("name"))
+            vendor_type = _as_str(request.POST.get("vendor_type"))
+            primary_contact_name = _as_str(request.POST.get("primary_contact_name"))
+            primary_contact_email = _as_str(request.POST.get("primary_contact_email"))
+            website = _as_str(request.POST.get("website"))
+            tags = _as_str(request.POST.get("tags"))
+            notes = _as_str(request.POST.get("notes"))
+
+            if not name:
+                errors.append("Vendor name is required.")
+
+            valid_types = {choice[0] for choice in Vendor.VENDOR_TYPE_CHOICES}
+            if vendor_type and vendor_type not in valid_types:
+                errors.append("Invalid vendor type.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+            else:
+                vendor.name = name
+                vendor.vendor_type = vendor_type
+                vendor.primary_contact_name = primary_contact_name
+                vendor.primary_contact_email = primary_contact_email
+                vendor.website = website
+                vendor.tags = tags
+                vendor.notes = notes
+                vendor.save()
+
+                messages.success(request, "Vendor updated successfully.")
+                return redirect("portal:vendor_detail", pk=vendor.pk)
+
     context = {
         "vendor": vendor,
         "contracts": contracts,
@@ -838,6 +1112,7 @@ def vendor_detail(request, pk):
         "services": services,
         "total_contract_value": total_contract_value,
         "total_invoiced": total_invoiced,
+        "vendor_type_choices": Vendor.VENDOR_TYPE_CHOICES,
     }
     return render(request, "portal/vendor_detail.html", context)
 
@@ -848,20 +1123,216 @@ def vendor_detail(request, pk):
 
 @login_required
 def service_list(request):
-    services = Service.objects.select_related("vendor").order_by("vendor__name", "name")
-    return render(request, "portal/services.html", {"services": services})
+    vendors = Vendor.objects.all().order_by("name")
+    add_form_data: dict = {}
+    add_form_has_errors = False
+
+    if request.method == "POST":
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        name = _as_str(request.POST.get("name") or request.POST.get("service_name"))
+        category = _as_str(request.POST.get("category"))
+        billing_frequency = _as_str(request.POST.get("billing_frequency"))
+        default_currency = _as_str(request.POST.get("default_currency"))
+        service_code = _as_str(request.POST.get("service_code"))
+        owner_display = _as_str(request.POST.get("service_owner") or request.POST.get("owner_display"))
+        allocation_split = _as_str(request.POST.get("allocation_split"))
+        list_price_raw = _as_str(request.POST.get("list_price"))
+        contract_ref = _as_str(request.POST.get("contract_ref"))
+
+        add_form_data = {
+            "vendor_id": vendor_id,
+            "name": name,
+            "category": category,
+            "billing_frequency": billing_frequency,
+            "default_currency": default_currency,
+            "service_code": service_code,
+            "owner_display": owner_display,
+            "allocation_split": allocation_split,
+            "list_price": list_price_raw,
+            "contract_ref": contract_ref,
+        }
+
+        errors: list[str] = []
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        if not name:
+            errors.append("Service name is required.")
+
+        list_price = None
+        if list_price_raw:
+            try:
+                list_price = _parse_decimal(list_price_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        primary_contract = None
+        contract_not_found = False
+        if contract_ref and vendor:
+            contract_filters = Q(contract_name__iexact=contract_ref) | Q(contract_id__iexact=contract_ref)
+            try:
+                ref_pk = int(contract_ref)
+                contract_filters |= Q(pk=ref_pk)
+            except (TypeError, ValueError):
+                pass
+
+            primary_contract = (
+                Contract.objects.filter(owner=request.user, vendor=vendor)
+                .filter(contract_filters)
+                .first()
+            )
+
+            if primary_contract is None:
+                contract_not_found = True
+
+        if vendor and name:
+            exists = Service.objects.filter(vendor=vendor, name__iexact=name).exists()
+            if exists:
+                errors.append("A service with this name already exists for the selected vendor.")
+
+        if errors:
+            add_form_has_errors = True
+            for e in errors:
+                messages.error(request, e)
+        else:
+            Service.objects.create(
+                vendor=vendor,
+                name=name,
+                category=category or "",
+                service_code=service_code or "",
+                default_currency=default_currency or "",
+                default_billing_frequency=billing_frequency or "",
+                owner_display=owner_display or "",
+                allocation_split=allocation_split or "",
+                list_price=list_price,
+                primary_contract=primary_contract,
+            )
+            messages.success(request, "Service created successfully.")
+            if contract_not_found:
+                messages.warning(request, "Service saved, but no matching contract was linked.")
+            return redirect("portal:services")
+
+    services = (
+        Service.objects.select_related("vendor", "primary_contract")
+        .order_by("vendor__name", "name")
+    )
+    context = {
+        "services": services,
+        "vendors": vendors,
+        "add_form_data": add_form_data,
+        "add_form_has_errors": add_form_has_errors,
+    }
+    return render(request, "portal/services.html", context)
 
 
 @login_required
 def service_detail(request, pk: int):
     """
-    Additive: service detail page.
-    No ownership filter (services are global in your current model usage).
+    Service detail + inline edit / delete.
+    Services are global across portal.
     """
-    service = get_object_or_404(Service.objects.select_related("vendor"), pk=pk)
+    service = get_object_or_404(Service.objects.select_related("vendor", "primary_contract"), pk=pk)
+
+    vendors = Vendor.objects.all().order_by("name")
+    contracts = Contract.objects.filter(owner=request.user, vendor=service.vendor).order_by("contract_name")
+
+    related_contracts = (
+        service.contracts.filter(owner=request.user)
+        .select_related("vendor")
+        .order_by("vendor__name", "contract_name")
+    )
+    invoice_lines = (
+        service.invoice_lines.select_related("invoice", "invoice__vendor")
+        .order_by("-invoice__invoice_date", "-invoice__id")[:10]
+    )
+
+    if request.method == "POST":
+        action = _as_str(request.POST.get("action")) or "update"
+
+        if action == "delete":
+            name = str(service)
+            service.delete()
+            messages.success(request, f"Service '{name}' was deleted.")
+            return redirect("portal:services")
+
+        errors: list[str] = []
+
+        vendor_id = _as_str(request.POST.get("vendor_id"))
+        name = _as_str(request.POST.get("name"))
+        category = _as_str(request.POST.get("category"))
+        billing_frequency = _as_str(request.POST.get("billing_frequency"))
+        default_currency = _as_str(request.POST.get("default_currency"))
+        service_code = _as_str(request.POST.get("service_code"))
+        owner_display = _as_str(request.POST.get("owner_display"))
+        allocation_split = _as_str(request.POST.get("allocation_split"))
+        list_price_raw = _as_str(request.POST.get("list_price"))
+        primary_contract_id = _as_str(request.POST.get("primary_contract_id"))
+
+        if not name:
+            errors.append("Service name is required.")
+
+        vendor = None
+        if not vendor_id:
+            errors.append("Vendor is required.")
+        else:
+            vendor = Vendor.objects.filter(pk=vendor_id).first()
+            if not vendor:
+                errors.append("Selected vendor does not exist.")
+
+        list_price = None
+        if list_price_raw:
+            try:
+                list_price = _parse_decimal(list_price_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+        primary_contract = None
+        if primary_contract_id:
+            primary_contract = Contract.objects.filter(owner=request.user, pk=primary_contract_id).first()
+            if not primary_contract:
+                errors.append("Selected primary contract does not exist.")
+
+        # uniqueness check per vendor + name
+        if vendor and name:
+            exists = (
+                Service.objects.filter(vendor=vendor, name__iexact=name)
+                .exclude(pk=service.pk)
+                .exists()
+            )
+            if exists:
+                errors.append("A service with this name already exists for the selected vendor.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            service.vendor = vendor
+            service.name = name
+            service.category = category or ""
+            service.default_billing_frequency = billing_frequency or ""
+            service.default_currency = default_currency or ""
+            service.service_code = service_code or ""
+            service.owner_display = owner_display or ""
+            service.allocation_split = allocation_split or ""
+            service.list_price = list_price
+            service.primary_contract = primary_contract
+            service.save()
+
+            messages.success(request, "Service updated successfully.")
+            return redirect("portal:service_detail", pk=service.pk)
 
     context = {
         "service": service,
+        "vendors": vendors,
+        "contracts": contracts,
+        "related_contracts": related_contracts,
+        "invoice_lines": invoice_lines,
     }
     return render(request, "portal/service_detail.html", context)
 
@@ -869,8 +1340,7 @@ def service_detail(request, pk: int):
 @login_required
 def service_create(request):
     """
-    Additive: create service via portal without touching admin.
-    Uses a simple POST parser so we don't need to change your existing forms.py right now.
+    Create service via portal.
     """
     vendors = Vendor.objects.all().order_by("name")
 
@@ -905,7 +1375,7 @@ def service_create(request):
             except Exception as e:
                 errors.append(str(e))
 
-        # Uniqueness heuristic (matches importer behavior): (vendor, name case-insensitive)
+        # Uniqueness heuristic: (vendor, name case-insensitive)
         if vendor and name:
             exists = Service.objects.filter(vendor=vendor, name__iexact=name).exists()
             if exists:
@@ -964,7 +1434,8 @@ def service_create(request):
 @login_required
 def service_edit(request, pk: int):
     """
-    Additive: edit service via portal.
+    Legacy endpoint – keeping it in case ти трябва,
+    но детайлната страница вече покрива edit.
     """
     service = get_object_or_404(Service.objects.select_related("vendor"), pk=pk)
     vendors = Vendor.objects.all().order_by("name")
@@ -1104,6 +1575,199 @@ def users_list(request):
     return render(request, "portal/users.html", {"users": users_qs})
 
 
+@login_required
+def user_detail(request, pk: int):
+    """
+    Detail + inline edit / delete за отделен user.
+    """
+    user_obj = get_object_or_404(
+        User.objects.select_related("profile", "profile__cost_center", "profile__manager"),
+        pk=pk,
+    )
+    profile, _ = UserProfile.objects.get_or_create(user=user_obj)
+
+    cost_centers = CostCenter.objects.all().order_by("code")
+    managers = User.objects.exclude(pk=user_obj.pk).order_by("username")
+
+    if request.method == "POST":
+        action = _as_str(request.POST.get("action")) or "update"
+
+        if action == "delete":
+            if user_obj == request.user:
+                messages.error(request, "You cannot delete the currently logged-in user.")
+            else:
+                username = user_obj.username
+                user_obj.delete()
+                messages.success(request, f"User '{username}' was deleted.")
+            return redirect("portal:users")
+
+        # UPDATE
+        errors: list[str] = []
+
+        username = _as_str(request.POST.get("username"))
+        email = _as_str(request.POST.get("email"))
+        first_name = _as_str(request.POST.get("first_name"))
+        last_name = _as_str(request.POST.get("last_name"))
+        is_active_flag = request.POST.get("is_active") == "on"
+
+        full_name = _as_str(request.POST.get("full_name"))
+        cost_center_id = _as_str(request.POST.get("cost_center_id"))
+        manager_id = _as_str(request.POST.get("manager_id"))
+        location = _as_str(request.POST.get("location"))
+        legal_entity = _as_str(request.POST.get("legal_entity"))
+        phone_number = _as_str(request.POST.get("phone_number"))
+
+        if not username:
+            errors.append("Username is required.")
+        else:
+            if (
+                User.objects.exclude(pk=user_obj.pk)
+                .filter(username__iexact=username)
+                .exists()
+            ):
+                errors.append("Another user with this username already exists.")
+
+        if email:
+            if (
+                User.objects.exclude(pk=user_obj.pk)
+                .filter(email__iexact=email)
+                .exists()
+            ):
+                errors.append("Another user with this email already exists.")
+
+        cost_center = None
+        if cost_center_id:
+            cost_center = CostCenter.objects.filter(pk=cost_center_id).first()
+            if not cost_center:
+                errors.append("Selected cost centre does not exist.")
+
+        manager = None
+        if manager_id:
+            manager = User.objects.filter(pk=manager_id).first()
+            if not manager:
+                errors.append("Selected manager does not exist.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            user_obj.username = username
+            user_obj.email = email
+            user_obj.first_name = first_name
+            user_obj.last_name = last_name
+            user_obj.is_active = is_active_flag
+            user_obj.save()
+
+            profile.full_name = full_name
+            profile.cost_center = cost_center
+            profile.manager = manager
+            profile.location = location
+            profile.legal_entity = legal_entity
+            profile.phone_number = phone_number
+            profile.save()
+
+            messages.success(request, "User updated successfully.")
+            return redirect("portal:user_detail", pk=user_obj.pk)
+
+    return render(
+        request,
+        "portal/user_detail.html",
+        {
+            "user_obj": user_obj,
+            "cost_centers": cost_centers,
+            "managers": managers,
+        },
+    )
+
+# ----------
+# SEARCH (global)
+# ----------
+
+@login_required
+def global_search(request):
+    """
+    Global search across vendors, services, contracts, invoices and users.
+    """
+    query = _as_str(request.GET.get("q"))
+
+    vendors = []
+    services = []
+    contracts = []
+    invoices = []
+    users = []
+
+    if query:
+        vendors = (
+            Vendor.objects.filter(
+                Q(name__icontains=query)
+                | Q(tags__icontains=query)
+                | Q(primary_contact_name__icontains=query)
+                | Q(primary_contact_email__icontains=query)
+            )
+            .order_by("name")[:25]
+        )
+
+        services = (
+            Service.objects.select_related("vendor")
+            .filter(
+                Q(name__icontains=query)
+                | Q(category__icontains=query)
+                | Q(service_code__icontains=query)
+                | Q(vendor__name__icontains=query)
+            )
+            .order_by("vendor__name", "name")[:25]
+        )
+
+        contracts = (
+            Contract.objects.select_related("vendor", "owning_cost_center")
+            .filter(owner=request.user)
+            .filter(
+                Q(contract_name__icontains=query)
+                | Q(contract_id__icontains=query)
+                | Q(vendor__name__icontains=query)
+            )
+            .order_by("-start_date", "-created_at")[:25]
+        )
+
+        invoices = (
+            Invoice.objects.select_related("vendor", "contract")
+            .filter(owner=request.user)
+            .filter(
+                Q(invoice_number__icontains=query)
+                | Q(vendor__name__icontains=query)
+                | Q(contract__contract_name__icontains=query)
+            )
+            .order_by("-invoice_date", "-id")[:25]
+        )
+
+        users = (
+            User.objects.select_related("profile", "profile__cost_center")
+            .filter(
+                Q(username__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(email__icontains=query)
+                | Q(profile__full_name__icontains=query)
+            )
+            .order_by("username")[:25]
+        )
+
+    has_results = bool(query and (vendors or services or contracts or invoices or users))
+
+    return render(
+        request,
+        "portal/search_results.html",
+        {
+            "query": query,
+            "vendors": vendors,
+            "services": services,
+            "contracts": contracts,
+            "invoices": invoices,
+            "users": users,
+            "has_results": has_results,
+        },
+    )
+
 # ----------
 # DATA HUB
 # ----------
@@ -1199,13 +1863,117 @@ def data_template(request, entity: str):
 
 
 # ----------
-# USAGE (placeholder)
+# USAGE
 # ----------
 
 @login_required
 def usage_overview(request):
+    # демо екрана с сигналите, dormant users и overlapping products
     return render(request, "portal/usage.html")
 
+
+@login_required
+def usage_invoices(request):
+    """
+    Invoice inventory в Usage – показва същата таблица като Invoices list,
+    но менюто вляво е Usage inventory.
+    """
+    return invoice_list(request)
+
+
+@login_required
+def usage_contracts(request):
+    """
+    Contract inventory в Usage.
+    """
+    return contract_list(request)
+
+
+@login_required
+def usage_vendors(request):
+    """
+    Vendor inventory в Usage.
+    """
+    return vendor_list(request)
+
+
+@login_required
+def usage_users(request):
+    """
+    User inventory в Usage.
+    """
+    return users_list(request)
+
+# ----------
+# USAGE INVENTORY VIEWS
+# ----------
+
+@login_required
+def usage_invoices(request):
+    """
+    Simple invoice inventory table for Usage section.
+    """
+    invoices = (
+        Invoice.objects.filter(owner=request.user)
+        .select_related("vendor")
+        .order_by("-invoice_date", "-id")
+    )
+    return render(request, "portal/usage_invoices.html", {"invoices": invoices})
+
+
+@login_required
+def usage_contract(request):
+    """
+    Contract inventory table for Usage section.
+    """
+    contracts = (
+        Contract.objects.filter(owner=request.user)
+        .select_related("vendor")
+        .order_by("-start_date", "-created_at")
+    )
+    return render(request, "portal/usage_contract.html", {"contracts": contracts})
+
+
+@login_required
+def usage_vendors(request):
+    """
+    Vendor inventory view, showing linkage към договори и фактури.
+    """
+    vendors = (
+        Vendor.objects
+        .annotate(
+            contract_count=Count(
+                "contracts",
+                filter=Q(contracts__owner=request.user),
+                distinct=True,
+            ),
+            invoice_count=Count(
+                "invoices",
+                filter=Q(invoices__owner=request.user),
+                distinct=True,
+            ),
+        )
+        .order_by("name")
+    )
+    return render(request, "portal/usage_vendors.html", {"vendors": vendors})
+
+
+@login_required
+def usage_users(request):
+    """
+    User inventory – базова таблица с всички потребители.
+    """
+    # гарантираме, че всеки има профил
+    users_qs = get_user_model().objects.all().order_by("username")
+    for u in users_qs:
+        UserProfile.objects.get_or_create(user=u)
+
+    users_qs = (
+        get_user_model().objects
+        .select_related("profile", "profile__cost_center")
+        .order_by("username")
+    )
+    return render(request, "portal/usage_users.html", {"users": users_qs})
 
 # ----------
 # LOGOUT HELPER

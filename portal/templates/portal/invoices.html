@@ -1,130 +1,131 @@
 {% extends "portal/base_portal.html" %}
 
-{% block title_suffix %} · Invoicing{% endblock %}
+{% block title_suffix %} · Invoices{% endblock %}
 
 {% block content %}
 <div class="row g-3">
     <div class="col-12">
         <div class="portal-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="section-eyebrow mb-1">Inventory</div>
-                    <h1 class="section-title mb-1">Invoicing</h1>
-                    <p class="section-subtitle mb-0">
-                        Invoice list (number, date, amount, currency). In a full deployment this view feeds your
-                        spend analytics, budget vs. actuals and GL reconciliations.
-                    </p>
-                </div>
-                <div class="text-end portal-card-muted small">
-                    <div>Total invoices: <span class="fw-semibold">{{ invoices|length }}</span></div>
+            <div class="section-header mb-2">
+                <div class="section-eyebrow">Invoicing</div>
+                <h1 class="section-title mb-0">Invoices</h1>
+                <p class="section-subtitle mb-0">
+                    Upload invoices to keep a record of billed amounts and link them to contracts.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-3">
+                <div class="d-flex flex-wrap gap-3">
                     <div>
-                        Total amount:
-                        <span class="fw-semibold">
-                            {{ total_amount|default:"0.00" }}
-                        </span>
+                        <div class="metric-label">Total invoices</div>
+                        <div class="metric-value">
+                            {{ invoices|length }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-label">Total amount</div>
+                        <div class="metric-value">
+                            {% if total_amount %}{{ total_amount }}{% else %}—{% endif %}
+                        </div>
                     </div>
                 </div>
+                <div class="text-end small portal-card-muted">
+                    Use the <strong>Add</strong> button in the top bar to upload a new invoice.
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Филтри + таблица -->
-    <div class="col-12">
-        <div class="portal-card">
-            <form method="get" class="row g-2 align-items-end mb-3">
-                <div class="col-md-6 col-lg-5">
-                    <label class="form-label text-uppercase text-muted mb-1"
-                           style="font-size:.72rem; letter-spacing:.12em;">
-                        Search
-                    </label>
-                    <input type="text"
-                           name="q"
-                           class="form-control form-control-sm"
-                           placeholder="Invoice №, vendor, contract..."
-                           value="{{ filter_q }}">
+            {# TOOLBAR: search + filters #}
+            {% if invoices %}
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="input-group input-group-sm" style="max-width: 320px;">
+                            <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
+                                Search
+                            </span>
+                            <input
+                                type="search"
+                                id="invoiceSearch"
+                                class="form-control"
+                                placeholder="Invoice, vendor, contract…">
+                        </div>
+
+                        <select id="invoiceVendorFilter" class="form-select form-select-sm" style="min-width: 180px;">
+                            <option value="">All vendors</option>
+                        </select>
+
+                        <select id="invoiceContractFilter" class="form-select form-select-sm" style="min-width: 180px;">
+                            <option value="">All contracts</option>
+                        </select>
+
+                        <select id="invoiceCurrencyFilter" class="form-select form-select-sm" style="min-width: 120px;">
+                            <option value="">All currencies</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-3 col-lg-3">
-                    <label class="form-label text-uppercase text-muted mb-1"
-                           style="font-size:.72rem; letter-spacing:.12em;">
-                        Year
-                    </label>
-                    <select name="year" class="form-select form-select-sm">
-                        <option value="">All years</option>
-                        {% for y in year_choices %}
-                            <option value="{{ y }}" {% if filter_year|stringformat:'s' == y|stringformat:'s' %}selected{% endif %}>
-                                {{ y }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-ghost btn-sm w-100">
-                        Apply
-                    </button>
-                    <a href="{% url 'portal:invoices' %}" class="btn btn-outline-secondary btn-sm w-100">
-                        Reset
-                    </a>
-                </div>
-            </form>
+            {% endif %}
 
             {% if invoices %}
                 <div class="table-responsive">
                     <table class="portal-table align-middle">
                         <thead>
-                            <tr>
-                                <th style="width:18%;">Invoice №</th>
-                                <th style="width:14%;">Invoice date</th>
-                                <th style="width:22%;">Vendor</th>
-                                <th style="width:22%;">Contract</th>
-                                <th style="width:14%;">Amount</th>
-                                <th style="width:10%;">Currency</th>
-                                <th style="width:10%;">Document</th>
-                            </tr>
+                        <tr>
+                            <th style="width: 18%;">Invoice</th>
+                            <th style="width: 18%;">Vendor</th>
+                            <th style="width: 14%;">Contract</th>
+                            <th style="width: 10%;">Date</th>
+                            <th style="width: 8%;">Currency</th>
+                            <th style="width: 12%; text-align:right;">Total</th>
+                            <th style="width: 8%;">Tax</th>
+                            <th style="width: 12%;">Period</th>
+                        </tr>
                         </thead>
-                        <tbody>
-                            {% for i in invoices %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'portal:invoice_detail' i.pk %}" class="link-inline">
-                                            <strong>{{ i.invoice_number }}</strong>
-                                        </a>
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ i.invoice_date }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        <a href="{% url 'portal:vendor_detail' i.vendor.pk %}" class="link-inline">
-                                            {{ i.vendor.name }}
-                                        </a>
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if i.contract %}
-                                            <a href="{% url 'portal:contract_detail' i.contract.pk %}" class="link-inline">
-                                                {{ i.contract.contract_name }}
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted text-end">
-                                        {{ i.total_amount }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ i.currency }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        <a href="{% url 'portal:invoice_detail' i.pk %}" class="link-inline">
-                                            Open
-                                        </a>
-                                        {% if i.file %}
-                                            <span class="cell-muted">·</span>
+                        <tbody id="invoicesTableBody">
+                        {% for i in invoices %}
+                            <tr
+                                data-invoice-number="{{ i.invoice_number|default_if_none:'' }}"
+                                data-vendor="{{ i.vendor.name|default_if_none:'' }}"
+                                data-contract="{% if i.contract %}{{ i.contract.contract_name }}{% endif %}"
+                                data-currency="{{ i.currency|default_if_none:'' }}"
+                            >
+                                <td>
+                                    <a href="{% url 'portal:invoice_detail' i.pk %}" class="link-table">
+                                        {{ i.invoice_number }}
+                                    </a>
+                                    {% if i.file %}
+                                        <div class="cell-muted small">
                                             <a href="{{ i.file.url }}" target="_blank" rel="noopener" class="link-inline">
                                                 PDF
                                             </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="cell-muted">{{ i.vendor.name }}</td>
+                                <td class="cell-muted">
+                                    {% if i.contract %}
+                                        {{ i.contract.contract_name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="cell-muted">{{ i.invoice_date }}</td>
+                                <td class="cell-muted">{{ i.currency }}</td>
+                                <td class="cell-muted" style="text-align:right;">{{ i.total_amount }}</td>
+                                <td class="cell-muted">
+                                    {% if i.tax_amount %}{{ i.tax_amount }}{% else %}—{% endif %}
+                                </td>
+                                <td class="cell-muted">
+                                    {% if i.period_start and i.period_end %}
+                                        {{ i.period_start }} → {{ i.period_end }}
+                                    {% elif i.period_start %}
+                                        From {{ i.period_start }}
+                                    {% elif i.period_end %}
+                                        Until {{ i.period_end }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -134,9 +135,19 @@
                     links back to the contract record.
                 </p>
             {% else %}
-                <div class="empty">
-                    No invoices yet for this user. Use the global
-                    <span class="fw-semibold">Add</span> button in the top bar to upload invoice PDFs.
+                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        No invoices yet for this user. Use the
+                        <span class="fw-semibold">Add</span> button in the top bar to upload invoice PDFs.
+                    </div>
+                    <div class="mt-2 mt-sm-0">
+                        <button type="button"
+                                class="btn btn-add btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addInvoiceModal">
+                            + Add invoice
+                        </button>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -166,10 +177,12 @@
                         <div class="col-md-6">
                             {{ form.vendor.label_tag }}
                             {{ form.vendor }}
+                            {{ form.vendor.errors }}
                         </div>
                         <div class="col-md-6">
                             {{ form.contract.label_tag }}
                             {{ form.contract }}
+                            {{ form.contract.errors }}
                         </div>
                     </div>
 
@@ -177,14 +190,17 @@
                         <div class="col-md-4">
                             {{ form.invoice_number.label_tag }}
                             {{ form.invoice_number }}
+                            {{ form.invoice_number.errors }}
                         </div>
                         <div class="col-md-4">
                             {{ form.invoice_date.label_tag }}
                             {{ form.invoice_date }}
+                            {{ form.invoice_date.errors }}
                         </div>
                         <div class="col-md-4">
                             {{ form.currency.label_tag }}
                             {{ form.currency }}
+                            {{ form.currency.errors }}
                         </div>
                     </div>
 
@@ -192,14 +208,17 @@
                         <div class="col-md-4">
                             {{ form.total_amount.label_tag }}
                             {{ form.total_amount }}
+                            {{ form.total_amount.errors }}
                         </div>
                         <div class="col-md-4">
                             {{ form.tax_amount.label_tag }}
                             {{ form.tax_amount }}
+                            {{ form.tax_amount.errors }}
                         </div>
                         <div class="col-md-4">
                             {{ form.file.label_tag }}
                             {{ form.file }}
+                            {{ form.file.errors }}
                         </div>
                     </div>
 
@@ -207,10 +226,12 @@
                         <div class="col-md-6">
                             {{ form.period_start.label_tag }}
                             {{ form.period_start }}
+                            {{ form.period_start.errors }}
                         </div>
                         <div class="col-md-6">
                             {{ form.period_end.label_tag }}
                             {{ form.period_end }}
+                            {{ form.period_end.errors }}
                         </div>
                     </div>
 
@@ -223,4 +244,131 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+    const tableBody = document.getElementById('invoicesTableBody');
+    const searchInput = document.getElementById('invoiceSearch');
+    const vendorSelect = document.getElementById('invoiceVendorFilter');
+    const contractSelect = document.getElementById('invoiceContractFilter');
+    const currencySelect = document.getElementById('invoiceCurrencyFilter');
+    const globalAddBtn = document.getElementById('globalAddButton');
+    const modalEl = document.getElementById('addInvoiceModal');
+    const modal =
+        modalEl && window.bootstrap
+            ? new bootstrap.Modal(modalEl)
+            : null;
+
+    let rows = [];
+    const vendors = new Set();
+    const contracts = new Set();
+    const currencies = new Set();
+
+    if (tableBody) {
+        rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Попълваме филтрите от наличните редове
+        rows.forEach(row => {
+            const v = (row.dataset.vendor || '').trim();
+            const c = (row.dataset.contract || '').trim();
+            const cur = (row.dataset.currency || '').trim();
+            if (v) vendors.add(v);
+            if (c) contracts.add(c);
+            if (cur) currencies.add(cur);
+        });
+
+        if (vendorSelect) {
+            Array.from(vendors).sort().forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                vendorSelect.appendChild(opt);
+            });
+        }
+
+        if (contractSelect) {
+            Array.from(contracts).sort().forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                contractSelect.appendChild(opt);
+            });
+        }
+
+        if (currencySelect) {
+            Array.from(currencies).sort().forEach(cur => {
+                const opt = document.createElement('option');
+                opt.value = cur;
+                opt.textContent = cur;
+                currencySelect.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const query = (searchInput ? searchInput.value : '').toLowerCase();
+            const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
+            const contractFilter = contractSelect ? contractSelect.value.toLowerCase() : '';
+            const currencyFilter = currencySelect ? currencySelect.value.toLowerCase() : '';
+
+            rows.forEach(row => {
+                const invoiceNumber = (row.dataset.invoiceNumber || '').toLowerCase();
+                const vendor = (row.dataset.vendor || '').toLowerCase();
+                const contract = (row.dataset.contract || '').toLowerCase();
+                const currency = (row.dataset.currency || '').toLowerCase();
+                const fullText = (row.textContent || '').toLowerCase();
+
+                const matchesText =
+                    !query ||
+                    invoiceNumber.includes(query) ||
+                    vendor.includes(query) ||
+                    contract.includes(query) ||
+                    fullText.includes(query);
+
+                const matchesVendor =
+                    !vendorFilter || vendor === vendorFilter;
+
+                const matchesContract =
+                    !contractFilter || contract === contractFilter;
+
+                const matchesCurrency =
+                    !currencyFilter || currency === currencyFilter;
+
+                row.style.display =
+                    (matchesText && matchesVendor && matchesContract && matchesCurrency)
+                        ? ''
+                        : 'none';
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
+        if (vendorSelect) {
+            vendorSelect.addEventListener('change', applyFilters);
+        }
+        if (contractSelect) {
+            contractSelect.addEventListener('change', applyFilters);
+        }
+        if (currencySelect) {
+            currencySelect.addEventListener('change', applyFilters);
+        }
+    }
+
+    // Глобалният Add бутон в topbar -> отваря този invoice modal
+    if (globalAddBtn && modal) {
+        globalAddBtn.addEventListener('click', function () {
+            modal.show();
+        });
+    }
+
+    // Auto-open modal ако POST-натата форма е върнала грешки
+    const hasErrors = document.querySelector('#addInvoiceModal .errorlist') !== null;
+    if (hasErrors && modal) {
+        modal.show();
+    }
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,31 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage – Contract inventory{% endblock %}
+
+{% block content %}
+<div class="portal-card">
+  <div class="section-eyebrow mb-1">Dashboards · Contracts</div>
+  <h1 class="section-title mb-1">Contract inventory</h1>
+  <p class="section-subtitle mb-3">
+    All contracts with their vendor, currency and annual value for quick economic view.
+  </p>
+
+  <div class="table-responsive">
+    <table class="portal-table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 30%;">Contract</th>
+          <th style="width: 26%;">Vendor</th>
+          <th style="width: 14%;">Currency</th>
+          <th style="width: 30%;">Annual value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-muted" colspan="4">No contracts in scope yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

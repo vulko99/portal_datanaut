@@ -17,7 +17,7 @@
                         <a href="{% url 'portal:vendor_detail' service.vendor.pk %}" class="link-inline">
                             {{ service.vendor.name }}
                         </a>
-                        {% if service.category %} · {{ service.get_category_display }}{% endif %}
+                        {% if service.category %} · {{ service.category }}{% endif %}
                     </p>
                 </div>
 
@@ -25,79 +25,196 @@
                     <div class="metric-label mb-1">Primary contract</div>
                     <div class="metric-value" style="font-size:1rem;">
                         {% if service.primary_contract %}
-                            <a href="{% url 'portal:contract_detail' service.primary_contract.pk %}" class="link-inline">
+                            <a href="{% url 'portal:contract_detail' service.primary_contract.pk %}"
+                               class="link-inline">
                                 {{ service.primary_contract.contract_name }}
                             </a>
                         {% else %}
                             —
                         {% endif %}
                     </div>
-
                     <div class="portal-card-muted small mt-2">
-                        Billing: {{ service.get_default_billing_frequency_display|default:"—" }}<br>
-                        Currency: {{ service.default_currency|default:"—" }}
+                        Billing:
+                        {{ service.default_billing_frequency|default:"—" }}<br>
+                        Currency:
+                        {{ service.default_currency|default:"—" }}
                     </div>
 
-                    <div class="mt-3">
+                    <div class="d-flex justify-content-end flex-wrap gap-2 mt-3">
                         <a href="{% url 'portal:services' %}" class="btn btn-ghost btn-sm">
                             Back to services
                         </a>
+
+                        <button type="button" id="service-cancel-btn"
+                                class="btn btn-ghost btn-sm d-none">
+                            Cancel
+                        </button>
+
+                        <button type="button" id="service-edit-btn"
+                                class="btn btn-add btn-sm">
+                            Edit
+                        </button>
+
+                        <button type="button" id="service-delete-open"
+                                class="btn btn-ghost btn-sm">
+                            Delete
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- LEFT: EDIT FORM -->
-    <div class="col-lg-6">
+    <!-- LEFT: VIEW MODE -->
+    <div class="col-lg-7" id="service-view-mode">
         <div class="portal-card h-100">
-            <h6 class="mb-2">Edit service</h6>
+            <h6 class="mb-2">Service detail</h6>
             <p class="portal-card-muted mb-3">
-                Update the core attributes of this service. Changes are saved immediately on submit.
+                Core attributes of this service.
             </p>
 
-            <form method="post" class="small">
-                {% csrf_token %}
-                <div class="row g-3">
+            <div class="row gy-3">
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Service name</div>
+                    <div>{{ service.name }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Vendor</div>
+                    <div>{{ service.vendor.name }}</div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Category</div>
+                    <div>{{ service.category|default:"—" }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Billing frequency</div>
+                    <div>{{ service.default_billing_frequency|default:"—" }}</div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Default currency</div>
+                    <div>{{ service.default_currency|default:"—" }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Service code / SKU</div>
+                    <div>{{ service.service_code|default:"—" }}</div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Owner</div>
+                    <div>{{ service.owner_display|default:"—" }}</div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Primary contract</div>
+                    <div>
+                        {% if service.primary_contract %}
+                            <a href="{% url 'portal:contract_detail' service.primary_contract.pk %}"
+                               class="link-inline">
+                                {{ service.primary_contract.contract_name }}
+                            </a>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">List price</div>
+                    <div>
+                        {% if service.list_price %}
+                            {{ service.list_price }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="metric-label mb-1">Allocation split</div>
+                    <div>{{ service.allocation_split|default:"—" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEFT: EDIT MODE -->
+    <div class="col-lg-7 d-none" id="service-edit-mode">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update">
+            <div class="portal-card h-100">
+                <h6 class="mb-2">Service detail</h6>
+                <p class="portal-card-muted mb-3">
+                    Update the core attributes of this service. Use Save changes to apply.
+                </p>
+
+                <div class="row g-3 small">
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Service name</label>
-                        {{ form.name }}
+                        <input type="text" name="name" class="form-control form-control-sm"
+                               value="{{ service.name }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Vendor</label>
-                        {{ form.vendor }}
+                        <select name="vendor_id" class="form-select form-select-sm">
+                            <option value="">---------</option>
+                            {% for v in vendors %}
+                                <option value="{{ v.pk }}" {% if v.pk == service.vendor_id %}selected{% endif %}>
+                                    {{ v.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Category</label>
-                        {{ form.category }}
+                        <input type="text" name="category" class="form-control form-control-sm"
+                               value="{{ service.category }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Billing frequency</label>
-                        {{ form.default_billing_frequency }}
+                        <input type="text" name="billing_frequency" class="form-control form-control-sm"
+                               value="{{ service.default_billing_frequency }}">
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Default currency</label>
-                        {{ form.default_currency }}
+                        <input type="text" name="default_currency" class="form-control form-control-sm"
+                               value="{{ service.default_currency }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Service code / SKU</label>
-                        {{ form.service_code }}
+                        <input type="text" name="service_code" class="form-control form-control-sm"
+                               value="{{ service.service_code }}">
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Owner</label>
-                        {{ form.owner_display }}
+                        <input type="text" name="owner_display" class="form-control form-control-sm"
+                               value="{{ service.owner_display }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Primary contract</label>
-                        {{ form.primary_contract }}
+                        <select name="primary_contract_id" class="form-select form-select-sm">
+                            <option value="">---------</option>
+                            {% for c in contracts %}
+                                <option value="{{ c.pk }}"
+                                    {% if service.primary_contract_id == c.pk %}selected{% endif %}>
+                                    {{ c.contract_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">List price</label>
-                        {{ form.list_price }}
+                        <input type="text" name="list_price" class="form-control form-control-sm"
+                               value="{{ service.list_price|default_if_none:'' }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label form-label-sm">Allocation split</label>
-                        {{ form.allocation_split }}
+                        <input type="text" name="allocation_split" class="form-control form-control-sm"
+                               value="{{ service.allocation_split }}">
                     </div>
                 </div>
 
@@ -106,25 +223,21 @@
                         Save changes
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
-    <!-- RIGHT: RELATED INFO -->
-    <div class="col-lg-6 d-flex flex-column gap-3">
+    <!-- RIGHT: RELATED CONTRACTS / INVOICE LINES -->
+    <div class="col-lg-5 d-flex flex-column gap-3">
         <div class="portal-card">
             <h6 class="mb-2">Contracts linked to this service</h6>
             {% if related_contracts %}
-                <ul class="small mb-0">
+                <ul class="mb-0 small">
                     {% for c in related_contracts %}
                         <li>
                             <a href="{% url 'portal:contract_detail' c.pk %}" class="link-inline">
                                 {{ c.contract_name }}
                             </a>
-                            <span class="portal-card-muted">
-                                · {{ c.vendor.name }}
-                                {% if c.start_date %} · {{ c.start_date }}{% endif %}
-                            </span>
                         </li>
                     {% endfor %}
                 </ul>
@@ -139,42 +252,30 @@
                 <div class="table-responsive">
                     <table class="portal-table align-middle">
                         <thead>
-                            <tr>
-                                <th style="width:34%;">Invoice</th>
-                                <th style="width:34%;">Vendor</th>
-                                <th style="width:16%;">Date</th>
-                                <th style="width:16%;">Amount</th>
-                            </tr>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for l in invoice_lines %}
-                                <tr>
-                                    <td class="cell-muted">
-                                        {% if l.invoice %}
-                                            <a href="{% url 'portal:invoice_detail' l.invoice.pk %}" class="link-inline">
-                                                {{ l.invoice.invoice_number }}
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if l.invoice %}
-                                            {{ l.invoice.vendor.name }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if l.invoice %}
-                                            {{ l.invoice.invoice_date }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted text-end">{{ l.line_amount }}</td>
-                                </tr>
-                            {% endfor %}
+                        {% for line in invoice_lines %}
+                            <tr>
+                                <td class="cell-muted">
+                                    <a href="{% url 'portal:invoice_detail' line.invoice.pk %}" class="link-inline">
+                                        {{ line.invoice.invoice_number }}
+                                    </a>
+                                </td>
+                                <td class="cell-muted">
+                                    {% if line.invoice.invoice_date %}
+                                        {{ line.invoice.invoice_date|date:"M. d, Y" }}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td class="cell-muted text-end">
+                                    {{ line.line_amount }}
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -184,4 +285,100 @@
         </div>
     </div>
 </div>
+
+<!-- DELETE MODAL -->
+<div id="service-delete-backdrop" class="portal-modal-backdrop d-none">
+    <div class="portal-modal-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0">Delete service</h6>
+            <button type="button" class="btn btn-ghost btn-sm delete-service-cancel" aria-label="Close">
+                ✕
+            </button>
+        </div>
+        <p class="mb-2">
+            Are you sure you want to delete service <strong>{{ service.name }}</strong>?
+        </p>
+        <p class="portal-card-muted mb-4">
+            This action cannot be undone.
+        </p>
+
+        <form method="post" id="service-delete-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-ghost btn-sm delete-service-cancel">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-danger btn-sm">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.portal-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 6, 23, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+
+.portal-modal-card {
+    background: #050816;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+}
+</style>
+
+<script>
+(function () {
+    const viewMode = document.getElementById("service-view-mode");
+    const editMode = document.getElementById("service-edit-mode");
+    const editBtn = document.getElementById("service-edit-btn");
+    const cancelBtn = document.getElementById("service-cancel-btn");
+
+    if (editBtn && viewMode && editMode && cancelBtn) {
+        editBtn.addEventListener("click", function () {
+            viewMode.classList.add("d-none");
+            editMode.classList.remove("d-none");
+            editBtn.classList.add("d-none");
+            cancelBtn.classList.remove("d-none");
+        });
+
+        cancelBtn.addEventListener("click", function () {
+            window.location.reload();
+        });
+    }
+
+    const openDeleteBtn = document.getElementById("service-delete-open");
+    const backdrop = document.getElementById("service-delete-backdrop");
+    const cancelDeleteBtns = document.querySelectorAll(".delete-service-cancel");
+
+    if (openDeleteBtn && backdrop) {
+        openDeleteBtn.addEventListener("click", function () {
+            backdrop.classList.remove("d-none");
+        });
+
+        cancelDeleteBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                backdrop.classList.add("d-none");
+            });
+        });
+
+        backdrop.addEventListener("click", function (e) {
+            if (e.target === backdrop) {
+                backdrop.classList.add("d-none");
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

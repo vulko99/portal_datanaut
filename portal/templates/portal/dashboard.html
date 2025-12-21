@@ -136,7 +136,7 @@
                 <canvas id="spendByVendorChart"></canvas>
             </div>
 
-            <p class="table-caption mb-0">
+            <p class="portal-card-muted mb-0 small">
                 Example split only. In production this chart is fed directly from contract and invoice data.
             </p>
         </div>
@@ -155,7 +155,7 @@
                 <canvas id="contractsByStatusChart"></canvas>
             </div>
 
-            <p class="table-caption mb-0">
+            <p class="portal-card-muted mb-0 small">
                 Demo numbers today; later this will read directly from your contract repository.
             </p>
         </div>
@@ -173,7 +173,7 @@
             </p>
 
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="portal-table align-middle">
                     <thead>
                         <tr>
                             <th scope="col">Vendor</th>
@@ -184,7 +184,7 @@
                             <th scope="col" class="text-end">Risk</th>
                         </tr>
                     </thead>
-                    <tbody class="small">
+                    <tbody>
                         <tr>
                             <td>Refinitiv</td>
                             <td>Core desktop &amp; feeds</td>
@@ -229,7 +229,7 @@
                 </table>
             </div>
 
-            <p class="table-caption mb-0 mt-2">
+            <p class="portal-card-muted mb-0 mt-2 small">
                 In production, this widget can be filtered by entity, vendor category or contract owner.
             </p>
         </div>
@@ -244,7 +244,7 @@
             </p>
 
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="portal-table align-middle">
                     <thead>
                         <tr>
                             <th scope="col">Vendor</th>
@@ -252,7 +252,7 @@
                             <th scope="col" class="text-end">Annual spend</th>
                         </tr>
                     </thead>
-                    <tbody class="small">
+                    <tbody>
                         <tr>
                             <td>Refinitiv</td>
                             <td>Market data / feeds</td>
@@ -282,7 +282,7 @@
                 </table>
             </div>
 
-            <p class="table-caption mb-0 mt-2">
+            <p class="portal-card-muted mb-0 mt-2 small">
                 Numbers above are demo only. Live data would be calculated from your invoice history.
             </p>
         </div>
@@ -291,11 +291,12 @@
 {% endblock %}
 
 {% block extra_js %}
+    {{ block.super }}
     <!-- Chart.js от CDN – само за Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Общи настройки за по-добра четимост на тъмен фон
-        const baseTextColor = 'rgba(229, 231, 235, 0.9)'; // светло сиво
+        const baseTextColor = 'rgba(229, 231, 235, 0.9)';
         const mutedTextColor = 'rgba(148, 163, 184, 0.9)';
         const gridColor = 'rgba(55, 65, 81, 0.6)';
 
@@ -317,13 +318,13 @@
                             label: 'Actual',
                             data: [1.12, 1.18, 1.09, 1.21],
                             borderRadius: 6,
-                            backgroundColor: 'rgba(56, 189, 248, 0.85)',  // blue-cyan
+                            backgroundColor: 'rgba(56, 189, 248, 0.85)',
                         },
                         {
                             label: 'Budget',
                             data: [1.10, 1.15, 1.12, 1.18],
                             borderRadius: 6,
-                            backgroundColor: 'rgba(129, 140, 248, 0.85)', // indigo
+                            backgroundColor: 'rgba(129, 140, 248, 0.85)',
                         }
                     ]
                 },
@@ -365,13 +366,13 @@
             });
         }
 
-        // Палитра за pie / doughnut – меки, професионални цветове
+        // Палитра за pie / doughnut
         const segmentColors = [
-            'rgba(56, 189, 248, 0.9)',   // cyan
-            'rgba(34, 197, 94, 0.9)',    // green
-            'rgba(249, 115, 22, 0.9)',   // orange
-            'rgba(244, 114, 182, 0.9)',  // pink
-            'rgba(148, 163, 184, 0.9)',  // grey
+            'rgba(56, 189, 248, 0.9)',
+            'rgba(34, 197, 94, 0.9)',
+            'rgba(249, 115, 22, 0.9)',
+            'rgba(244, 114, 182, 0.9)',
+            'rgba(148, 163, 184, 0.9)',
         ];
 
         // ---------- Spend by vendor doughnut ----------
@@ -382,7 +383,6 @@
                 data: {
                     labels: ['Refinitiv', 'Bloomberg', 'ICE', 'MSCI', 'Other'],
                     datasets: [{
-                        // values in USD millions, sum = 4.3
                         data: [1.2, 1.0, 0.9, 0.6, 0.6],
                         backgroundColor: segmentColors,
                         borderWidth: 1,
@@ -425,10 +425,10 @@
                     datasets: [{
                         data: [24, 6, 3, 1],
                         backgroundColor: [
-                            'rgba(34, 197, 94, 0.9)',   // green
-                            'rgba(250, 204, 21, 0.9)',  // amber
-                            'rgba(248, 113, 113, 0.9)', // red
-                            'rgba(148, 163, 184, 0.9)', // grey
+                            'rgba(34, 197, 94, 0.9)',
+                            'rgba(250, 204, 21, 0.9)',
+                            'rgba(248, 113, 113, 0.9)',
+                            'rgba(148, 163, 184, 0.9)',
                         ],
                         borderWidth: 1,
                         borderColor: '#020617',

@@ -1,0 +1,32 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage – Invoice inventory{% endblock %}
+
+{% block content %}
+<div class="portal-card">
+  <div class="section-eyebrow mb-1">Dashboards · Invoices</div>
+  <h1 class="section-title mb-1">Invoice inventory</h1>
+  <p class="section-subtitle mb-3">
+    All invoices in scope, with invoice number, total, currency and vendor.
+  </p>
+
+  <div class="table-responsive">
+    <table class="portal-table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 24%;">Invoice</th>
+          <th style="width: 18%;">Invoice date</th>
+          <th style="width: 18%;">Total</th>
+          <th style="width: 14%;">Currency</th>
+          <th style="width: 26%;">Vendor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-muted" colspan="5">No invoices in scope yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

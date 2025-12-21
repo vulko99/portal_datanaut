@@ -1,0 +1,31 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage – User inventory{% endblock %}
+
+{% block content %}
+<div class="portal-card">
+  <div class="section-eyebrow mb-1">Dashboards · Users</div>
+  <h1 class="section-title mb-1">User inventory</h1>
+  <p class="section-subtitle mb-3">
+    All users with key identifiers – a starting point to join licence usage back to people and desks.
+  </p>
+
+  <div class="table-responsive">
+    <table class="portal-table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 22%;">Username</th>
+          <th style="width: 26%;">Name</th>
+          <th style="width: 24%;">Cost centre</th>
+          <th style="width: 18%;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-muted" colspan="4">No users in scope yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

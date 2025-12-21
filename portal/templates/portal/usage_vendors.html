@@ -1,0 +1,33 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Usage – Vendor inventory{% endblock %}
+
+{% block content %}
+<div class="portal-card">
+  <div class="section-eyebrow mb-1">Dashboards · Vendors</div>
+  <h1 class="section-title mb-1">Vendor inventory</h1>
+  <p class="section-subtitle mb-3">
+    All vendors with type, tags and linkage to contracts and invoices.
+    A starting point for vendor-level reviews.
+  </p>
+
+  <div class="table-responsive">
+    <table class="portal-table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 30%;">Vendor</th>
+          <th style="width: 18%;">Type</th>
+          <th style="width: 22%;">Tags</th>
+          <th style="width: 15%;">Contracts</th>
+          <th style="width: 15%;">Invoices</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-muted" colspan="5">No vendors in scope yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

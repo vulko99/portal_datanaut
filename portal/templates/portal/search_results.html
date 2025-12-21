@@ -1,0 +1,242 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Search{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+
+  <!-- HEADER -->
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <div class="section-eyebrow mb-1">Search</div>
+          <h1 class="section-title mb-1">
+            {% if query %}
+              Results for “{{ query }}”
+            {% else %}
+              Global search
+            {% endif %}
+          </h1>
+          <p class="section-subtitle mb-0">
+            {% if not query %}
+              Type a keyword in the search box above to search vendors, services, contracts, invoices and users.
+            {% elif has_results %}
+              Showing up to 25 matches per section.
+            {% else %}
+              No matches found. Try a different keyword or narrow it down.
+            {% endif %}
+          </p>
+        </div>
+        <div class="text-end">
+          <a href="{% url 'portal:dashboard' %}" class="btn btn-ghost btn-sm">Back to dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if query %}
+
+  <!-- Vendors -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Vendors</h6>
+      {% if vendors %}
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for v in vendors %}
+            <tr>
+              <td>
+                <a href="{% url 'portal:vendor_detail' v.pk %}" class="link-inline">
+                  {{ v.name }}
+                </a>
+              </td>
+              <td class="cell-muted">{{ v.vendor_type|default:"—" }}</td>
+              <td class="cell-muted">{{ v.tags|default:"—" }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty small">No vendors matched this search.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Services -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Services</h6>
+      {% if services %}
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Vendor</th>
+              <th>Category</th>
+              <th>Code / SKU</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for s in services %}
+            <tr>
+              <td>
+                <a href="{% url 'portal:service_detail' s.pk %}" class="link-inline">
+                  {{ s.name }}
+                </a>
+              </td>
+              <td class="cell-muted">{{ s.vendor.name }}</td>
+              <td class="cell-muted">{{ s.category|default:"—" }}</td>
+              <td class="cell-muted">{{ s.service_code|default:"—" }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty small">No services matched this search.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Contracts -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Contracts</h6>
+      {% if contracts %}
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Vendor</th>
+              <th>Entity</th>
+              <th>Start</th>
+              <th>End</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for c in contracts %}
+            <tr>
+              <td>
+                <a href="{% url 'portal:contract_detail' c.pk %}" class="link-inline">
+                  {{ c.contract_name }}
+                </a>
+              </td>
+              <td class="cell-muted">{{ c.vendor.name }}</td>
+              <td class="cell-muted">{{ c.entity|default:"—" }}</td>
+              <td class="cell-muted">
+                {% if c.start_date %}{{ c.start_date|date:"M j, Y" }}{% else %}—{% endif %}
+              </td>
+              <td class="cell-muted">
+                {% if c.end_date %}{{ c.end_date|date:"M j, Y" }}{% else %}—{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty small">No contracts matched this search (within your portal owner).</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Invoices -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Invoices</h6>
+      {% if invoices %}
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Vendor</th>
+              <th>Contract</th>
+              <th>Date</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for inv in invoices %}
+            <tr>
+              <td>
+                <a href="{% url 'portal:invoice_detail' inv.pk %}" class="link-inline">
+                  {{ inv.invoice_number }}
+                </a>
+              </td>
+              <td class="cell-muted">{{ inv.vendor.name }}</td>
+              <td class="cell-muted">
+                {% if inv.contract %}{{ inv.contract.contract_name }}{% else %}—{% endif %}
+              </td>
+              <td class="cell-muted">
+                {% if inv.invoice_date %}{{ inv.invoice_date|date:"M j, Y" }}{% else %}—{% endif %}
+              </td>
+              <td class="cell-muted">
+                {{ inv.total_amount }} {{ inv.currency }}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty small">No invoices matched this search.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Users</h6>
+      {% if users %}
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Display name</th>
+              <th>Email</th>
+              <th>Cost center</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for u in users %}
+            <tr>
+              <td>
+                <a href="{% url 'portal:user_detail' u.pk %}" class="link-inline">
+                  {{ u.username }}
+                </a>
+              </td>
+              <td class="cell-muted">
+                {% if u.profile and u.profile.full_name %}
+                  {{ u.profile.full_name }}
+                {% else %}
+                  {{ u.get_full_name|default:"—" }}
+                {% endif %}
+              </td>
+              <td class="cell-muted">{{ u.email|default:"—" }}</td>
+              <td class="cell-muted">
+                {% if u.profile.cost_center %}
+                  {{ u.profile.cost_center.code }} – {{ u.profile.cost_center.name }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty small">No users matched this search.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}
