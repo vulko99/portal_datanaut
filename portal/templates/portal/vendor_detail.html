@@ -11,7 +11,14 @@
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
                     <div class="section-eyebrow mb-1">Vendors · Detail</div>
-                    <h1 class="section-title mb-1">{{ vendor.name }}</h1>
+                    <h1 class="section-title mb-1">
+                        {{ vendor.name }}
+
+                        {# NEW: Closed badge #}
+                        {% if vendor.is_active is not None and not vendor.is_active %}
+                            <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                        {% endif %}
+                    </h1>
                     <p class="section-subtitle mb-0">
                         {{ vendor.vendor_type|default:"" }}{% if vendor.vendor_type %} ·{% endif %}
                         Tags: {{ vendor.tags|default:"—" }}
@@ -58,6 +65,12 @@
                             Back to vendors
                         </a>
 
+                        <!-- NEW: Audit log button -->
+                        <button type="button" id="vendor-audit-btn"
+                                class="btn btn-ghost btn-sm">
+                            Audit log
+                        </button>
+
                         <button type="button" id="vendor-cancel-btn"
                                 class="btn btn-ghost btn-sm d-none">
                             Cancel
@@ -75,16 +88,123 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NEW: Collapsible Audit Log Panel (hidden by default) -->
+            <div id="vendor-audit-panel" class="d-none mt-3">
+                <div class="portal-card" style="padding: 0; background: transparent; border: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">Audit log</h6>
+                            <div class="portal-card-muted small">
+                                Changes made to this vendor record (who/when/what).
+                            </div>
+                        </div>
+                        <button type="button" id="vendor-audit-close"
+                                class="btn btn-ghost btn-sm" aria-label="Close audit log">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="portal-table align-middle">
+                            <thead>
+                            <tr>
+                                <th style="width: 120px;">Date</th>
+                                <th style="width: 90px;">Time</th>
+                                <th style="width: 110px;">Action</th>
+                                <th style="width: 180px;">User</th>
+                                <th>Change description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if audit_events %}
+                                {% for ev in audit_events %}
+                                    <tr>
+                                        <td class="cell-muted">
+                                            {% if ev.occurred_at %}{{ ev.occurred_at|date:"M. d, Y" }}{% else %}—{% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.occurred_at %}{{ ev.occurred_at|date:"H:i" }}{% else %}—{% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.action %}
+                                                {{ ev.action|capfirst }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.actor_display %}
+                                                {{ ev.actor_display }}
+                                            {% elif ev.actor %}
+                                                {{ ev.actor }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {{ ev.description|default:"—" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="cell-muted">
+                                        No audit events yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if audit_has_more %}
+                        <div class="portal-card-muted small mt-2">
+                            Showing latest events. Load more is available in the next iteration.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- LEFT: VIEW MODE -->
     <div class="col-lg-7" id="vendor-view-mode">
         <div class="portal-card h-100">
-            <h6 class="mb-2">Vendor details</h6>
-            <p class="portal-card-muted mb-3">
-                Core attributes for this vendor. Use Edit to unlock fields, then Save changes.
-            </p>
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                <div>
+                    <h6 class="mb-1">Vendor details</h6>
+                    <p class="portal-card-muted mb-0">
+                        Core attributes for this vendor. Use Edit to unlock fields, then Save changes.
+                    </p>
+                </div>
+
+                {# NEW: Closed toggle (quick action) — CHECKED = Closed #}
+                <form method="post" class="small">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+
+                    {# default: Active (is_active=1). If checkbox is checked, override to 0 (Closed). #}
+                    <input type="hidden" name="is_active" value="1">
+
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="vendor-closed-toggle"
+                               name="is_active"
+                               value="0"
+                               {% if vendor.is_active is not None and not vendor.is_active %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="vendor-closed-toggle">
+                            Closed
+                        </label>
+                    </div>
+                    <div class="portal-card-muted" style="font-size: .8rem; margin-top: .15rem;">
+                        Turn on to mark vendor as Closed.
+                    </div>
+                </form>
+            </div>
 
             <div class="row gy-3">
                 <div class="col-sm-6">
@@ -142,10 +262,35 @@
             {% csrf_token %}
             <input type="hidden" name="action" value="update">
             <div class="portal-card h-100">
-                <h6 class="mb-2">Vendor details</h6>
-                <p class="portal-card-muted mb-3">
-                    Update the core attributes of this vendor. Use Save changes to apply.
-                </p>
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                    <div>
+                        <h6 class="mb-1">Vendor details</h6>
+                        <p class="portal-card-muted mb-0">
+                            Update the core attributes of this vendor. Use Save changes to apply.
+                        </p>
+                    </div>
+
+                    {# NEW: Closed checkbox in edit form too — CHECKED = Closed #}
+                    <div class="small text-end">
+                        {# default: Active (is_active=1). If checkbox is checked, override to 0 (Closed). #}
+                        <input type="hidden" name="is_active" value="1">
+
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="vendor-closed-edit"
+                                   name="is_active"
+                                   value="0"
+                                   {% if vendor.is_active is not None and not vendor.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="vendor-closed-edit">
+                                Closed
+                            </label>
+                        </div>
+                        <div class="portal-card-muted" style="font-size:.8rem; margin-top:.15rem;">
+                            Turn on to mark as Closed.
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row g-3 small">
                     <div class="col-md-6">
@@ -361,6 +506,12 @@
     width: 100%;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
 }
+
+/* Optional: make audit panel feel native */
+#vendor-audit-panel {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 1rem;
+}
 </style>
 
 <script>
@@ -380,6 +531,22 @@
 
         cancelBtn.addEventListener("click", function () {
             window.location.reload();
+        });
+    }
+
+    // Audit panel toggle
+    const auditBtn = document.getElementById("vendor-audit-btn");
+    const auditPanel = document.getElementById("vendor-audit-panel");
+    const auditClose = document.getElementById("vendor-audit-close");
+
+    if (auditBtn && auditPanel) {
+        auditBtn.addEventListener("click", function () {
+            auditPanel.classList.toggle("d-none");
+        });
+    }
+    if (auditClose && auditPanel) {
+        auditClose.addEventListener("click", function () {
+            auditPanel.classList.add("d-none");
         });
     }
 

@@ -617,6 +617,11 @@
           </div>
         </form>
 
+        {# NEW: Permissions button (placed between Search and Data Hub) #}
+        <a href="{% url 'portal:permissions' %}" class="btn btn-ghost btn-sm me-2">
+  Permissions
+</a>
+
         <a href="{% url 'portal:data_hub' %}" class="btn btn-ghost btn-sm me-2">
           Data Hub
         </a>

@@ -3,348 +3,503 @@
 {% block title_suffix %} · User · {{ user_obj.username }}{% endblock %}
 
 {% block content %}
-<form method="post" id="userForm">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="update" id="userActionInput">
+<div class="row g-3">
 
-    <div class="row g-3">
-
-        <!-- HEADER -->
-        <div class="col-12">
-            <div class="portal-card">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                    <div>
-                        <div class="section-eyebrow mb-1">Users · Detail</div>
-                        <h1 class="section-title mb-1">{{ user_obj.username }}</h1>
-                        <p class="section-subtitle mb-0">
-                            {{ user_obj.get_full_name|default:user_obj.username }}
-                            {% if user_obj.email %} · {{ user_obj.email }}{% endif %}
-                        </p>
-                    </div>
-
-                    <div class="text-end">
-                        <div class="metric-label mb-1">Status</div>
-                        <div class="metric-value" style="font-size:1rem;">
-                            {% if user_obj.is_active %}
-                                Active
-                            {% else %}
-                                Inactive
-                            {% endif %}
-                        </div>
-                        <div class="portal-card-muted small mt-2">
-                            Cost center:
-                            {% if user_obj.profile.cost_center %}
-                                {{ user_obj.profile.cost_center.code }} – {{ user_obj.profile.cost_center.name }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </div>
-
-                        <div class="d-flex justify-content-end flex-wrap gap-2 mt-3">
-                            <a href="{% url 'portal:users' %}" class="btn btn-ghost btn-sm">
-                                Back to users
-                            </a>
-                            <button type="button" class="btn btn-add btn-sm" id="editButton">
-                                Edit
-                            </button>
-                            <button type="button"
-                                    class="btn btn-ghost btn-sm"
-                                    id="deleteButton">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- HEADER -->
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <div class="section-eyebrow mb-1">Users · Detail</div>
+          <h1 class="section-title mb-1">
+            {{ user_obj.username }}
+            {% if user_obj.is_active is not None and not user_obj.is_active %}
+              <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+            {% endif %}
+          </h1>
+          <p class="section-subtitle mb-0">
+            {{ user_obj.get_full_name|default:user_obj.username }}
+            {% if user_obj.email %} · {{ user_obj.email }}{% endif %}
+          </p>
         </div>
 
-        <!-- ACCOUNT COLUMN -->
-        <div class="col-lg-6">
-            <div class="portal-card h-100">
-                <h6 class="mb-2">Account</h6>
-                <p class="portal-card-muted mb-3">
-                    Core Django user fields. Username cannot be blank; status controls login availability.
-                </p>
+        <div class="text-end">
+          <div class="metric-label mb-1">Status</div>
+          <div class="metric-value" style="font-size:1rem;">
+            {% if user_obj.is_active %}Active{% else %}Closed{% endif %}
+          </div>
 
-                <!-- VIEW MODE -->
-                <div id="accountView">
-                    <div class="row gy-3 small">
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Username</div>
-                            <div>{{ user_obj.username }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Email</div>
-                            <div>{{ user_obj.email|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">First name</div>
-                            <div>{{ user_obj.first_name|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Last name</div>
-                            <div>{{ user_obj.last_name|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Active user</div>
-                            <div>{% if user_obj.is_active %}Yes{% else %}No{% endif %}</div>
-                        </div>
-                    </div>
-                </div>
+          <div class="portal-card-muted small mt-2">
+            Cost center:
+            {% if user_obj.profile.cost_center %}
+              {{ user_obj.profile.cost_center.code }} – {{ user_obj.profile.cost_center.name }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
 
-                <!-- EDIT MODE -->
-                <div id="accountEdit" hidden>
-                    <div class="row g-3 small">
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Username</label>
-                            <input type="text"
-                                   name="username"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.username }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Email</label>
-                            <input type="email"
-                                   name="email"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.email }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">First name</label>
-                            <input type="text"
-                                   name="first_name"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.first_name }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Last name</label>
-                            <input type="text"
-                                   name="last_name"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.last_name }}">
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check mt-4">
-                                <input type="checkbox"
-                                       name="is_active"
-                                       id="is_active"
-                                       class="form-check-input"
-                                       {% if user_obj.is_active %}checked{% endif %}>
-                                <label for="is_active" class="form-check-label small">Active user</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+          <div class="d-flex justify-content-end flex-wrap gap-2 mt-3">
+            <a href="{% url 'portal:users' %}" class="btn btn-ghost btn-sm">Back to users</a>
+            <button type="button" id="user-audit-btn" class="btn btn-ghost btn-sm">Audit log</button>
+            <button type="button" id="user-cancel-btn" class="btn btn-ghost btn-sm d-none">Cancel</button>
+            <button type="button" class="btn btn-add btn-sm" id="user-edit-btn">Edit</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="user-delete-open">Delete</button>
+          </div>
         </div>
+      </div>
 
-        <!-- PROFILE COLUMN -->
-        <div class="col-lg-6">
-            <div class="portal-card h-100">
-                <h6 class="mb-2">Profile</h6>
-                <p class="portal-card-muted mb-3">
-                    Extended attributes for approvals, allocation and directory information.
-                </p>
-
-                <!-- VIEW MODE -->
-                <div id="profileView">
-                    <div class="row gy-3 small">
-                        <div class="col-md-12">
-                            <div class="metric-label mb-1">Display name</div>
-                            <div>{{ user_obj.profile.full_name|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Cost center</div>
-                            <div>
-                                {% if user_obj.profile.cost_center %}
-                                    {{ user_obj.profile.cost_center.code }} – {{ user_obj.profile.cost_center.name }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Manager</div>
-                            <div>
-                                {% if user_obj.profile.manager %}
-                                    {{ user_obj.profile.manager.username }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Location</div>
-                            <div>{{ user_obj.profile.location|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Legal entity</div>
-                            <div>{{ user_obj.profile.legal_entity|default:"—" }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric-label mb-1">Phone</div>
-                            <div>{{ user_obj.profile.phone_number|default:"—" }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EDIT MODE -->
-                <div id="profileEdit" hidden>
-                    <div class="row g-3 small">
-                        <div class="col-md-12">
-                            <label class="form-label form-label-sm">Display name</label>
-                            <input type="text"
-                                   name="full_name"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.profile.full_name }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Cost center</label>
-                            <select name="cost_center_id"
-                                    class="form-select form-select-sm">
-                                <option value="">---------</option>
-                                {% for cc in cost_centers %}
-                                    <option value="{{ cc.pk }}"
-                                            {% if user_obj.profile.cost_center_id == cc.pk %}selected{% endif %}>
-                                        {{ cc.code }} – {{ cc.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Manager</label>
-                            <select name="manager_id"
-                                    class="form-select form-select-sm">
-                                <option value="">---------</option>
-                                {% for m in managers %}
-                                    <option value="{{ m.pk }}"
-                                            {% if user_obj.profile.manager_id == m.pk %}selected{% endif %}>
-                                        {{ m.username }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Location</label>
-                            <input type="text"
-                                   name="location"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.profile.location }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Legal entity</label>
-                            <input type="text"
-                                   name="legal_entity"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.profile.legal_entity }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Phone</label>
-                            <input type="text"
-                                   name="phone_number"
-                                   class="form-control form-control-sm"
-                                   value="{{ user_obj.profile.phone_number }}">
-                        </div>
-                    </div>
-                </div>
-
+      <!-- AUDIT (collapsible) -->
+      <div id="user-audit-panel" class="d-none mt-3">
+        <div class="portal-card" style="padding:0;background:transparent;border:none;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h6 class="mb-0">Audit log</h6>
+              <div class="portal-card-muted small">Changes made to this user record (who/when/what).</div>
             </div>
-        </div>
+            <button type="button" id="user-audit-close" class="btn btn-ghost btn-sm" aria-label="Close audit log">✕</button>
+          </div>
 
-        <!-- SAVE BAR -->
-        <div class="col-12">
-            <div class="portal-card">
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" class="btn btn-add btn-sm" id="saveButton" hidden>
-                        Save changes
-                    </button>
-                </div>
-            </div>
+          <div class="table-responsive">
+            <table class="portal-table align-middle">
+              <thead>
+                <tr>
+                  <th style="width:120px;">Date</th>
+                  <th style="width:90px;">Time</th>
+                  <th style="width:110px;">Action</th>
+                  <th style="width:180px;">User</th>
+                  <th>Change description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if audit_events %}
+                  {% for ev in audit_events %}
+                    <tr>
+                      <td class="cell-muted">{% if ev.occurred_at %}{{ ev.occurred_at|date:"M. d, Y" }}{% else %}—{% endif %}</td>
+                      <td class="cell-muted">{% if ev.occurred_at %}{{ ev.occurred_at|date:"H:i" }}{% else %}—{% endif %}</td>
+                      <td class="cell-muted">{% if ev.action %}{{ ev.action|capfirst }}{% else %}—{% endif %}</td>
+                      <td class="cell-muted">
+                        {% if ev.actor_display %}{{ ev.actor_display }}
+                        {% elif ev.actor %}{{ ev.actor }}
+                        {% else %}—{% endif %}
+                      </td>
+                      <td class="cell-muted">{{ ev.description|default:"—" }}</td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr><td colspan="5" class="cell-muted">No audit events yet.</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if audit_has_more %}
+            <div class="portal-card-muted small mt-2">Showing latest events. Load more is available in the next iteration.</div>
+          {% endif %}
         </div>
+      </div>
 
     </div>
-</form>
+  </div>
+
+  <!-- SERVICES USED -->
+  <div class="col-12">
+    <div class="portal-card">
+      <h6 class="mb-2">Services used</h6>
+      <p class="portal-card-muted mb-3">
+        Services currently assigned to this user (from Permissions). List price is indicative (service-level list price).
+      </p>
+
+      {% if assigned_services_rows_by_vendor %}
+        <div class="table-responsive">
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width:26%;">Vendor</th>
+                <th>Service</th>
+                <th style="width:110px;">Status</th>
+                <th style="width:140px;" class="text-end">List price</th>
+                <th style="width:80px;">CCY</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vname, rows in assigned_services_rows_by_vendor.items %}
+                {% for row in rows %}
+                  <tr>
+                    {% if forloop.first %}
+                      <td class="cell-muted" rowspan="{{ rows|length }}">{{ vname }}</td>
+                    {% endif %}
+
+                    <td>
+                      <a href="{% url 'portal:service_detail' row.service.pk %}" class="link-inline">
+                        {{ row.service.name }}
+                      </a>
+                      {% if row.is_active is not None and not row.is_active %}
+                        <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                      {% endif %}
+                    </td>
+
+                    <td class="cell-muted">{% if row.is_active %}Active{% else %}Closed{% endif %}</td>
+
+                    <td class="text-end">
+                      {% if row.list_price is not None %}
+                        {{ row.list_price|floatformat:2 }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+
+                    <td class="cell-muted">{{ row.currency|default:"—" }}</td>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      {% elif assigned_services_by_vendor %}
+        <div class="table-responsive">
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width:28%;">Vendor</th>
+                <th>Services</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for vname, services in assigned_services_by_vendor.items %}
+                <tr>
+                  <td class="cell-muted">{{ vname }}</td>
+                  <td>
+                    {% for s in services %}
+                      <a href="{% url 'portal:service_detail' s.pk %}" class="link-inline">{{ s.name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">No assigned services yet. Assign from the Permissions page.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- VIEW MODE: Login & Identity -->
+  <div class="col-lg-6" id="user-view-mode">
+    <div class="portal-card h-100">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div>
+          <h6 class="mb-2">Login &amp; identity</h6>
+          <p class="portal-card-muted mb-0"></p>
+        </div>
+
+        <!-- QUICK STATUS TOGGLE (separate form on purpose) -->
+        <form method="post" class="small">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+          <input type="hidden" name="is_active" value="1">
+          <div class="form-check form-switch m-0">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="user-closed-toggle"
+                   name="is_active"
+                   value="0"
+                   {% if user_obj.is_active is not None and not user_obj.is_active %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <label class="form-check-label" for="user-closed-toggle">Closed</label>
+          </div>
+          <div class="portal-card-muted" style="font-size:.8rem;margin-top:.15rem;"></div>
+        </form>
+      </div>
+
+      <div class="row gy-3 small">
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Username</div>
+          <div>{{ user_obj.username }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Email</div>
+          <div>{{ user_obj.email|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">First name</div>
+          <div>{{ user_obj.first_name|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Last name</div>
+          <div>{{ user_obj.last_name|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Status</div>
+          <div>{% if user_obj.is_active %}Active{% else %}Closed{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW MODE: Business profile -->
+  <div class="col-lg-6" id="profile-view-mode">
+    <div class="portal-card h-100">
+      <h6 class="mb-2">Business profile</h6>
+      <p class="portal-card-muted mb-3">
+        Internal attributes for approvals, allocations and directory information.
+      </p>
+
+      <div class="row gy-3 small">
+        <div class="col-md-12">
+          <div class="metric-label mb-1">Display name</div>
+          <div>{{ user_obj.profile.full_name|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Cost center</div>
+          <div>
+            {% if user_obj.profile.cost_center %}
+              {{ user_obj.profile.cost_center.code }} – {{ user_obj.profile.cost_center.name }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Manager</div>
+          <div>{% if user_obj.profile.manager %}{{ user_obj.profile.manager.username }}{% else %}—{% endif %}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Location</div>
+          <div>{{ user_obj.profile.location|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Legal entity</div>
+          <div>{{ user_obj.profile.legal_entity|default:"—" }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="metric-label mb-1">Phone</div>
+          <div>{{ user_obj.profile.phone_number|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODE: Account -->
+  <div class="col-lg-6 d-none" id="user-edit-mode">
+    <form method="post" id="user-edit-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_account">
+
+      <div class="portal-card h-100">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+          <div>
+            <h6 class="mb-2">Login &amp; identity</h6>
+            <p class="portal-card-muted mb-0">
+              These fields affect sign-in and user identity. Username cannot be blank.
+            </p>
+          </div>
+
+          <div class="small text-end">
+            <input type="hidden" name="is_active" value="1">
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input"
+                     type="checkbox"
+                     id="user-closed-edit"
+                     name="is_active"
+                     value="0"
+                     {% if user_obj.is_active is not None and not user_obj.is_active %}checked{% endif %}>
+              <label class="form-check-label" for="user-closed-edit">Closed</label>
+            </div>
+            <div class="portal-card-muted" style="font-size:.8rem;margin-top:.15rem;">
+              Turn on to disable login (record remains).
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 small">
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Username</label>
+            <input type="text" name="username" class="form-control form-control-sm" value="{{ user_obj.username }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Email</label>
+            <input type="email" name="email" class="form-control form-control-sm" value="{{ user_obj.email }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">First name</label>
+            <input type="text" name="first_name" class="form-control form-control-sm" value="{{ user_obj.first_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Last name</label>
+            <input type="text" name="last_name" class="form-control form-control-sm" value="{{ user_obj.last_name }}">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="submit" class="btn btn-add btn-sm">Save changes</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- EDIT MODE: Profile -->
+  <div class="col-lg-6 d-none" id="profile-edit-mode">
+    <form method="post" id="profile-edit-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_profile">
+
+      <div class="portal-card h-100">
+        <h6 class="mb-2">Business profile</h6>
+        <p class="portal-card-muted mb-3">
+          Internal fields for approvals, allocation and directory info.
+        </p>
+
+        <div class="row g-3 small">
+          <div class="col-md-12">
+            <label class="form-label form-label-sm">Display name</label>
+            <input type="text" name="full_name" class="form-control form-control-sm" value="{{ user_obj.profile.full_name }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Cost center</label>
+            <select name="cost_center_id" class="form-select form-select-sm">
+              <option value="">---------</option>
+              {% for cc in cost_centers %}
+                <option value="{{ cc.pk }}" {% if user_obj.profile.cost_center_id == cc.pk %}selected{% endif %}>
+                  {{ cc.code }} – {{ cc.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Manager</label>
+            <select name="manager_id" class="form-select form-select-sm">
+              <option value="">---------</option>
+              {% for m in managers %}
+                <option value="{{ m.pk }}" {% if user_obj.profile.manager_id == m.pk %}selected{% endif %}>
+                  {{ m.username }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Location</label>
+            <input type="text" name="location" class="form-control form-control-sm" value="{{ user_obj.profile.location }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Legal entity</label>
+            <input type="text" name="legal_entity" class="form-control form-control-sm" value="{{ user_obj.profile.legal_entity }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Phone</label>
+            <input type="text" name="phone_number" class="form-control form-control-sm" value="{{ user_obj.profile.phone_number }}">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="submit" class="btn btn-add btn-sm">Save changes</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
 
 <!-- DELETE MODAL -->
-<div class="modal fade" id="userDeleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background:#020617;border:1px solid rgba(148,163,184,.35);">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete user</h5>
-                <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete user <strong>{{ user_obj.username }}</strong>?<br>
-                This action cannot be undone.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-sm btn-danger" id="confirmDeleteButton">
-                    Delete
-                </button>
-            </div>
-        </div>
+<div id="user-delete-backdrop" class="portal-modal-backdrop d-none">
+  <div class="portal-modal-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0">Delete user</h6>
+      <button type="button" class="btn btn-ghost btn-sm delete-user-cancel" aria-label="Close">✕</button>
     </div>
+    <p class="mb-2">
+      Are you sure you want to delete user <strong>{{ user_obj.username }}</strong>?
+    </p>
+    <p class="portal-card-muted mb-4">This action cannot be undone.</p>
+
+    <form method="post" id="user-delete-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-ghost btn-sm delete-user-cancel">Cancel</button>
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </div>
+    </form>
+  </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-{{ block.super }}
+<style>
+.portal-modal-backdrop{
+  position:fixed; inset:0; background:rgba(3,6,23,.85);
+  display:flex; align-items:center; justify-content:center; z-index:1100;
+}
+.portal-modal-card{
+  background:#050816; border-radius:12px; padding:1.5rem 1.75rem;
+  max-width:520px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,.65);
+}
+#user-audit-panel{ border-top:1px solid rgba(255,255,255,.06); padding-top:1rem; }
+</style>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const editBtn = document.getElementById('editButton');
-    const saveBtn = document.getElementById('saveButton');
-    const actionInput = document.getElementById('userActionInput');
-    const form = document.getElementById('userForm');
+(function () {
+  const viewUser = document.getElementById("user-view-mode");
+  const viewProfile = document.getElementById("profile-view-mode");
+  const editUser = document.getElementById("user-edit-mode");
+  const editProfile = document.getElementById("profile-edit-mode");
 
-    const accountView = document.getElementById('accountView');
-    const accountEdit = document.getElementById('accountEdit');
-    const profileView = document.getElementById('profileView');
-    const profileEdit = document.getElementById('profileEdit');
+  const editBtn = document.getElementById("user-edit-btn");
+  const cancelBtn = document.getElementById("user-cancel-btn");
 
-    const deleteBtn = document.getElementById('deleteButton');
-    const deleteModalEl = document.getElementById('userDeleteModal');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
+  if (editBtn && cancelBtn && viewUser && viewProfile && editUser && editProfile) {
+    editBtn.addEventListener("click", function () {
+      viewUser.classList.add("d-none");
+      viewProfile.classList.add("d-none");
+      editUser.classList.remove("d-none");
+      editProfile.classList.remove("d-none");
 
-    let editMode = false;
+      editBtn.classList.add("d-none");
+      cancelBtn.classList.remove("d-none");
+    });
 
-    function setEditMode(on) {
-        editMode = on;
+    cancelBtn.addEventListener("click", function () {
+      window.location.reload();
+    });
+  }
 
-        if (accountView) accountView.hidden = on;
-        if (accountEdit) accountEdit.hidden = !on;
-        if (profileView) profileView.hidden = on;
-        if (profileEdit) profileEdit.hidden = !on;
+  // Audit panel toggle
+  const auditBtn = document.getElementById("user-audit-btn");
+  const auditPanel = document.getElementById("user-audit-panel");
+  const auditClose = document.getElementById("user-audit-close");
 
-        if (saveBtn) saveBtn.hidden = !on;
-        if (editBtn) editBtn.textContent = on ? 'Cancel' : 'Edit';
-    }
+  if (auditBtn && auditPanel) {
+    auditBtn.addEventListener("click", function () {
+      auditPanel.classList.toggle("d-none");
+    });
+  }
+  if (auditClose && auditPanel) {
+    auditClose.addEventListener("click", function () {
+      auditPanel.classList.add("d-none");
+    });
+  }
 
-    setEditMode(false);
+  // Delete modal
+  const openDeleteBtn = document.getElementById("user-delete-open");
+  const backdrop = document.getElementById("user-delete-backdrop");
+  const cancelDeleteBtns = document.querySelectorAll(".delete-user-cancel");
 
-    if (editBtn) {
-        editBtn.addEventListener('click', function () {
-            setEditMode(!editMode);
-        });
-    }
+  if (openDeleteBtn && backdrop) {
+    openDeleteBtn.addEventListener("click", function () {
+      backdrop.classList.remove("d-none");
+    });
 
-    // Delete logic – POST с action=delete
-    if (deleteBtn && deleteModalEl && confirmDeleteBtn && window.bootstrap) {
-        const modal = new bootstrap.Modal(deleteModalEl);
+    cancelDeleteBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        backdrop.classList.add("d-none");
+      });
+    });
 
-        deleteBtn.addEventListener('click', function () {
-            modal.show();
-        });
-
-        confirmDeleteBtn.addEventListener('click', function () {
-            if (actionInput) actionInput.value = 'delete';
-            form.submit();
-        });
-    }
-});
+    backdrop.addEventListener("click", function (e) {
+      if (e.target === backdrop) {
+        backdrop.classList.add("d-none");
+      }
+    });
+  }
+})();
 </script>
 {% endblock %}

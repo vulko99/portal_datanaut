@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -26,6 +27,15 @@ class Vendor(models.Model):
     ]
 
     name = models.CharField(max_length=255)
+
+    # soft-close flag (True = Active, False = Closed)
+    # Used by views/templates for "Show Closed" behaviour.
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text="Soft status flag. True = Active, False = Closed (hidden unless Show Closed is enabled).",
+    )
+
     vendor_type = models.CharField(
         max_length=50,
         choices=VENDOR_TYPE_CHOICES,
@@ -67,7 +77,6 @@ class CostCenter(models.Model):
     code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
 
-    # свободни полета за репортинг / сегментиране
     business_unit = models.CharField(max_length=255, blank=True)
     region = models.CharField(max_length=255, blank=True)
 
@@ -87,7 +96,7 @@ class CostCenter(models.Model):
         return f"{self.code} – {self.name}"
 
 
-# ---------- USER PROFILE (за бъдещия license request портал) ----------
+# ---------- USER PROFILE ----------
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
@@ -135,7 +144,7 @@ class UserProfile(models.Model):
         return self.full_name or self.user.get_username()
 
 
-# ---------- SERVICE (какво продава vendor-ът) ----------
+# ---------- SERVICE ----------
 
 class Service(models.Model):
     DATA_FEED = "data_feed"
@@ -170,6 +179,14 @@ class Service(models.Model):
         related_name="services",
     )
     name = models.CharField(max_length=255)
+
+    # NEW: service soft-close flag (True = Active, False = Closed)
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text="Soft status flag. True = Active, False = Closed (hidden unless Show Closed is enabled).",
+    )
+
     category = models.CharField(
         max_length=50,
         choices=CATEGORY_CHOICES,
@@ -191,7 +208,6 @@ class Service(models.Model):
         blank=True,
     )
 
-    # допълнителни полета за портала
     owner_display = models.CharField(
         max_length=255,
         blank=True,
@@ -222,8 +238,54 @@ class Service(models.Model):
         ordering = ["vendor__name", "name"]
         unique_together = [("vendor", "name")]
 
+        indexes = [
+            models.Index(fields=["vendor", "is_active", "name"]),
+            models.Index(fields=["is_active"]),
+        ]
+
     def __str__(self) -> str:
         return f"{self.vendor.name} – {self.name}"
+
+
+# ---------- PERMISSIONS / ASSIGNMENTS (NEW) ----------
+
+class ServiceAssignment(models.Model):
+    """
+    Assign portal users to services (license/entitlement style).
+    This is intentionally simple for UAT; later we can scope by Portal/Tenant.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="service_assignments",
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="user_assignments",
+    )
+    assigned_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="service_assignments_made",
+        help_text="Actor who made the assignment (optional).",
+    )
+
+    class Meta:
+        unique_together = [("user", "service")]
+        indexes = [
+            models.Index(fields=["service", "user"]),
+            models.Index(fields=["user", "service"]),
+            models.Index(fields=["assigned_at"]),
+        ]
+        ordering = ["-assigned_at", "-id"]
+
+    def __str__(self) -> str:
+        return f"{self.user} → {self.service}"
 
 
 # ---------- CONTRACT ----------
@@ -270,7 +332,6 @@ class Contract(models.Model):
         on_delete=models.PROTECT,
         related_name="contracts",
     )
-    # старото "title" – запазваме го като contract_name
     contract_name = models.CharField(
         max_length=255,
         help_text="Contract name or internal reference.",
@@ -292,7 +353,6 @@ class Contract(models.Model):
         help_text="Legal entity / desk / cost centre.",
     )
 
-    # Total annual contract value
     annual_value = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -310,7 +370,6 @@ class Contract(models.Model):
     end_date = models.DateField(null=True, blank=True)
     renewal_date = models.DateField(null=True, blank=True)
 
-    # --- NEW: Notice / Termination controls ---
     notice_period_days = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
@@ -329,7 +388,6 @@ class Contract(models.Model):
         default=STATUS_ACTIVE,
     )
 
-    # Relationship към services – позволява split по услуги
     related_services = models.ManyToManyField(
         Service,
         blank=True,
@@ -345,7 +403,6 @@ class Contract(models.Model):
         help_text="Which cost center owns this contract overall.",
     )
 
-    # Оригиналният качен файл (PDF/DOCX)
     file = models.FileField(
         upload_to="contracts/",
         help_text="Signed contract document",
@@ -366,7 +423,6 @@ class Contract(models.Model):
         related_name="uploaded_contracts",
     )
 
-    # Кой клиент/потребител „вижда“ този контракт в портала
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -387,12 +443,6 @@ class Contract(models.Model):
 
     @property
     def effective_notice_date(self):
-        """
-        Returns:
-          - notice_date if set (manual override)
-          - else end_date - notice_period_days if possible
-          - else None
-        """
         if self.notice_date:
             return self.notice_date
         if self.end_date and self.notice_period_days:
@@ -460,7 +510,6 @@ class Invoice(models.Model):
         help_text="Additional notes to Finance / GL / tax.",
     )
 
-    # За multi-tenant портал – кой клиент да я вижда
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -483,10 +532,6 @@ class Invoice(models.Model):
 
     @property
     def period_label(self) -> str:
-        """
-        Render a human-friendly billed period label for templates.
-        Does not affect schema.
-        """
         if self.period_start and self.period_end:
             return f"{self.period_start} → {self.period_end}"
         if self.period_start and not self.period_end:
@@ -497,14 +542,10 @@ class Invoice(models.Model):
 
     @property
     def tax_label(self) -> str:
-        """
-        Render a human-friendly tax label for templates.
-        Does not affect schema.
-        """
         return str(self.tax_amount) if self.tax_amount is not None else "—"
 
 
-# ---------- INVOICE LINE (където правим split към cost centers / users) ----------
+# ---------- INVOICE LINE ----------
 
 class InvoiceLine(models.Model):
     invoice = models.ForeignKey(
@@ -570,3 +611,63 @@ class InvoiceLine(models.Model):
 
     def __str__(self) -> str:
         return f"Line {self.id} – {self.description}"
+
+
+# ---------- AUDIT EVENT ----------
+
+class AuditEvent(models.Model):
+    """
+    Audit log model aligned with:
+      - current views.py (_audit_log_event uses object_type/object_id + actor + actor_display + occurred_at + description)
+      - current vendor_detail.html (optionally renders ev.action)
+    """
+
+    ACTION_CREATE = "create"
+    ACTION_UPDATE = "update"
+    ACTION_DELETE = "delete"
+
+    ACTION_CHOICES = [
+        (ACTION_CREATE, "Create"),
+        (ACTION_UPDATE, "Update"),
+        (ACTION_DELETE, "Delete"),
+    ]
+
+    object_type = models.CharField(max_length=50, db_index=True)     # e.g. "Vendor"
+    object_id = models.PositiveIntegerField(db_index=True)          # pk of the object
+    occurred_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    action = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Optional structured action for UI filtering (create/update/delete).",
+    )
+
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_events",
+    )
+    actor_display = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Snapshot of actor name/email at the time of change.",
+    )
+
+    description = models.TextField()
+
+    class Meta:
+        ordering = ["-occurred_at", "-id"]
+        indexes = [
+            models.Index(fields=["object_type", "object_id", "occurred_at"]),
+            models.Index(fields=["object_type", "object_id"]),
+            models.Index(fields=["occurred_at"]),
+        ]
+
+    def __str__(self) -> str:
+        who = self.actor_display or (self.actor.username if self.actor else "system")
+        return f"{self.object_type}#{self.object_id} · {self.occurred_at:%Y-%m-%d %H:%M} · {who}"

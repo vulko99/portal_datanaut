@@ -9,7 +9,7 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("search/", views.global_search, name="global_search"),
 
-    # Inventory (основните екрани)
+    # Inventory
     path("vendors/", views.vendor_list, name="vendors"),
     path("vendors/<int:pk>/", views.vendor_detail, name="vendor_detail"),
 
@@ -29,6 +29,10 @@ urlpatterns = [
 
     path("cost-centers/", views.cost_centers_list, name="cost_centers"),
 
+    # Permissions (NEW)
+    path("permissions/", views.permissions, name="permissions"),
+
+
     # Usage + usage inventory
     path("usage/", views.usage_overview, name="usage"),
     path("usage/invoices/", views.usage_invoices, name="usage_invoices"),
@@ -36,7 +40,7 @@ urlpatterns = [
     path("usage/vendors/", views.usage_vendors, name="usage_vendors"),
     path("usage/users/", views.usage_users, name="usage_users"),
 
-    # Data Hub (Import/Export center)
+    # Data Hub
     path("data-hub/", views.data_hub, name="data_hub"),
     path("data-hub/<str:entity>/import/", views.data_import, name="data_import"),
     path("data-hub/<str:entity>/export/", views.data_export, name="data_export"),

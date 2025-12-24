@@ -11,7 +11,14 @@
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
                     <div class="section-eyebrow mb-1">Services · Detail</div>
-                    <h1 class="section-title mb-1">{{ service.name }}</h1>
+                    <h1 class="section-title mb-1">
+                        {{ service.name }}
+
+                        {# OPTIONAL: Closed badge (matches Vendor pattern) #}
+                        {% if service.is_active is not None and not service.is_active %}
+                            <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                        {% endif %}
+                    </h1>
                     <p class="section-subtitle mb-0">
                         Vendor:
                         <a href="{% url 'portal:vendor_detail' service.vendor.pk %}" class="link-inline">
@@ -45,6 +52,12 @@
                             Back to services
                         </a>
 
+                        <!-- Audit log button (Vendor-style) -->
+                        <button type="button" id="service-audit-btn"
+                                class="btn btn-ghost btn-sm">
+                            Audit log
+                        </button>
+
                         <button type="button" id="service-cancel-btn"
                                 class="btn btn-ghost btn-sm d-none">
                             Cancel
@@ -62,16 +75,125 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NEW: Collapsible Audit Log Panel (Vendor-style) -->
+            <div id="service-audit-panel" class="d-none mt-3">
+                <div class="portal-card" style="padding: 0; background: transparent; border: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">Audit log</h6>
+                            <div class="portal-card-muted small">
+                                Changes made to this service record (who/when/what).
+                            </div>
+                        </div>
+                        <button type="button" id="service-audit-close"
+                                class="btn btn-ghost btn-sm" aria-label="Close audit log">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="portal-table align-middle">
+                            <thead>
+                            <tr>
+                                <th style="width: 120px;">Date</th>
+                                <th style="width: 90px;">Time</th>
+                                <th style="width: 110px;">Action</th>
+                                <th style="width: 180px;">User</th>
+                                <th>Change description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if audit_events %}
+                                {% for ev in audit_events %}
+                                    <tr>
+                                        <td class="cell-muted">
+                                            {% if ev.occurred_at %}{{ ev.occurred_at|date:"M. d, Y" }}{% else %}—{% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.occurred_at %}{{ ev.occurred_at|date:"H:i" }}{% else %}—{% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.action %}
+                                                {{ ev.action|capfirst }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {% if ev.actor_display %}
+                                                {{ ev.actor_display }}
+                                            {% elif ev.actor %}
+                                                {{ ev.actor }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td class="cell-muted">
+                                            {{ ev.description|default:"—" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="cell-muted">
+                                        No audit events yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if audit_has_more %}
+                        <div class="portal-card-muted small mt-2">
+                            Showing latest events. Load more is available in the next iteration.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- LEFT: VIEW MODE -->
     <div class="col-lg-7" id="service-view-mode">
         <div class="portal-card h-100">
-            <h6 class="mb-2">Service detail</h6>
-            <p class="portal-card-muted mb-3">
-                Core attributes of this service.
-            </p>
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2 flex-wrap">
+                <div>
+                    <h6 class="mb-1">Service detail</h6>
+                    <p class="portal-card-muted mb-0">
+                        Core attributes of this service.
+                    </p>
+                </div>
+
+                <!-- STATUS TOGGLE (like Vendor: inside the details card, top-right) -->
+                {% if service.is_active is not None %}
+                <form method="post" class="small">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+
+                    {# default: Active (is_active=1). If checkbox is checked, override to 0 (Closed). #}
+                    <input type="hidden" name="is_active" value="1">
+
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="service-closed-toggle"
+                               name="is_active"
+                               value="0"
+                               {% if service.is_active is not None and not service.is_active %}checked{% endif %}
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="service-closed-toggle">
+                            Closed
+                        </label>
+                    </div>
+                    <div class="portal-card-muted" style="font-size: .8rem; margin-top: .15rem;">
+                        Turn on to mark service as Closed.
+                    </div>
+                </form>
+                {% endif %}
+            </div>
 
             <div class="row gy-3">
                 <div class="col-sm-6">
@@ -336,6 +458,12 @@
     width: 100%;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
 }
+
+/* Optional: make audit panel feel native */
+#service-audit-panel {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 1rem;
+}
 </style>
 
 <script>
@@ -355,6 +483,22 @@
 
         cancelBtn.addEventListener("click", function () {
             window.location.reload();
+        });
+    }
+
+    // Audit panel toggle (Vendor-style)
+    const auditBtn = document.getElementById("service-audit-btn");
+    const auditPanel = document.getElementById("service-audit-panel");
+    const auditClose = document.getElementById("service-audit-close");
+
+    if (auditBtn && auditPanel) {
+        auditBtn.addEventListener("click", function () {
+            auditPanel.classList.toggle("d-none");
+        });
+    }
+    if (auditClose && auditPanel) {
+        auditClose.addEventListener("click", function () {
+            auditPanel.classList.add("d-none");
         });
     }
 

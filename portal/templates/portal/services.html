@@ -31,7 +31,7 @@
 
             <!-- TOOLBAR: search + filters -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
                     <div class="input-group input-group-sm" style="max-width: 320px;">
                         <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
                             Search
@@ -56,6 +56,12 @@
                         <option value="connectivity">Connectivity</option>
                         <option value="other">Other</option>
                     </select>
+
+                    <!-- NEW: Show Closed toggle (server-side list filtering via ?show_closed=1) -->
+                    <div class="form-check form-switch ms-1" style="user-select:none;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="showClosedToggle">
+                        <label class="form-check-label small" for="showClosedToggle">Show closed</label>
+                    </div>
                 </div>
             </div>
 
@@ -84,11 +90,19 @@
                                     data-category="{{ service.category|default_if_none:'' }}"
                                     data-owner="{{ service.owner_display|default_if_none:'' }}"
                                     data-contract="{% if service.primary_contract %}{{ service.primary_contract.contract_name }}{% endif %}"
+                                    data-is-active="{{ service.is_active|yesno:'1,0' }}"
                                 >
                                     <td>
                                         <a href="{% url 'portal:service_detail' service.pk %}" class="link-inline">
                                             {{ service.name }}
                                         </a>
+
+                                        {% if service.is_active == False %}
+                                            <span class="badge rounded-pill ms-2"
+                                                  style="background: rgba(148,163,184,.18); border:1px solid rgba(148,163,184,.35); color:#cbd5e1; font-weight:600;">
+                                                Closed
+                                            </span>
+                                        {% endif %}
                                     </td>
                                     <td class="cell-muted">{{ service.vendor.name }}</td>
                                     <td class="cell-muted">
@@ -277,6 +291,8 @@
     const tableBody = document.getElementById('servicesTableBody');
     const globalAddBtn = document.getElementById('globalAddButton');
     const addServiceModalEl = document.getElementById('addServiceModal');
+    const showClosedToggle = document.getElementById('showClosedToggle');
+
     const addServiceModal =
         addServiceModalEl && window.bootstrap
             ? new bootstrap.Modal(addServiceModalEl)
@@ -284,6 +300,39 @@
 
     let rows = [];
     const vendors = new Set();
+
+    // ---- NEW: Show Closed toggle wiring (query param show_closed=1) ----
+    function getShowClosedFromUrl() {
+        try {
+            const p = new URLSearchParams(window.location.search);
+            const v = (p.get('show_closed') || '').toLowerCase();
+            return (v === '1' || v === 'true' || v === 'on' || v === 'yes');
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function setShowClosedInUrl(enabled) {
+        const url = new URL(window.location.href);
+        const p = url.searchParams;
+
+        if (enabled) {
+            p.set('show_closed', '1');
+        } else {
+            p.delete('show_closed');
+        }
+
+        // Preserve any other query params.
+        url.search = p.toString();
+        window.location.href = url.toString();
+    }
+
+    if (showClosedToggle) {
+        showClosedToggle.checked = getShowClosedFromUrl();
+        showClosedToggle.addEventListener('change', function () {
+            setShowClosedInUrl(showClosedToggle.checked);
+        });
+    }
 
     if (tableBody) {
         rows = Array.from(tableBody.querySelectorAll('tr'));

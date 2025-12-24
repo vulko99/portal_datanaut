@@ -30,7 +30,7 @@
 
             <!-- TOOLBAR: search + filters -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
                     <div class="input-group input-group-sm" style="max-width: 320px;">
                         <span class="input-group-text">Search</span>
                         <input
@@ -53,6 +53,25 @@
                     <select id="managerFilter" class="form-select form-select-sm" style="min-width: 180px;">
                         <option value="">All managers</option>
                     </select>
+
+                    <form method="get" class="small">
+    {# default: hide closed #}
+    <input type="hidden" name="show_closed" value="0">
+
+    <div class="form-check form-switch m-0">
+        <input class="form-check-input"
+               type="checkbox"
+               id="users-show-closed-toggle"
+               name="show_closed"
+               value="1"
+               {% if show_closed %}checked{% endif %}
+               onchange="this.form.submit()">
+        <label class="form-check-label" for="users-show-closed-toggle">
+            Show closed
+        </label>
+    </div>
+</form>
+                    </a>
                 </div>
             </div>
 
@@ -76,18 +95,23 @@
                                 data-username="{{ u.username|default_if_none:'' }}"
                                 data-full-name="{{ u.profile.full_name|default_if_none:'' }}"
                                 data-email="{{ u.email|default_if_none:'' }}"
-                                data-status="{{ u.profile.status|default_if_none:'' }}"
+                                data-status="{% if u.is_active %}active{% else %}inactive{% endif %}"
                                 data-cost-center="{{ u.profile.cost_center.code|default_if_none:'' }}"
                                 data-manager="{{ u.profile.manager.username|default_if_none:'' }}"
                             >
                                 <td>
                                     <a href="{% url 'portal:user_detail' u.pk %}" class="link-table">
                                         {{ u.username }}
+                                        {% if not u.is_active %}
+                                            <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                                        {% endif %}
                                     </a>
                                 </td>
                                 <td class="cell-muted">{{ u.profile.full_name|default:"—" }}</td>
                                 <td class="cell-muted">{{ u.email|default:"—" }}</td>
-                                <td class="cell-muted">{{ u.profile.get_status_display|default:"—" }}</td>
+                                <td class="cell-muted">
+                                    {% if u.is_active %}Active{% else %}Closed{% endif %}
+                                </td>
                                 <td class="cell-muted">
                                     {% if u.profile.cost_center %}
                                         {{ u.profile.cost_center.code }} – {{ u.profile.cost_center.name }}
@@ -111,6 +135,12 @@
                 <p class="portal-card-muted mb-0 mt-2">
                     Over time this grid can power access reviews and user-level allocation splits.
                 </p>
+
+                {% if not show_closed %}
+                    <p class="portal-card-muted mb-0 mt-1">
+                        Closed users are hidden by default. Use <strong>Show closed</strong> to include them.
+                    </p>
+                {% endif %}
             {% else %}
                 <p class="portal-card-muted mb-0">
                     No users yet. Add users to start linking them to cost centers and invoices.
