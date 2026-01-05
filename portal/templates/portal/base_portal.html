@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,6 +72,20 @@
         var(--dn-bg);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
+
+    /* ---- Bootstrap modal: make background fully opaque / non-readable ---- */
+
+.modal-backdrop.show{
+  opacity: .82 !important;              /* default is ~.5 */
+  background-color: #020617 !important;  /* very dark */
+}
+
+.portal-modal{
+  /* override previous radial/transparent look */
+  background: #0B1220 !important;              /* solid panel */
+  border: 1px solid rgba(148,163,184,.28) !important;
+  box-shadow: 0 30px 90px rgba(0,0,0,.75) !important;
+}
 
     .layout { min-height:100vh; display:flex; }
 
@@ -320,6 +334,7 @@
       border: 1px solid rgba(148,163,184,.30);
       background: rgba(15,23,42,.55);
       color: var(--dn-strong);
+      white-space: nowrap;
     }
 
     .btn-ghost{
@@ -332,6 +347,87 @@
     .btn-ghost:hover{
       border-color: rgba(20,244,212,.55);
       background: rgba(20,244,212,.10);
+    }
+
+    /* NEW: Reports button in topbar */
+    .btn-report{
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .86rem;
+      border: 1px solid rgba(20,244,212,.7);
+      background:
+        radial-gradient(circle at top left, rgba(20,244,212,.20), rgba(15,23,42,.94));
+      color: var(--dn-strong);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      box-shadow: 0 10px 26px rgba(15,23,42,.7);
+    }
+    .btn-report:hover{
+      border-color: rgba(96,165,250,.9);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,.24), rgba(15,23,42,.96));
+      color: var(--dn-strong);
+      text-decoration: none;
+      box-shadow: 0 14px 34px rgba(15,23,42,.9);
+    }
+    .btn-report-icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 18px;
+      height: 18px;
+      border-radius:999px;
+      background: rgba(15,23,42,.98);
+    }
+    .btn-report-icon svg{
+      width: 12px;
+      height: 12px;
+    }
+
+    /* NEW: topbar acting dropdown styling (solid, matches portal) */
+    .acting-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--dn-strong);
+      white-space: nowrap;
+    }
+    .acting-pill .label{
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(156,163,175,.92);
+    }
+    .acting-pill .value{
+      font-size: .86rem;
+      font-weight: 600;
+      color: rgba(229,231,235,.92);
+    }
+    .acting-menu{
+      background: #0B1220 !important;
+      border: 1px solid rgba(148,163,184,.24) !important;
+      box-shadow: 0 24px 70px rgba(0,0,0,.55) !important;
+    }
+    .acting-menu .dropdown-item{
+      color: rgba(229,231,235,.92) !important;
+    }
+    .acting-menu .dropdown-item:hover{
+      background: rgba(20,244,212,.10) !important;
+    }
+    .acting-menu .dropdown-header{
+      color: rgba(156,163,175,.92) !important;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .72rem;
+    }
+    .acting-menu .dropdown-divider{
+      border-top-color: rgba(148,163,184,.18) !important;
     }
 
     .content{
@@ -507,6 +603,7 @@
     @media (max-width: 991px){
       .sidebar{ display:none; }
       .content{ padding: 16px; }
+      .topbar-search{ max-width: 100%; }
     }
   </style>
 
@@ -560,7 +657,60 @@
             User inventory
           </a>
         </nav>
+
+      {% elif current_view == 'provisioning_hub' or current_view|slice:":13" == 'provisioning_' %}
+        {# ---------- PROVISIONING HUB CONTEXT ---------- #}
+        <div class="nav-section">Provisioning Hub</div>
+        <nav class="side-nav">
+          <a class="side-link {% if current_view == 'provisioning_hub' %}active{% endif %}"
+             href="{% url 'portal:provisioning_hub' %}">
+            Overview
+          </a>
+
+          <a class="side-link {% if current_view == 'provisioning_my_requests' %}active{% endif %}"
+             href="{% url 'portal:provisioning_my_requests' %}">
+            Requests
+          </a>
+
+          <a class="side-link {% if current_view == 'provisioning_catalog' %}active{% endif %}"
+             href="{% url 'portal:provisioning_catalog' %}">
+            Catalog
+          </a>
+
+          <a class="side-link {% if current_view == 'provisioning_approvals' %}active{% endif %}"
+             href="{% url 'portal:provisioning_approvals' %}">
+            Approvals
+          </a>
+        </nav>
+
+      {% elif current_view == 'reports' %}
+        {# ---------- REPORTS CONTEXT ---------- #}
+        <div class="nav-section">Reports</div>
+        <nav class="side-nav">
+          <a class="side-link {% if active_view|default:'overview' == 'overview' %}active{% endif %}"
+             href="{% url 'portal:reports' %}?view=overview">
+            Overview
+          </a>
+          <a class="side-link {% if active_view == 'users_cost' %}active{% endif %}"
+             href="{% url 'portal:reports' %}?view=users_cost">
+            Users · access cost
+          </a>
+          <a class="side-link {% if active_view == 'services_catalog' %}active{% endif %}"
+             href="{% url 'portal:reports' %}?view=services_catalog">
+            Services catalog (pricing)
+          </a>
+          <a class="side-link {% if active_view == 'contracts_renewals' %}active{% endif %}"
+             href="{% url 'portal:reports' %}?view=contracts_renewals">
+            Contracts renewals schedule
+          </a>
+          <a class="side-link {% if active_view == 'builder' %}active{% endif %}"
+             href="{% url 'portal:reports' %}?view=builder">
+            Report builder
+          </a>
+        </nav>
+
       {% else %}
+
         {# ---------- Нормален портал: стандартно Inventory ---------- #}
         <div class="nav-section">Inventory</div>
         <nav class="side-nav">
@@ -598,6 +748,56 @@
     <header class="topbar">
       {% if request.user.is_authenticated %}
 
+        {# NEW: Manage Access dropdown (left-most in topbar) #}
+        {% if manageable_users %}
+          <div class="dropdown me-2">
+            <button class="btn btn-ghost btn-sm dropdown-toggle acting-pill"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+              <span class="label">Manage</span>
+              <span class="value">
+                {% if is_acting and acting_user %}
+                  {{ acting_user.username }}
+                {% else %}
+                  My access
+                {% endif %}
+              </span>
+            </button>
+
+            <ul class="dropdown-menu acting-menu">
+              <li class="dropdown-header">Manage access for</li>
+
+              {% if is_acting %}
+                <li>
+                  <form method="post" action="{% url 'portal:provisioning_acting_clear' %}" class="px-3 py-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-ghost btn-sm w-100">
+                      Back to my access
+                    </button>
+                  </form>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+              {% endif %}
+
+              {% for u in manageable_users %}
+                <li>
+                  <form method="post" action="{% url 'portal:provisioning_acting_set' %}" class="px-3 py-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <button type="submit"
+                            class="dropdown-item {% if acting_user and u.id == acting_user.id %}active{% endif %}">
+                      {{ u.username }}
+                    </button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
         {# Global search bar – left side #}
         <form class="d-flex flex-grow-1 me-3 topbar-search" method="get" action="{% url 'portal:global_search' %}">
           <div class="input-group input-group-sm w-100">
@@ -617,13 +817,36 @@
           </div>
         </form>
 
-        {# NEW: Permissions button (placed between Search and Data Hub) #}
-        <a href="{% url 'portal:permissions' %}" class="btn btn-ghost btn-sm me-2">
-  Permissions
-</a>
+        {# Provisioning Hub button #}
+        <a href="{% url 'portal:provisioning_hub' %}" class="btn btn-ghost btn-sm me-2">
+          Provisioning Hub
+        </a>
 
+        {# Permissions button #}
+        <a href="{% url 'portal:permissions' %}" class="btn btn-ghost btn-sm me-2">
+          Permissions
+        </a>
+
+        {# Data Hub button #}
         <a href="{% url 'portal:data_hub' %}" class="btn btn-ghost btn-sm me-2">
           Data Hub
+        </a>
+
+        {# Reports icon button (opens in new tab) #}
+        <a href="{% url 'portal:reports' %}"
+           class="btn btn-report btn-sm me-2"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="Reports">
+          <span class="btn-report-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="3" ry="3" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M8 10L8 16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M12 8L12 16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M16 12L16 16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="visually-hidden">Reports</span>
         </a>
 
         {% with request.resolver_match.url_name as current_view %}

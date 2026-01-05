@@ -1,0 +1,663 @@
+{% extends "portal/base_reports.html" %}
+{% load portal_extras %}
+
+{% block content %}
+<div class="page">
+
+  <div class="page-header mb-3">
+    <h1 class="page-title">Reports</h1>
+    <p class="page-subtitle">
+      Structured exports based on your contracts, invoices, vendors and user access.
+      Nothing here changes live data.
+    </p>
+  </div>
+
+  {# Tabs за навигация вътре в Reports #}
+  <div class="reports-tabs mb-3">
+    <a href="{% url 'portal:reports' %}?view=overview"
+       class="reports-tab {% if active_view == 'overview' %}active{% endif %}">
+      Overview
+    </a>
+    <a href="{% url 'portal:reports' %}?view=users_cost"
+       class="reports-tab {% if active_view == 'users_cost' %}active{% endif %}">
+      Users · access cost
+    </a>
+    <a href="{% url 'portal:reports' %}?view=services_catalog"
+       class="reports-tab {% if active_view == 'services_catalog' %}active{% endif %}">
+      Services catalog (pricing)
+    </a>
+    <a href="{% url 'portal:reports' %}?view=contracts_renewals"
+       class="reports-tab {% if active_view == 'contracts_renewals' %}active{% endif %}">
+      Contracts renewals schedule
+    </a>
+    <a href="{% url 'portal:reports' %}?view=vendor_spend_year"
+       class="reports-tab {% if active_view == 'vendor_spend_year' %}active{% endif %}">
+      Vendor spend by year
+    </a>
+    <a href="{% url 'portal:reports' %}?view=user_activity_timeline"
+       class="reports-tab {% if active_view == 'user_activity_timeline' %}active{% endif %}">
+      User activity timeline
+    </a>
+    <a href="{% url 'portal:reports' %}?view=builder"
+       class="reports-tab {% if active_view == 'builder' %}active{% endif %}">
+      Report builder
+    </a>
+  </div>
+
+  {# ============================= OVERVIEW ============================= #}
+  {% if active_view == "overview" %}
+    <div class="page-section">
+      <div class="row g-3">
+        {% for report in available_reports %}
+          <div class="col-md-6 col-xl-4">
+            <div class="portal-card h-100">
+              <div class="section-eyebrow mb-1">Report</div>
+              <div class="section-title mb-1" style="font-size:1.05rem;">
+                {{ report.name }}
+              </div>
+              <p class="portal-card-muted mb-3">
+                {{ report.description }}
+              </p>
+              {% if report.url %}
+                <a href="{{ report.url }}" class="dn-btn-primary btn-sm">
+                  Open report
+                </a>
+              {% else %}
+                <button type="button" class="dn-btn-primary btn-sm" disabled>
+                  Planned
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  {# ========================= USERS · ACCESS COST ====================== #}
+  {% elif active_view == "users_cost" %}
+    <div class="portal-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="section-eyebrow mb-1">Users</div>
+          <div class="section-title" style="font-size:1.15rem;">Access cost by user</div>
+          <p class="portal-card-muted mb-1">
+            Each row shows a user, number of active services and estimated run-rate based on service list prices.
+          </p>
+        </div>
+        <div>
+          <a href="?view=users_cost&export=csv" class="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
+        </div>
+      </div>
+
+      {% if user_cost_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="users-cost-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="users-cost-table" class="portal-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Full name</th>
+                <th>Cost center</th>
+                <th class="text-end"># services</th>
+                <th class="text-end">Estimated cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in user_cost_rows %}
+                <tr>
+                  <td>{{ row.username }}</td>
+                  <td>{{ row.full_name|default:"—" }}</td>
+                  <td class="cell-muted">
+                    {% if row.cost_center %}
+                      {{ row.cost_center.code }} · {{ row.cost_center.name }}
+                    {% else %}
+                      — 
+                    {% endif %}
+                  </td>
+                  <td class="text-end">{{ row.services_count }}</td>
+                  <td class="text-end">
+                    {% if row.currency == "Mixed" %}
+                      Mixed currencies
+                    {% elif row.currency %}
+                      {{ row.total_cost }} {{ row.currency }}
+                    {% else %}
+                      — 
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          Costs are indicative and based on service list prices; discounts and invoice timing are not applied.
+        </p>
+      {% else %}
+        <div class="empty">
+          No active service assignments found. Once users have services assigned, this report will populate automatically.
+        </div>
+      {% endif %}
+    </div>
+
+  {# ======================== SERVICES CATALOG (PRICING) ================ #}
+  {% elif active_view == "services_catalog" %}
+    <div class="portal-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="section-eyebrow mb-1">Services</div>
+          <div class="section-title" style="font-size:1.15rem;">Services catalog (pricing)</div>
+          <p class="portal-card-muted mb-1">
+            Flat list of services with vendor, category and list price. Use the filters to narrow down by vendor or status.
+          </p>
+        </div>
+        <div>
+          <a href="?view=services_catalog&export=csv" class="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
+        </div>
+      </div>
+
+      <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="view" value="services_catalog">
+
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted" style="letter-spacing:.08em;">
+            Search
+          </label>
+          <input type="text"
+                 name="q"
+                 class="form-control form-control-sm"
+                 placeholder="Filter by service, vendor or category..."
+                 value="{{ request.GET.q|default_if_none:'' }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small text-uppercase text-muted" style="letter-spacing:.08em;">
+            Status
+          </label>
+          <select name="status" class="form-select form-select-sm">
+            <option value="" {% if not request.GET.status %}selected{% endif %}>All</option>
+            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+            <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>Closed</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end justify-content-md-end gap-2">
+          <button type="submit" class="btn btn-ghost btn-sm">Apply</button>
+          <a href="?view=services_catalog" class="btn btn-ghost btn-sm">Reset</a>
+        </div>
+      </form>
+
+      {% if services_catalog_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="services-catalog-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="services-catalog-table" class="portal-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Code</th>
+                <th>Vendor</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>List price</th>
+                <th>Currency</th>
+                <th>Billing period</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in services_catalog_rows %}
+                <tr>
+                  <td>{{ row.service_name }}</td>
+                  <td class="cell-muted">{{ row.service_code|default:"—" }}</td>
+                  <td>{{ row.vendor_name|default:"—" }}</td>
+                  <td class="cell-muted">{{ row.category|default:"—" }}</td>
+                  <td>{{ row.status }}</td>
+                  <td>{{ row.list_price|default:"—" }}</td>
+                  <td>{{ row.currency|default:"—" }}</td>
+                  <td class="cell-muted">{{ row.billing_period|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          Use search and status filters above to focus on a subset of services. Export CSV respects the same filters.
+        </p>
+      {% else %}
+        <div class="empty">
+          No services match the current filters.
+        </div>
+      {% endif %}
+    </div>
+
+  {# ======================= CONTRACTS RENEWALS SCHEDULE ================= #}
+  {% elif active_view == "contracts_renewals" %}
+    <div class="portal-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="section-eyebrow mb-1">Contracts</div>
+          <div class="section-title" style="font-size:1.15rem;">Contracts renewals schedule</div>
+          <p class="portal-card-muted mb-1">
+            Upcoming contract renewals with annual value and simple risk flags. Sorted by renewal date.
+          </p>
+        </div>
+        <div>
+          <a href="?view=contracts_renewals&export=csv" class="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
+        </div>
+      </div>
+
+      {% if contracts_renewals_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="contracts-renewals-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="contracts-renewals-table" class="portal-table">
+            <thead>
+              <tr>
+                <th>Contract</th>
+                <th>Service</th>
+                <th>Vendor</th>
+                <th>Legal entity</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>Status</th>
+                <th>Annual value</th>
+                <th>Currency</th>
+                <th>Risk</th>
+                <th>Days to renewal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in contracts_renewals_rows %}
+                <tr>
+                  <td>{{ row.contract_code }}</td>
+                  <td>{{ row.service_name|default:"—" }}</td>
+                  <td>{{ row.vendor_name|default:"—" }}</td>
+                  <td class="cell-muted">{{ row.legal_entity|default:"—" }}</td>
+                  <td>{{ row.start_date|date:"Y-m-d"|default:"—" }}</td>
+                  <td>{{ row.end_date|date:"Y-m-d"|default:"—" }}</td>
+                  <td>{{ row.status|default:"—" }}</td>
+                  <td>{{ row.annual_value|default:"—" }}</td>
+                  <td>{{ row.currency|default:"—" }}</td>
+                  <td>
+                    {% if row.risk_flag %}
+                      {% with flag=row.risk_flag|lower %}
+                        {% if "high" in flag %}
+                          <span class="risk-badge risk-high">High</span>
+                        {% elif "med" in flag %}
+                          <span class="risk-badge risk-medium">Medium</span>
+                        {% elif "low" in flag %}
+                          <span class="risk-badge risk-low">Low</span>
+                        {% else %}
+                          <span class="risk-badge">{{ row.risk_flag }}</span>
+                        {% endif %}
+                      {% endwith %}
+                    {% else %}
+                      — 
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    {% if row.days_to_renewal is not None %}
+                      {{ row.days_to_renewal }}
+                    {% else %}
+                      — 
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          Rows are ordered by end date. Days to renewal are calculated relative to today; negative values indicate past expiry.
+        </p>
+      {% else %}
+        <div class="empty">
+          No contracts found for the renewals schedule.
+        </div>
+      {% endif %}
+    </div>
+
+  {# ========================= VENDOR SPEND BY YEAR ====================== #}
+  {% elif active_view == "vendor_spend_year" %}
+    <div class="portal-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="section-eyebrow mb-1">Vendors</div>
+          <div class="section-title" style="font-size:1.15rem;">Vendor spend by year</div>
+          <p class="portal-card-muted mb-1">
+            Yearly spend per vendor based on your invoice data. This view will later power the spend widgets on the main dashboard.
+          </p>
+        </div>
+        <div>
+          <a href="?view=vendor_spend_year&export=csv" class="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
+        </div>
+      </div>
+
+      {% if vendor_spend_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="vendor-spend-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="vendor-spend-table" class="portal-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Vendor</th>
+                <th>Currency</th>
+                <th class="text-end">Total spend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in vendor_spend_rows %}
+                <tr>
+                  <td>{{ row.year }}</td>
+                  <td>{{ row.vendor_name }}</td>
+                  <td>{{ row.currency|default:"—" }}</td>
+                  <td class="text-end">{{ row.total_spend|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          One row per vendor and fiscal year. Multi-currency datasets will be surfaced as separate currency lines until FX logic is added.
+        </p>
+      {% else %}
+        <div class="empty">
+          This report shell is ready, but spend aggregation has not been wired to your invoice data yet.
+          Once we connect the invoices model, you will see vendor × year totals here and in the dashboard widgets.
+        </div>
+      {% endif %}
+    </div>
+
+  {% elif active_view == "user_activity_timeline" %}
+    <div class="portal-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="section-eyebrow mb-1">Usage</div>
+          <div class="section-title" style="font-size:1.15rem;">User activity timeline</div>
+          <p class="portal-card-muted mb-1">
+            High-level activity timeline per user – logins, service usage and dormant periods.
+            This view will feed the Usage overview panel on the main dashboard.
+          </p>
+        </div>
+        <div>
+          <a href="?view=user_activity_timeline&export=csv" class="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
+        </div>
+      </div>
+
+      {% if user_activity_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="user-activity-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="user-activity-table" class="portal-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Full name</th>
+                <th>Last activity</th>
+                <th>Active days (90d)</th>
+                <th>Dormant since</th>
+                <th>Services used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in user_activity_rows %}
+                <tr>
+                  <td>{{ row.username }}</td>
+                  <td>{{ row.full_name|default:"—" }}</td>
+                  <td>{{ row.last_activity|date:"Y-m-d H:i"|default:"—" }}</td>
+                  <td>{{ row.active_days_90d|default:"—" }}</td>
+                  <td>{{ row.dormant_since|date:"Y-m-d"|default:"—" }}</td>
+                  <td class="cell-muted">{{ row.services_summary|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          The final implementation will aggregate activity from provisioning, access assignments and usage logs.
+          For now the structure is in place and ready to plug into live data.
+        </p>
+      {% else %}
+        <div class="empty">
+          The timeline layout is ready, but user activity is not yet connected to live usage logs.
+          Once we wire the usage models, you will see per-user activity and dormancy signals here.
+        </div>
+      {% endif %}
+    </div>
+
+  {% elif active_view == "builder" %}
+    <div class="portal-card mb-3">
+      <div class="section-eyebrow mb-1">Builder</div>
+      <div class="section-title" style="font-size:1.15rem;">Report builder</div>
+      <p class="portal-card-muted mb-3">
+        Choose a dataset, tweak columns and per-column filters, then export the result as CSV.
+        Use <strong>Users &amp; profiles</strong> for user master data, or
+        <strong>User · services</strong> for a flat access matrix users × services.
+      </p>
+
+      <form id="report-builder-form" class="row g-3 align-items-end mb-3" method="get">
+        <input type="hidden" name="view" value="builder">
+
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted" style="letter-spacing:.08em;">
+            Dataset
+          </label>
+          <select class="form-select form-select-sm" name="dataset">
+            {% for ds in builder_datasets %}
+              <option value="{{ ds.key }}" {% if ds.key == builder_active_dataset %}selected{% endif %}>
+                {{ ds.label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6 text-md-end">
+          <button class="btn btn-ghost btn-sm me-1" type="submit">
+            Refresh
+          </button>
+          <button class="btn btn-ghost btn-sm" type="submit" name="export" value="csv">
+            Export CSV
+          </button>
+        </div>
+
+        <div class="col-12">
+          <details open>
+            <summary class="small text-muted" style="cursor:pointer;">
+              Columns
+            </summary>
+            <div class="mt-2">
+              <div class="row g-1">
+                {% for col in builder_columns %}
+                  <div class="col-md-3 col-sm-4 col-6">
+                    <div class="form-check">
+                      <input class="form-check-input builder-col-toggle"
+                             type="checkbox"
+                             name="col"
+                             value="{{ col.key }}"
+                             id="col_{{ col.key }}"
+                             {% if col.key in builder_selected_cols %}checked{% endif %}>
+                      <label class="form-check-label small" for="col_{{ col.key }}">
+                        {{ col.label }}
+                      </label>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </details>
+        </div>
+      </form>
+
+      {% if builder_rows %}
+        <div class="reports-table-toolbar">
+          <span>Rows per view:</span>
+          <select class="form-select form-select-sm dn-rows-select"
+                  data-rows-control
+                  data-target="builder-table">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+
+        <div class="table-responsive reports-table-shell">
+          <table id="builder-table" class="portal-table">
+            <thead>
+              <tr>
+                {% for col in builder_columns %}
+                  {% if col.key in builder_selected_cols %}
+                    <th>{{ col.label }}</th>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+              <tr>
+                {% for col in builder_columns %}
+                  {% if col.key in builder_selected_cols %}
+                    <th>
+                      <input type="text"
+                             name="f_{{ col.key }}"
+                             form="report-builder-form"
+                             class="form-control form-control-sm"
+                             placeholder="Filter..."
+                             value="{{ builder_filters|report_value:col.key|default_if_none:'' }}">
+                    </th>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in builder_rows %}
+                <tr>
+                  {% for col in builder_columns %}
+                    {% if col.key in builder_selected_cols %}
+                      <td>
+                        {{ row|report_value:col.key|default_if_none:"" }}
+                      </td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">
+          Showing {{ builder_preview_count }} of {{ builder_total_count }} rows (preview limit: {{ builder_preview_limit }}).
+          Export CSV uses the same dataset, filters and selected columns for the full dataset.
+        </p>
+      {% else %}
+        <div class="empty">
+          No records match the current filters.
+        </div>
+      {% endif %}
+    </div>
+
+  {% else %}
+    <div class="empty">
+      Unknown report view.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    const form = document.getElementById("report-builder-form");
+    if (!form) return;
+
+    // Auto-submit при смяна на dataset
+    const datasetSelect = form.querySelector("select[name='dataset']");
+    if (datasetSelect) {
+      datasetSelect.addEventListener("change", function() {
+        form.submit();
+      });
+    }
+
+    // Auto-submit при чек/ънчек на колоните, без да затваря <details>
+    const colCheckboxes = form.querySelectorAll(".builder-col-toggle");
+    colCheckboxes.forEach(function(cb) {
+      cb.addEventListener("change", function() {
+        const columnsDetails = form.querySelector("details");
+        if (columnsDetails && !columnsDetails.open) {
+          columnsDetails.open = true;
+        }
+        form.submit();
+      });
+    });
+  })();
+</script>
+{% endblock %}

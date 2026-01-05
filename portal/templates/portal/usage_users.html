@@ -1,31 +1,309 @@
 {% extends "portal/base_portal.html" %}
+{% load static %}
+{% load portal_extras %}
 
-{% block title_suffix %} · Usage – User inventory{% endblock %}
+{% block title %}Usage – User inventory{% endblock %}
 
 {% block content %}
-<div class="portal-card">
-  <div class="section-eyebrow mb-1">Dashboards · Users</div>
-  <h1 class="section-title mb-1">User inventory</h1>
-  <p class="section-subtitle mb-3">
-    All users with key identifiers – a starting point to join licence usage back to people and desks.
-  </p>
+<style>
+  /* Общ card фон и типография */
+  .usage-card {
+    background: radial-gradient(circle at top left, #020617, #020617 45%, #000000 100%);
+    border-radius: 1rem;
+  }
 
-  <div class="table-responsive">
-    <table class="portal-table align-middle">
-      <thead>
-        <tr>
-          <th style="width: 22%;">Username</th>
-          <th style="width: 26%;">Name</th>
-          <th style="width: 24%;">Cost centre</th>
-          <th style="width: 18%;">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="cell-muted" colspan="4">No users in scope yet.</td>
-        </tr>
-      </tbody>
-    </table>
+  /* Таблица – висок контраст, ясни редове */
+  .usage-table {
+    font-size: 0.8rem;
+    color: #e5e7eb;
+    background-color: #020617;
+  }
+  .usage-table thead {
+    background-color: #020617;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-size: 0.7rem;
+  }
+  .usage-table th,
+  .usage-table td {
+    border-bottom: 1px solid #111827 !important;
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+    vertical-align: middle;
+  }
+  .usage-table tbody tr:nth-child(odd) {
+    background-color: #020617;
+  }
+  .usage-table tbody tr:nth-child(even) {
+    background-color: #030712;
+  }
+  .usage-table tbody tr:hover {
+    background-color: #1f2937;
+  }
+
+  /* Баджове за статус */
+  .usage-badge-dormant {
+    background: rgba(248,113,113,.08);
+    color: #fecaca;
+    border: 1px solid rgba(248,113,113,.5);
+    font-size: 0.7rem;
+    padding: .15rem .7rem;
+    border-radius: 999px;
+  }
+  .usage-badge-active {
+    background: rgba(34,197,94,.08);
+    color: #bbf7d0;
+    border: 1px solid rgba(34,197,94,.5);
+    font-size: 0.7rem;
+    padding: .15rem .7rem;
+    border-radius: 999px;
+  }
+
+  /* Филтри */
+  .usage-filter-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #9ca3af;
+  }
+  .usage-input,
+  .usage-select {
+    background: #020617;
+    border-color: #1f2937;
+    color: #e5e7eb;
+  }
+  .usage-input::placeholder {
+    color: #6b7280;
+  }
+
+  /* Десен панел – по-голям и четим текст */
+  .usage-help-card {
+    background: #000000;
+    border-radius: 1rem;
+  }
+
+  /* Име на потребител – добре четим върху бял фон */
+  .usage-user-name {
+      color: #020617;          /* почти черно */
+      font-weight: 600;
+  }
+  .usage-user-name:hover {
+      color: #0f766e;          /* лек акцент при hover */
+      text-decoration: none;
+  }
+
+  .usage-user-meta {
+      color: #6b7280;          /* muted, за "7 services / yr" */
+      font-size: 0.75rem;
+  }
+</style>
+
+<div class="container-xl py-4">
+
+  <!-- Заглавие -->
+  <div class="mb-3">
+    <div class="text-uppercase small text-muted mb-1">Usage inventory</div>
+    <h1 class="h4 text-white mb-1">User inventory</h1>
+    <p class="small text-muted mb-0">
+      Users, their assigned services and recent activity. Use this view to identify dormant
+      licences and potential savings.
+    </p>
+  </div>
+
+  <!-- Навигация между inventory изгледите -->
+  <div class="mb-4">
+    <ul class="nav nav-pills nav-sm bg-dark rounded-pill px-1 py-1 d-inline-flex shadow-sm">
+      <li class="nav-item">
+        <a class="nav-link text-white-50 px-3"
+           href="{% url 'portal:usage_invoices' %}">
+          Invoice inventory
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white-50 px-3"
+           href="{% url 'portal:usage_contract' %}">
+          Contract inventory
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white-50 px-3"
+           href="{% url 'portal:usage_vendors' %}">
+          Vendor inventory
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active px-3"
+           aria-current="page"
+           href="{% url 'portal:usage_users' %}">
+          User inventory
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Ляво: основна таблица -->
+    <div class="col-lg-9">
+      <div class="card usage-card border-0 shadow-sm h-100">
+
+        <!-- Header + филтри -->
+        <div class="card-header border-0 pb-3" style="background: transparent;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div class="text-uppercase small text-muted mb-1" style="letter-spacing: .08em;">
+                Users and assigned services
+              </div>
+              <h2 class="h5 text-white mb-0">Licence footprint per user</h2>
+            </div>
+          </div>
+
+          <form method="get">
+            <div class="row g-2 align-items-end">
+              <!-- Search -->
+              <div class="col-md-5">
+                <label class="usage-filter-label mb-1">Search</label>
+                <input type="text"
+                       name="q"
+                       value="{{ q }}"
+                       class="form-control form-control-sm usage-input"
+                       placeholder="User or desk…">
+              </div>
+
+              <!-- Status -->
+              <div class="col-md-3">
+                <label class="usage-filter-label mb-1">Status</label>
+                <select name="status"
+                        class="form-select form-select-sm usage-select">
+                  <option value="all" {% if status == "all" %}selected{% endif %}>All statuses</option>
+                  <option value="active" {% if status == "active" %}selected{% endif %}>Active</option>
+                  <option value="dormant" {% if status == "dormant" %}selected{% endif %}>Dormant</option>
+                </select>
+              </div>
+
+              <!-- Rows selector -->
+              <div class="col-md-3">
+                <label class="usage-filter-label mb-1">Rows</label>
+                <select name="limit"
+                        class="form-select form-select-sm usage-select">
+                  {% for size in page_sizes %}
+                    <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>
+                      {{ size }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Apply -->
+              <div class="col-md-1 d-grid">
+                <button type="submit"
+                        class="btn btn-sm btn-primary"
+                        style="background: #06b6d4; border-color: #06b6d4;">
+                  Apply
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Таблица -->
+        <div class="card-body p-0">
+          <!-- вътрешен скрол, да не дърпа целия екран -->
+          <div class="table-responsive" style="max-height: 540px; overflow-y: auto;">
+            <table class="table table-hover table-borderless align-middle mb-0 text-nowrap usage-table">
+              <thead>
+                <tr>
+                  <th scope="col" style="min-width: 210px;">User</th>
+                  <th scope="col">Desk</th>
+                  <th scope="col" class="text-end">Services</th>
+                  <th scope="col" class="text-end">Dormant services</th>
+                  <th scope="col">Last login</th>
+                  <th scope="col" class="text-end">Status</th>
+                </tr>
+              </thead>
+              <td>
+  <tbody>
+  {% for u in user_rows %}
+    <tr>
+      <!-- USER -->
+      <td class="align-middle">
+        <div>
+          <a href="{% url 'portal:user_detail' u.user.id %}"
+             class="usage-user-name">
+            {{ u.username }}
+          </a>
+        </div>
+        <div class="usage-user-meta">
+          {{ u.services }} services
+          {% if u.total_price %}
+            · {{ u.total_price|floatformat:0 }} / yr
+          {% endif %}
+        </div>
+      </td>
+
+      <!-- DESK -->
+      <td class="text-muted align-middle">
+        {{ u.desk_label }}
+      </td>
+
+      <!-- SERVICES -->
+      <td class="text-muted align-middle text-center">
+        {{ u.services }}
+      </td>
+
+      <!-- DORMANT SERVICES -->
+      <td class="text-muted align-middle text-center">
+        {{ u.dormant_services }}
+      </td>
+
+      <!-- LAST LOGIN -->
+      <td class="text-muted align-middle">
+        {% if u.last_login %}
+          {{ u.last_login|date:"Y-m-d" }}
+        {% else %}
+          No login
+        {% endif %}
+      </td>
+
+      <!-- STATUS -->
+      <td class="align-middle">
+        {% if u.status == "Dormant" %}
+          <span class="badge bg-soft-danger text-danger fw-semibold px-3 py-1 rounded-pill">
+            Dormant
+          </span>
+        {% else %}
+          <span class="badge bg-soft-success text-success fw-semibold px-3 py-1 rounded-pill">
+            Active
+          </span>
+        {% endif %}
+      </td>
+    </tr>
+  {% empty %}
+    <tr>
+      <td colspan="6" class="text-center text-muted py-4">
+        No users match the current filters.
+      </td>
+    </tr>
+  {% endfor %}
+</tbody>
+
+    <!-- Дясно: обяснителен панел, вече наистина четим -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="card usage-help-card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h3 class="h6 text-white mb-3">How to read this view</h3>
+          <p class="small text-light mb-3">
+            Each row is a single user with their current licence footprint and last login.
+          </p>
+          <ul class="small text-light mb-0">
+            <li><span class="fw-semibold text-white">Status filter</span> – switch between all users and dormant only.</li>
+            <li><span class="fw-semibold text-white">Rows selector</span> – 10 / 20 / 30 / 40 / 50 rows at a time.</li>
+            <li>Click a username to drill into the detailed user view.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}

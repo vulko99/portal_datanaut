@@ -1,0 +1,88 @@
+{% extends "portal/base_portal.html" %}
+{% block content %}
+
+<div class="portal-card">
+  <div class="d-flex align-items-start justify-content-between gap-3">
+    <div>
+      <div class="section-eyebrow">Provisioning Hub</div>
+      <div class="section-title">Catalog</div>
+      <div class="section-subtitle">Select services and submit a single request batch.</div>
+    </div>
+    <a href="{% url 'portal:provisioning_hub' %}" class="btn btn-ghost btn-sm">Back</a>
+  </div>
+
+  <form method="post" action="{% url 'portal:provisioning_catalog_request_bulk' %}" class="mt-3">
+    {% csrf_token %}
+
+    <div class="d-flex justify-content-end mb-2">
+      <button type="submit" class="btn-add btn-sm">
+        Request selected
+      </button>
+    </div>
+
+    {% if services_by_vendor %}
+      {% for vendor, rows in services_by_vendor.items %}
+        <div class="mt-3">
+          <div class="metric-label mb-2">{{ vendor }}</div>
+
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width:44px;"></th>
+                <th>Service</th>
+                <th>Category</th>
+                <th>List price</th>
+                <th style="width:160px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+                {% with s=r.service %}
+                <tr>
+                  <td>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="service_ids"
+                      value="{{ s.pk }}"
+                      {% if r.is_assigned or r.is_pending %}disabled{% endif %}
+                    >
+                  </td>
+
+                  <td>{{ s.name }}</td>
+
+                  <td class="cell-muted">{{ s.category|default:"—" }}</td>
+
+                  <td class="cell-muted">
+                    {% if s.list_price %}
+                      {{ s.list_price|floatformat:2 }} {{ s.default_currency|default:"" }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+
+                  <td class="cell-muted">
+                    {% if r.is_assigned %}
+                      Already assigned
+                    {% elif r.is_pending %}
+                      Pending request
+                    {% else %}
+                      Available
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty mt-3">
+        No available services in the catalog yet.
+      </div>
+    {% endif %}
+  </form>
+</div>
+
+{% endblock %}

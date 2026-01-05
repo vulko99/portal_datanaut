@@ -1,33 +1,146 @@
 {% extends "portal/base_portal.html" %}
+{% load i18n %}
+{% load humanize %}
 
-{% block title_suffix %} · Usage – Vendor inventory{% endblock %}
+{% block portal_content %}
+<div class="usage-page">
 
-{% block content %}
-<div class="portal-card">
-  <div class="section-eyebrow mb-1">Dashboards · Vendors</div>
-  <h1 class="section-title mb-1">Vendor inventory</h1>
-  <p class="section-subtitle mb-3">
-    All vendors with type, tags and linkage to contracts and invoices.
-    A starting point for vendor-level reviews.
-  </p>
+  <div class="usage-page-header">
+    <div>
+      <p class="usage-eyebrow">USAGE INVENTORY</p>
+      <h1 class="usage-title">Vendor inventory</h1>
+      <p class="usage-subtitle">
+        Summary of all vendors with active licences, based on actual ServiceAssignment data.
+      </p>
+    </div>
 
-  <div class="table-responsive">
-    <table class="portal-table align-middle">
-      <thead>
-        <tr>
-          <th style="width: 30%;">Vendor</th>
-          <th style="width: 18%;">Type</th>
-          <th style="width: 22%;">Tags</th>
-          <th style="width: 15%;">Contracts</th>
-          <th style="width: 15%;">Invoices</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="cell-muted" colspan="5">No vendors in scope yet.</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="usage-kpi-row">
+      <div class="usage-kpi-card">
+        <span class="usage-kpi-label">Vendors</span>
+        <span class="usage-kpi-value">
+          {{ kpis.vendors_count|default:vendor_rows|length }}
+        </span>
+      </div>
+      <div class="usage-kpi-card">
+        <span class="usage-kpi-label">Licences monitored</span>
+        <span class="usage-kpi-value">{{ kpis.licences_monitored|default:"0" }}</span>
+      </div>
+      <div class="usage-kpi-card">
+        <span class="usage-kpi-label">Value at risk (dormant)</span>
+        <span class="usage-kpi-value">
+          {{ kpis.potential_savings|floatformat:2|intcomma }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="usage-card usage-card--table">
+    <div class="usage-card-header">
+      <div>
+        <h2 class="usage-card-title">Vendor coverage</h2>
+        <p class="usage-card-subtitle">
+          One row per vendor. Values are approximate list prices based on assigned services.
+        </p>
+      </div>
+
+      <div class="usage-card-actions">
+        <form method="get" class="usage-toggle-form">
+          <label class="usage-toggle">
+            <input type="checkbox" name="show_closed" value="1"
+                   {% if show_closed %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <span>Show inactive vendors</span>
+          </label>
+        </form>
+
+        <div class="usage-search">
+          <input id="vendor-search"
+                 type="text"
+                 autocomplete="off"
+                 placeholder="Search vendor…">
+        </div>
+      </div>
+    </div>
+
+    <div class="usage-table-wrapper">
+      <table class="usage-table">
+        <thead>
+          <tr>
+            <th>Vendor</th>
+            <th class="text-right">Desks</th>
+            <th class="text-right">Total licences</th>
+            <th class="text-right">Active</th>
+            <th class="text-right">Dormant</th>
+            <th class="text-right">Annual value</th>
+            <th class="text-right">Value at risk</th>
+          </tr>
+        </thead>
+        <tbody id="vendor-table-body">
+          {% for row in vendor_rows %}
+            <tr>
+              <td class="usage-cell-main">
+                <a href="{% url 'portal:vendor_detail' row.vendor.pk %}"
+                   class="usage-link">
+                  {{ row.vendor_name }}
+                </a>
+              </td>
+              <td class="text-right">{{ row.desks_count }}</td>
+              <td class="text-right">{{ row.licences }}</td>
+              <td class="text-right">{{ row.active_licences }}</td>
+              <td class="text-right">
+                {% if row.dormant_licences %}
+                  <span class="badge badge--warn">
+                    {{ row.dormant_licences }}
+                  </span>
+                {% else %}
+                  <span class="badge badge--ok">0</span>
+                {% endif %}
+              </td>
+              <td class="text-right">
+                {{ row.total_price|floatformat:2|intcomma }}
+              </td>
+              <td class="text-right">
+                {% if row.dormant_price %}
+                  <span class="badge badge--accent">
+                    {{ row.dormant_price|floatformat:2|intcomma }}
+                  </span>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="usage-table-empty">
+                No vendors found.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="usage-footnote">
+      Values are based on list prices of assigned services. Contracted prices may differ.
+    </p>
   </div>
 </div>
+
+<script>
+  (function () {
+    const input = document.getElementById('vendor-search');
+    if (!input) return;
+    const rows = document.querySelectorAll('#vendor-table-body tr');
+
+    input.addEventListener('input', function () {
+      const q = this.value.toLowerCase();
+      rows.forEach(function (tr) {
+        const vendorCell = tr.querySelector('td');
+        if (!vendorCell) return;
+        const text = vendorCell.textContent.toLowerCase();
+        tr.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+  })();
+</script>
 {% endblock %}

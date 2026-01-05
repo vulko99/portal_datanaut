@@ -18,9 +18,12 @@
                 <div class="d-flex flex-wrap gap-2">
                     <div>
                         <div class="metric-label">Total users</div>
-                        <div class="metric-value">
-                            {{ users|length }}
-                        </div>
+<div class="metric-value">
+    {{ total_users }}
+</div>
+<div class="small text-muted">
+    Showing {{ users|length }} of {{ total_users }}
+</div>
                     </div>
                 </div>
                 <div class="text-end small text-muted">
@@ -54,30 +57,53 @@
                         <option value="">All managers</option>
                     </select>
 
+                    {# Show closed toggle – пазим и rows параметъра #}
                     <form method="get" class="small">
-    {# default: hide closed #}
-    <input type="hidden" name="show_closed" value="0">
+                        {# default: hide closed #}
+                        <input type="hidden" name="show_closed" value="0">
+                        <input type="hidden" name="rows" value="{{ rows_per_page|default_if_none:50 }}">
 
-    <div class="form-check form-switch m-0">
-        <input class="form-check-input"
-               type="checkbox"
-               id="users-show-closed-toggle"
-               name="show_closed"
-               value="1"
-               {% if show_closed %}checked{% endif %}
-               onchange="this.form.submit()">
-        <label class="form-check-label" for="users-show-closed-toggle">
-            Show closed
-        </label>
-    </div>
-</form>
-                    </a>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="users-show-closed-toggle"
+                                   name="show_closed"
+                                   value="1"
+                                   {% if show_closed %}checked{% endif %}
+                                   onchange="this.form.submit()">
+                            <label class="form-check-label" for="users-show-closed-toggle">
+                                Show closed
+                            </label>
+                        </div>
+                    </form>
+
+                    {# NEW: rows-per-page selector #}
+                    <form method="get" class="small">
+                        <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+                        <div class="d-flex align-items-center gap-1">
+                            <label for="rows-per-page" class="form-label mb-0 small text-muted">
+                                Rows:
+                            </label>
+                            <select id="rows-per-page"
+                                    name="rows"
+                                    class="form-select form-select-sm"
+                                    onchange="this.form.submit()"
+                                    style="width:auto; min-width: 80px;">
+                                {% for opt in rows_options %}
+                                    <option value="{{ opt }}"
+                                            {% if rows_per_page == opt %}selected{% endif %}>
+                                        {{ opt }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
                 </div>
             </div>
 
             <!-- USER GRID -->
             {% if users %}
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
                     <table class="portal-table align-middle">
                         <thead>
                         <tr>

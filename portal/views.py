@@ -1,23 +1,26 @@
-# portal/views.py
 from __future__ import annotations
 
 import csv
 import io
 import re
 from decimal import Decimal, InvalidOperation
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from collections import defaultdict
 
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Sum, Count, Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models.functions import ExtractYear
 from django.db.models.deletion import ProtectedError
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from .models import (
     Vendor,
@@ -27,6 +30,7 @@ from .models import (
     Contract,
     Invoice,
     ServiceAssignment,
+    ProvisioningRequest,   # добавено
 )
 from .forms import ContractUploadForm, InvoiceUploadForm, VendorCreateForm
 
@@ -382,6 +386,21 @@ def _csv_response(filename: str, headers: list[str], rows: list[list[str]]) -> H
     return resp
 
 
+def _first_existing_field(model, candidates):
+    """
+    Utility: връща първото име на поле от candidates, което реално съществува
+    в модела. Ако нито едно не съществува, връща None.
+    """
+    field_names = {
+        f.name for f in model._meta.get_fields()
+        if hasattr(f, "attname")
+    }
+    for name in candidates:
+        if name in field_names:
+            return name
+    return None
+
+
 # -------------------------
 # Importers (per entity)
 # -------------------------
@@ -658,6 +677,145 @@ def _import_invoices(rows: list[dict], request_user) -> dict:
     return {"created": created, "updated": updated}
 
 
+@transaction.atomic
+def _import_users(rows: list[dict], request_user) -> dict:
+    """
+    Basic users + profiles import.
+
+    Очаквани колони:
+      - username (required)
+      - email
+      - first_name
+      - last_name
+      - full_name
+      - cost_center_code
+      - manager_username
+      - location
+      - legal_entity
+      - is_active  (Active/Closed, 1/0, true/false, yes/no и т.н.)
+    """
+    _require_columns(rows, ["username"])
+    created = 0
+    updated = 0
+
+    for r in rows:
+        username = _as_str(r.get("username"))
+        if not username:
+            continue
+
+        email = _as_str(r.get("email"))
+        first_name = _as_str(r.get("first_name"))
+        last_name = _as_str(r.get("last_name"))
+        full_name = _as_str(r.get("full_name"))
+        cost_center_code = _as_str(r.get("cost_center_code"))
+        manager_username = _as_str(r.get("manager_username"))
+        location = _as_str(r.get("location"))
+        legal_entity = _as_str(r.get("legal_entity"))
+        is_active_raw = (_as_str(r.get("is_active")) or "").lower()
+
+        if is_active_raw in ("0", "false", "no", "closed", "inactive"):
+            is_active = False
+        elif is_active_raw in ("1", "true", "yes", "open", "active"):
+            is_active = True
+        else:
+            # празно или неразпознато -> приемаме Active
+            is_active = True
+
+        user = User.objects.filter(username__iexact=username).first()
+        if user:
+            updated += 1
+        else:
+            user = User(username=username)
+            try:
+                user.set_unusable_password()
+            except Exception:
+                pass
+            created += 1
+
+        if email:
+            user.email = email
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        user.is_active = is_active
+        user.save()
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        if full_name:
+            profile.full_name = full_name
+
+        cc = None
+        if cost_center_code:
+            cc = CostCenter.objects.filter(code__iexact=cost_center_code).first()
+        profile.cost_center = cc
+
+        manager = None
+        if manager_username:
+            manager = User.objects.filter(username__iexact=manager_username).first()
+        profile.manager = manager
+
+        if location:
+            profile.location = location
+        if legal_entity:
+            profile.legal_entity = legal_entity
+
+        profile.save()
+
+    return {"created": created, "updated": updated}
+
+
+@transaction.atomic
+def _import_permissions(rows: list[dict], request_user) -> dict:
+    """
+    Import за permissions (User × Service).
+
+    Очаквани колони:
+      - username
+      - vendor_name
+      - service_name
+    """
+    _require_columns(rows, ["username", "vendor_name", "service_name"])
+    created = 0
+    updated = 0  # няма real "update", просто създаваме, ако липсва
+
+    for r in rows:
+        username = _as_str(r.get("username"))
+        vendor_name = _as_str(r.get("vendor_name"))
+        service_name = _as_str(r.get("service_name"))
+
+        if not (username and vendor_name and service_name):
+            continue
+
+        user = User.objects.filter(username__iexact=username).first()
+        if not user:
+            raise ValueError(f"User not found for permission row (username='{username}').")
+
+        vendor = Vendor.objects.filter(name__iexact=vendor_name).first()
+        if not vendor:
+            raise ValueError(
+                f"Vendor not found for permission row (vendor='{vendor_name}', username='{username}')."
+            )
+
+        service = Service.objects.filter(vendor=vendor, name__iexact=service_name).first()
+        if not service:
+            raise ValueError(
+                f"Service not found for permission row "
+                f"(vendor='{vendor_name}', service='{service_name}', username='{username}')."
+            )
+
+        _, was_created = ServiceAssignment.objects.get_or_create(
+            user=user,
+            service=service,
+            defaults={"assigned_by": request_user},
+        )
+        if was_created:
+            created += 1
+
+    return {"created": created, "updated": updated}
+
+
 DATA_ENTITIES = {
     "vendors": {
         "label": "Vendors",
@@ -736,7 +894,9 @@ DATA_ENTITIES = {
                 _as_str(c.notice_date) if getattr(c, "notice_date", None) else "",
                 c.status or "",
             ]
-            for c in Contract.objects.filter(owner=user).select_related("vendor").order_by("-created_at")
+            for c in Contract.objects.filter(owner=user)
+                .select_related("vendor")
+                .order_by("-created_at")
         ],
     },
     "invoices": {
@@ -759,7 +919,65 @@ DATA_ENTITIES = {
                 _as_str(i.period_end) if i.period_end else "",
                 i.notes or "",
             ]
-            for i in Invoice.objects.filter(owner=user).select_related("vendor", "contract").order_by("-invoice_date", "-id")
+            for i in Invoice.objects.filter(owner=user)
+                .select_related("vendor", "contract")
+                .order_by("-invoice_date", "-id")
+        ],
+    },
+
+    # ---------- NEW: Users ----------
+    "users": {
+        "label": "Users",
+        "template_headers": [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "full_name",
+            "cost_center_code",
+            "manager_username",
+            "location",
+            "legal_entity",
+            "is_active",
+        ],
+        "importer": _import_users,
+        "exporter": lambda user: [
+            [
+                u.username,
+                u.email or "",
+                u.first_name or "",
+                u.last_name or "",
+                getattr(getattr(u, "profile", None), "full_name", "") or "",
+                getattr(getattr(getattr(u, "profile", None), "cost_center", None), "code", "") or "",
+                getattr(getattr(getattr(u, "profile", None), "manager", None), "username", "") or "",
+                getattr(getattr(u, "profile", None), "location", "") or "",
+                getattr(getattr(u, "profile", None), "legal_entity", "") or "",
+                "Active" if u.is_active else "Closed",
+            ]
+            for u in User.objects
+                .select_related("profile", "profile__cost_center", "profile__manager")
+                .order_by("username")
+        ],
+    },
+
+    # ---------- NEW: Permissions (User · Service) ----------
+    "permissions": {
+        "label": "Permissions (user · service)",
+        "template_headers": [
+            "username",
+            "vendor_name",
+            "service_name",
+        ],
+        "importer": _import_permissions,
+        "exporter": lambda user: [
+            [
+                a.user.username if a.user else "",
+                a.service.vendor.name if a.service and a.service.vendor else "",
+                a.service.name if a.service else "",
+            ]
+            for a in ServiceAssignment.objects
+                .select_related("user", "service", "service__vendor")
+                .order_by("user__username", "service__vendor__name", "service__name")
         ],
     },
 }
@@ -770,6 +988,7 @@ def _get_entity_or_404(entity: str) -> dict:
     if not cfg:
         raise Http404("Unknown Data Hub entity.")
     return cfg
+
 
 
 # ----------
@@ -1117,6 +1336,7 @@ def invoice_detail(request, pk):
 
 @login_required
 def vendor_list(request):
+    # --- create vendor (както досега) ---
     if request.method == "POST":
         form = VendorCreateForm(request.POST)
         if form.is_valid():
@@ -1135,6 +1355,7 @@ def vendor_list(request):
     else:
         form = VendorCreateForm()
 
+    # --- базов queryset + show_closed ---
     vendors = (
         Vendor.objects.all()
         .annotate(contract_count=Count("contracts", distinct=True))
@@ -1146,7 +1367,32 @@ def vendor_list(request):
     if not show_closed and hasattr(Vendor, "is_active"):
         vendors = vendors.filter(is_active=True)
 
-    context = {"vendors": vendors, "form": form, "show_closed": show_closed}
+    # --- pagination-подобна логика за rows ---
+    rows_param = request.GET.get("rows")
+    rows_options = [25, 50, 100, 250]
+    default_rows = 50
+
+    try:
+        rows_limit = int(rows_param) if rows_param else default_rows
+    except (TypeError, ValueError):
+        rows_limit = default_rows
+
+    if rows_limit not in rows_options:
+        rows_limit = default_rows
+
+    total_vendors = vendors.count()
+    vendors_page = vendors[:rows_limit]
+    showing_count = vendors_page.count()  # evaluate queryset length
+
+    context = {
+        "vendors": vendors_page,
+        "form": form,
+        "show_closed": show_closed,
+        "total_vendors": total_vendors,
+        "rows_limit": rows_limit,
+        "rows_options": rows_options,
+        "showing_count": showing_count,
+    }
     return render(request, "portal/vendors.html", context)
 
 
@@ -1276,7 +1522,7 @@ def vendor_detail(request, pk):
                 vendor.save()
 
                 after = _vendor_snapshot(vendor)
-                changes = _diff_snapshots(before, after)
+                changes = _diff_snapshots(after=after, before=before)
                 _audit_log_event(
                     request=request,
                     object_type="Vendor",
@@ -1417,14 +1663,33 @@ def service_list(request):
                 messages.warning(request, "Service saved, but no matching contract was linked.")
             return redirect("portal:services")
 
-    services = (
+    # базов queryset за списъка
+    services_qs = (
         Service.objects.select_related("vendor", "primary_contract")
         .order_by("vendor__name", "name")
     )
 
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
     if not show_closed and hasattr(Service, "is_active"):
-        services = services.filter(is_active=True)
+        services_qs = services_qs.filter(is_active=True)
+
+    # броячи + лимит на редове (като при Users/Vendors)
+    total_services = services_qs.count()
+
+    rows_options = [10, 25, 50, 100, 250]
+    rows_default = 25
+    rows_param = request.GET.get("rows")
+
+    try:
+        rows_limit = int(rows_param) if rows_param else rows_default
+    except (TypeError, ValueError):
+        rows_limit = rows_default
+
+    if rows_limit not in rows_options:
+        rows_limit = rows_default
+
+    services = list(services_qs[:rows_limit])
+    showing_count = len(services)
 
     context = {
         "services": services,
@@ -1432,6 +1697,10 @@ def service_list(request):
         "add_form_data": add_form_data,
         "add_form_has_errors": add_form_has_errors,
         "show_closed": show_closed,
+        "total_services": total_services,
+        "showing_count": showing_count,
+        "rows_limit": rows_limit,
+        "rows_options": rows_options,
     }
     return render(request, "portal/services.html", context)
 
@@ -1813,6 +2082,7 @@ def service_edit(request, pk: int):
     )
 
 
+
 # ----------
 # COST CENTERS
 # ----------
@@ -1836,13 +2106,28 @@ def cost_centers_list(request):
 def users_list(request):
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
 
-    users_qs = User.objects.all().order_by("username")
-    if not show_closed:
-        users_qs = users_qs.filter(is_active=True)
+    # колко реда да показваме
+    try:
+        rows_per_page = int(request.GET.get("rows") or 50)
+    except ValueError:
+        rows_per_page = 50
 
-    for u in users_qs:
+    # малко guard rails
+    if rows_per_page < 10:
+        rows_per_page = 10
+    if rows_per_page > 250:
+        rows_per_page = 250
+
+    # базов queryset (ползваме го, за да се уверим, че профилите съществуват)
+    base_qs = User.objects.all().order_by("username")
+    if not show_closed:
+        base_qs = base_qs.filter(is_active=True)
+
+    # ensure UserProfile съществува за всеки
+    for u in base_qs:
         UserProfile.objects.get_or_create(user=u)
 
+    # реалният queryset за екрана – със select_related
     users_qs = (
         User.objects.select_related("profile", "profile__cost_center", "profile__manager")
         .order_by("username")
@@ -1850,7 +2135,22 @@ def users_list(request):
     if not show_closed:
         users_qs = users_qs.filter(is_active=True)
 
-    return render(request, "portal/users.html", {"users": users_qs, "show_closed": show_closed})
+    total_users = users_qs.count()        # общо (след филтъра Show closed)
+    users_qs = users_qs[:rows_per_page]   # само първите N реда за екрана
+
+    rows_options = [10, 25, 50, 100, 250]
+
+    return render(
+        request,
+        "portal/users.html",
+        {
+            "users": users_qs,
+            "show_closed": show_closed,
+            "rows_per_page": rows_per_page,
+            "rows_options": rows_options,
+            "total_users": total_users,
+        },
+    )
 
 
 @login_required
@@ -2086,6 +2386,7 @@ def user_detail(request, pk: int):
             "assigned_services_rows_by_vendor": assigned_services_rows_by_vendor,
         },
     )
+
 
 
 # ----------
@@ -2371,6 +2672,10 @@ def data_hub(request):
             count = Contract.objects.filter(owner=request.user).count()
         elif key == "invoices":
             count = Invoice.objects.filter(owner=request.user).count()
+        elif key == "users":
+            count = User.objects.count()
+        elif key == "permissions":
+            count = ServiceAssignment.objects.count()
         else:
             count = 0
 
@@ -2448,79 +2753,1879 @@ def data_template(request, entity: str):
 
 
 # ----------
+# PROVISIONING HUB
+# ----------
+
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, transaction
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from .models import (
+    ProvisioningRequest,
+    Service,
+    ServiceAssignment,
+    UserProfile,
+    Vendor,
+)
+
+User = get_user_model()
+
+PROV_ACTING_SESSION_KEY = "prov_acting_user_id"
+
+
+def _is_prov_admin(user) -> bool:
+    return (
+        getattr(user, "is_superuser", False)
+        or getattr(user, "is_staff", False)
+        or user.groups.filter(name__in=["Provisioning Hub Admins", "ProvisioningHubAdmins"]).exists()
+    )
+
+
+def _can_act_for(manager_user, target_user) -> bool:
+    """
+    Who can manage access for whom:
+      - prov admin: can act for anyone
+      - user can act for self
+      - line manager can act for direct reports (UserProfile.manager == manager_user)
+    """
+    if not manager_user.is_authenticated:
+        return False
+
+    if manager_user.pk == target_user.pk:
+        return True
+
+    if _is_prov_admin(manager_user):
+        return True
+
+    # Manager rule (direct reports only)
+    try:
+        profile = getattr(target_user, "profile", None)
+        if profile and profile.manager_id == manager_user.pk:
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
+def _get_acting_user(request):
+    """
+    Returns the effective user for provisioning actions.
+    If a session acting user exists but is not allowed anymore -> clear it.
+    """
+    acting_id = request.session.get(PROV_ACTING_SESSION_KEY)
+    if not acting_id:
+        return request.user
+
+    try:
+        target = User.objects.select_related("profile").get(pk=int(acting_id))
+    except Exception:
+        request.session.pop(PROV_ACTING_SESSION_KEY, None)
+        return request.user
+
+    if not _can_act_for(request.user, target):
+        request.session.pop(PROV_ACTING_SESSION_KEY, None)
+        return request.user
+
+    return target
+
+
+def _get_manageable_users(request):
+    """
+    List of users visible in the "Manage access for" dropdown.
+    - prov admin: all users (safe for demo; later you can scope by tenant)
+    - manager: direct reports only
+    """
+    if _is_prov_admin(request.user):
+        return User.objects.order_by("username")
+
+    # direct reports
+    return (
+        User.objects.filter(profile__manager=request.user)
+        .order_by("username")
+    )
+
+
+@require_POST
+@login_required
+def provisioning_acting_set(request):
+    """
+    Sets the acting user (manage access for...) in session.
+    POST: user_id, optional next
+    """
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "portal:provisioning_hub"
+    user_id = request.POST.get("user_id")
+
+    if not user_id or not str(user_id).isdigit():
+        messages.error(request, "Invalid selection.")
+        return redirect(next_url)
+
+    target = get_object_or_404(User, pk=int(user_id))
+
+    if not _can_act_for(request.user, target):
+        messages.error(request, "You do not have permission to manage access for this user.")
+        return redirect(next_url)
+
+    request.session[PROV_ACTING_SESSION_KEY] = target.pk
+    messages.info(request, f"Managing access for: {target.username}.")
+    return redirect(next_url)
+
+
+@require_POST
+@login_required
+def provisioning_acting_clear(request):
+    """
+    Clears acting user (back to self).
+    """
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "portal:provisioning_hub"
+    request.session.pop(PROV_ACTING_SESSION_KEY, None)
+    messages.info(request, "Managing access for: you.")
+    return redirect(next_url)
+
+
+@login_required
+def provisioning_hub(request):
+    """
+    Provisioning Hub landing page:
+      - left: current assigned services (from ServiceAssignment)
+      - right: user card (profile + total cost)
+    IMPORTANT: uses acting user if set.
+    """
+    is_prov_admin = _is_prov_admin(request.user)
+
+    acting_user = _get_acting_user(request)
+    profile, _ = UserProfile.objects.get_or_create(user=acting_user)
+
+    assignments = (
+        ServiceAssignment.objects
+        .filter(user=acting_user)
+        .select_related("service", "service__vendor")
+        .order_by("service__vendor__name", "service__name")
+    )
+
+    assigned_rows = []
+    total_cost = Decimal("0")
+
+    for a in assignments:
+        s = a.service
+        if not s:
+            continue
+
+        vendor_name = s.vendor.name if s.vendor else "—"
+        is_active = getattr(s, "is_active", True)
+        list_price = getattr(s, "list_price", None)
+        currency = getattr(s, "default_currency", "") or "—"
+
+        assigned_rows.append({
+            "service": s,
+            "vendor_name": vendor_name,
+            "is_active": is_active,
+            "list_price": list_price,
+            "currency": currency,
+        })
+
+        if list_price is not None:
+            try:
+                total_cost += Decimal(str(list_price))
+            except Exception:
+                pass
+
+    return render(
+        request,
+        "portal/provisioning_hub.html",
+        {
+            "is_prov_admin": is_prov_admin,
+            "acting_user": acting_user,
+            "is_acting": (acting_user.pk != request.user.pk),
+            "manageable_users": _get_manageable_users(request),
+            "profile": profile,
+            "assigned_rows": assigned_rows,
+            "total_cost": total_cost,
+        },
+    )
+
+
+@login_required
+def provisioning_catalog(request):
+    """
+    Catalog page (active services), rendered with checkboxes.
+    Uses acting user for assigned/pending checks.
+    """
+    acting_user = _get_acting_user(request)
+
+    services = Service.objects.select_related("vendor").order_by("vendor__name", "name")
+
+    if hasattr(Service, "is_active"):
+        services = services.filter(is_active=True)
+
+    if hasattr(Vendor, "is_active"):
+        services = services.filter(vendor__is_active=True)
+
+    assigned_service_ids = set(
+        ServiceAssignment.objects.filter(user=acting_user).values_list("service_id", flat=True)
+    )
+
+    pending_service_ids = set(
+        ProvisioningRequest.objects.filter(
+            requester=acting_user,
+            status=ProvisioningRequest.STATUS_PENDING,
+        ).values_list("service_id", flat=True)
+    )
+
+    by_vendor: dict[str, list] = {}
+    for s in services:
+        vname = s.vendor.name if s.vendor else "—"
+        by_vendor.setdefault(vname, []).append({
+            "service": s,
+            "is_assigned": (s.id in assigned_service_ids),
+            "is_pending": (s.id in pending_service_ids),
+        })
+
+    return render(
+        request,
+        "portal/provisioning_catalog.html",
+        {
+            "acting_user": acting_user,
+            "is_acting": (acting_user.pk != request.user.pk),
+            "services_by_vendor": by_vendor,
+        },
+    )
+
+
+@require_POST
+@login_required
+def provisioning_catalog_request_bulk(request):
+    """
+    Create multiple ProvisioningRequest rows from selected service IDs.
+    Uses acting user (manager can request on behalf of employee).
+    """
+    acting_user = _get_acting_user(request)
+
+    service_ids = request.POST.getlist("service_ids")
+    if not service_ids:
+        messages.error(request, "No services selected.")
+        return redirect("portal:provisioning_catalog")
+
+    try:
+        service_ids_int = [int(x) for x in service_ids]
+    except ValueError:
+        messages.error(request, "Invalid selection.")
+        return redirect("portal:provisioning_catalog")
+
+    assigned_ids = set(
+        ServiceAssignment.objects.filter(user=acting_user, service_id__in=service_ids_int)
+        .values_list("service_id", flat=True)
+    )
+
+    pending_ids = set(
+        ProvisioningRequest.objects.filter(
+            requester=acting_user,
+            status=ProvisioningRequest.STATUS_PENDING,
+            service_id__in=service_ids_int,
+        ).values_list("service_id", flat=True)
+    )
+
+    to_create_ids = [sid for sid in service_ids_int if sid not in assigned_ids and sid not in pending_ids]
+    if not to_create_ids:
+        messages.info(request, "Nothing to request (already assigned or pending).")
+        return redirect("portal:provisioning_my_requests")
+
+    created = 0
+    skipped_inactive = 0
+    skipped_vendor_closed = 0
+
+    with transaction.atomic():
+        services = Service.objects.filter(id__in=to_create_ids).select_related("vendor")
+
+        for svc in services:
+            if hasattr(Service, "is_active") and not getattr(svc, "is_active", True):
+                skipped_inactive += 1
+                continue
+            if hasattr(Vendor, "is_active") and svc.vendor and not getattr(svc.vendor, "is_active", True):
+                skipped_vendor_closed += 1
+                continue
+
+            try:
+                ProvisioningRequest.objects.create(
+                    requester=acting_user,
+                    service=svc,
+                    status=ProvisioningRequest.STATUS_PENDING,
+                    reason="",
+                )
+                created += 1
+            except IntegrityError:
+                # unique pending constraint
+                pass
+
+    if created:
+        if acting_user.pk != request.user.pk:
+            messages.success(request, f"Submitted {created} request(s) for {acting_user.username}.")
+        else:
+            messages.success(request, f"Submitted {created} request(s).")
+    if skipped_inactive or skipped_vendor_closed:
+        messages.info(request, "Some services were skipped because they are not available (inactive/closed vendor).")
+
+    return redirect("portal:provisioning_my_requests")
+
+
+@login_required
+def provisioning_my_requests(request):
+    """
+    My Requests page (real data).
+    Uses acting user.
+    """
+    acting_user = _get_acting_user(request)
+
+    reqs = (
+        ProvisioningRequest.objects
+        .filter(requester=acting_user)
+        .select_related("service", "service__vendor", "decided_by")
+        .order_by("-created_at", "-id")
+    )
+
+    return render(
+        request,
+        "portal/provisioning_my_requests.html",
+        {
+            "acting_user": acting_user,
+            "is_acting": (acting_user.pk != request.user.pk),
+            "requests": reqs,
+        },
+    )
+
+
+@login_required
+def provisioning_approvals(request):
+    """
+    Provisioning Hub - Approvals (admin queue).
+    Shows pending requests only.
+    """
+    is_prov_admin = _is_prov_admin(request.user)
+    if not is_prov_admin:
+        messages.error(request, "You do not have permission to access approvals.")
+        return redirect("portal:provisioning_hub")
+
+    approvals = (
+        ProvisioningRequest.objects
+        .select_related("requester", "service", "service__vendor")
+        .filter(status=ProvisioningRequest.STATUS_PENDING)
+        .order_by("-created_at", "-id")
+    )
+
+    return render(
+        request,
+        "portal/provisioning_approvals.html",
+        {
+            "is_prov_admin": is_prov_admin,
+            "approvals": approvals,
+        },
+    )
+
+
+@login_required
+def provisioning_request_create(request, service_pk: int):
+    """
+    Single-service request create (kept for compatibility).
+    Uses acting user.
+    """
+    acting_user = _get_acting_user(request)
+
+    service = get_object_or_404(Service.objects.select_related("vendor"), pk=service_pk)
+
+    if hasattr(Service, "is_active") and not getattr(service, "is_active", True):
+        messages.error(request, "This service is closed and cannot be requested.")
+        return redirect("portal:provisioning_catalog")
+
+    if hasattr(Vendor, "is_active") and service.vendor and not getattr(service.vendor, "is_active", True):
+        messages.error(request, "This vendor is closed and cannot be requested.")
+        return redirect("portal:provisioning_catalog")
+
+    already_assigned = ServiceAssignment.objects.filter(user=acting_user, service=service).exists()
+    if already_assigned:
+        messages.info(request, "Access already exists for this service.")
+        return redirect("portal:provisioning_hub")
+
+    if request.method == "POST":
+        existing_pending = ProvisioningRequest.objects.filter(
+            requester=acting_user,
+            service=service,
+            status=ProvisioningRequest.STATUS_PENDING,
+        ).first()
+        if existing_pending:
+            messages.info(request, "A pending request already exists for this service.")
+            return redirect("portal:provisioning_my_requests")
+
+        try:
+            ProvisioningRequest.objects.create(
+                requester=acting_user,
+                service=service,
+                status=ProvisioningRequest.STATUS_PENDING,
+            )
+            if acting_user.pk != request.user.pk:
+                messages.success(request, f"Request submitted for {acting_user.username}: {service.vendor.name} – {service.name}.")
+            else:
+                messages.success(request, f"Request submitted: {service.vendor.name} – {service.name}.")
+        except IntegrityError:
+            messages.info(request, "A pending request already exists for this service.")
+
+        return redirect("portal:provisioning_my_requests")
+
+    return render(
+        request,
+        "portal/provisioning_request_create.html",
+        {
+            "acting_user": acting_user,
+            "is_acting": (acting_user.pk != request.user.pk),
+            "service": service,
+        },
+    )
+
+
+@login_required
+def provisioning_approval_decide(request, pk: int):
+    """
+    Keep single-item endpoint for backward compatibility.
+    """
+    if not _is_prov_admin(request.user):
+        messages.error(request, "You do not have permission to access approvals.")
+        return redirect("portal:provisioning_hub")
+
+    if request.method != "POST":
+        messages.error(request, "POST required.")
+        return redirect("portal:provisioning_approvals")
+
+    decision = (request.POST.get("decision") or "").strip().lower()
+    if decision not in ("approve", "reject"):
+        messages.error(request, "Invalid decision.")
+        return redirect("portal:provisioning_approvals")
+
+    pr = get_object_or_404(ProvisioningRequest, pk=pk)
+
+    if pr.status != ProvisioningRequest.STATUS_PENDING:
+        messages.warning(request, "This request is no longer pending.")
+        return redirect("portal:provisioning_approvals")
+
+    with transaction.atomic():
+        pr = ProvisioningRequest.objects.select_for_update().get(pk=pk)
+
+        if pr.status != ProvisioningRequest.STATUS_PENDING:
+            messages.warning(request, "This request is no longer pending.")
+            return redirect("portal:provisioning_approvals")
+
+        pr.decided_at = timezone.now()
+        pr.decided_by = request.user
+
+        if decision == "approve":
+            pr.status = ProvisioningRequest.STATUS_APPROVED
+            pr.save(update_fields=["status", "decided_at", "decided_by"])
+            ServiceAssignment.objects.get_or_create(
+                user=pr.requester,
+                service=pr.service,
+                defaults={"assigned_by": request.user},
+            )
+        else:
+            pr.status = ProvisioningRequest.STATUS_REJECTED
+            pr.save(update_fields=["status", "decided_at", "decided_by"])
+
+    messages.success(request, f"Decision recorded: {decision}.")
+    return redirect("portal:provisioning_approvals")
+
+
+@login_required
+def provisioning_approvals_decide_bulk(request):
+    """
+    Bulk approve/reject selected pending requests.
+    POST:
+      - ids: list of ProvisioningRequest ids
+      - decision: approve|reject
+    """
+    if request.method != "POST":
+        messages.error(request, "POST required.")
+        return redirect("portal:provisioning_approvals")
+
+    if not _is_prov_admin(request.user):
+        messages.error(request, "You do not have permission to access approvals.")
+        return redirect("portal:provisioning_hub")
+
+    decision = (request.POST.get("decision") or "").strip().lower()
+    if decision not in ("approve", "reject"):
+        messages.error(request, "Invalid decision.")
+        return redirect("portal:provisioning_approvals")
+
+    ids = request.POST.getlist("ids")
+    ids = [i for i in ids if str(i).isdigit()]
+    if not ids:
+        messages.warning(request, "No requests selected.")
+        return redirect("portal:provisioning_approvals")
+
+    with transaction.atomic():
+        qs = (
+            ProvisioningRequest.objects
+            .select_related("service", "service__vendor", "requester")
+            .select_for_update()
+            .filter(id__in=ids, status=ProvisioningRequest.STATUS_PENDING)
+        )
+
+        processed = 0
+        for pr in qs:
+            pr.decided_at = timezone.now()
+            pr.decided_by = request.user
+
+            if decision == "approve":
+                pr.status = ProvisioningRequest.STATUS_APPROVED
+                pr.save(update_fields=["status", "decided_at", "decided_by"])
+
+                ServiceAssignment.objects.get_or_create(
+                    user=pr.requester,
+                    service=pr.service,
+                    defaults={"assigned_by": request.user},
+                )
+            else:
+                pr.status = ProvisioningRequest.STATUS_REJECTED
+                pr.save(update_fields=["status", "decided_at", "decided_by"])
+
+            processed += 1
+
+    # (ако искаш да оправим текста "rejectd" → "rejected", ще го направим след това в 1 ред)
+    messages.success(request, f"{processed} request(s) {decision}d.")
+    return redirect("portal:provisioning_approvals")
+
+@login_required
+@require_POST
+def provisioning_access_remove(request, service_pk: int):
+    """
+    Remove access to a service (deletes ServiceAssignment).
+    Uses acting user, so a manager can remove access for direct report.
+    """
+    acting_user = _get_acting_user(request)
+
+    assignment = ServiceAssignment.objects.filter(
+        user=acting_user,
+        service_id=service_pk,
+    ).first()
+
+    if not assignment:
+        messages.error(request, "No active assignment found for this service.")
+        return redirect("portal:provisioning_hub")
+
+    assignment.delete()
+
+    if acting_user.pk != request.user.pk:
+        messages.success(request, f"Access removed for {acting_user.username}.")
+    else:
+        messages.success(request, "Access removed.")
+
+    return redirect("portal:provisioning_hub")
+
+@login_required
+def report_center(request):
+    """
+    Reports Center.
+
+    - view=overview               -> картите с наличните репорти
+    - view=users_cost             -> Users · access cost
+    - view=services_catalog       -> Services catalog (pricing)
+    - view=contracts_renewals     -> Contracts renewals schedule
+    - view=vendor_spend_year      -> Vendor spend by year (Invoice-based)
+    - view=user_activity_timeline -> User activity timeline (logins + access)
+    - view=builder                -> generic табличен report builder
+    """
+    active_view = (request.GET.get("view") or "overview").strip() or "overview"
+    if active_view not in {
+        "overview",
+        "users_cost",
+        "services_catalog",
+        "contracts_renewals",
+        "vendor_spend_year",
+        "user_activity_timeline",
+        "builder",
+    }:
+        active_view = "overview"
+
+    # ---------------- общи променливи ----------------
+    user_cost_rows: list[dict] = []
+    services_catalog_rows: list[dict] = []
+    contracts_renewals_rows: list[dict] = []
+    vendor_spend_rows: list[dict] = []
+    user_activity_rows: list[dict] = []
+
+    # builder
+    builder_datasets = [
+        {"key": "users_profiles", "label": "Users & profiles"},
+        {"key": "user_access", "label": "User · services"},
+    ]
+    builder_active_dataset = (
+        request.GET.get("dataset") or "users_profiles"
+    ).strip() or "users_profiles"
+    valid_dataset_keys = {d["key"] for d in builder_datasets}
+    if builder_active_dataset not in valid_dataset_keys:
+        builder_active_dataset = "users_profiles"
+
+    builder_columns: list[dict] = []
+    builder_rows: list[dict] = []
+    builder_selected_cols: set[str] = set()
+    builder_filters: dict[str, str] = {}
+    builder_preview_limit = 500
+    builder_total_count = 0
+    builder_preview_count = 0
+
+    # ============================================================
+    # 1) Users · access cost
+    # ============================================================
+    if active_view == "users_cost":
+        assignments = (
+            ServiceAssignment.objects
+            .select_related(
+                "user",
+                "user__profile",
+                "user__profile__cost_center",
+                "service",
+                "service__vendor",
+            )
+            .filter(user__is_active=True)
+        )
+
+        per_user: dict[int, dict] = {}
+
+        for a in assignments:
+            user = a.user
+            service = a.service
+            if not user or not service:
+                continue
+
+            entry = per_user.get(user.pk)
+            if not entry:
+                profile = getattr(user, "profile", None)
+                cost_center = getattr(profile, "cost_center", None)
+
+                # Full name: profile.full_name > Django full_name > username
+                if profile and getattr(profile, "full_name", ""):
+                    full_name = profile.full_name
+                else:
+                    fn = getattr(user, "get_full_name", lambda: "")()
+                    full_name = fn or user.username
+
+                entry = {
+                    "user": user,
+                    "username": user.username,
+                    "full_name": full_name,
+                    "cost_center": cost_center,
+                    "services_count": 0,
+                    "total_cost": Decimal("0"),
+                    "currencies": set(),
+                }
+                per_user[user.pk] = entry
+
+            entry["services_count"] += 1
+
+            price = getattr(service, "list_price", None)
+            currency = getattr(service, "default_currency", "") or ""
+            if price is not None:
+                try:
+                    entry["total_cost"] += price
+                except Exception:
+                    pass
+            if currency:
+                entry["currencies"].add(currency)
+
+        for entry in per_user.values():
+            currencies = entry["currencies"]
+            if not currencies:
+                currency_label = ""
+            elif len(currencies) == 1:
+                currency_label = list(currencies)[0]
+            else:
+                currency_label = "Mixed"
+
+            user_cost_rows.append({
+                "user": entry["user"],
+                "username": entry["username"],
+                "full_name": entry["full_name"],
+                "cost_center": entry["cost_center"],
+                "services_count": entry["services_count"],
+                "total_cost": entry["total_cost"],
+                "currency": currency_label,
+            })
+
+        user_cost_rows.sort(key=lambda r: r["username"].lower())
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = [
+                "username",
+                "full_name",
+                "cost_center_code",
+                "cost_center_name",
+                "services_count",
+                "total_cost",
+                "currency",
+            ]
+            rows = []
+            for r in user_cost_rows:
+                cc = r["cost_center"]
+                rows.append([
+                    r["username"],
+                    r["full_name"],
+                    getattr(cc, "code", "") if cc else "",
+                    getattr(cc, "name", "") if cc else "",
+                    str(r["services_count"]),
+                    str(r["total_cost"]) if r["total_cost"] is not None else "",
+                    r["currency"],
+                ])
+
+            filename = (
+                f"datanaut_report_users_cost_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+    # ============================================================
+    # 2) Services catalog (pricing)
+    # ============================================================
+    if active_view == "services_catalog":
+        search = (request.GET.get("q") or "").strip()
+        status = (request.GET.get("status") or "").strip().lower()
+
+        qs = Service.objects.select_related("vendor")
+
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search)
+                | Q(service_code__icontains=search)
+                | Q(vendor__name__icontains=search)
+                | Q(category__icontains=search)
+            )
+
+        if status == "active":
+            qs = qs.filter(is_active=True)
+        elif status == "closed":
+            qs = qs.filter(is_active=False)
+
+        qs = qs.order_by("vendor__name", "name")
+
+        for s in qs:
+            vendor = getattr(s, "vendor", None)
+            services_catalog_rows.append({
+                "service_name": getattr(s, "name", "") or "",
+                "service_code": getattr(s, "service_code", "") or "",
+                "vendor_name": getattr(vendor, "name", "") if vendor else "",
+                "category": getattr(s, "category", "") or "",
+                "status": "Active" if getattr(s, "is_active", True) else "Closed",
+                "list_price": getattr(s, "list_price", None),
+                "currency": getattr(s, "default_currency", "") or "",
+                "billing_period": (
+                    getattr(s, "billing_period", "")
+                    or getattr(s, "default_billing_frequency", "")
+                    or getattr(s, "billing_frequency", "")
+                ),
+            })
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = [
+                "service_name",
+                "service_code",
+                "vendor_name",
+                "category",
+                "status",
+                "list_price",
+                "currency",
+                "billing_period",
+            ]
+            rows = []
+            for r in services_catalog_rows:
+                rows.append([
+                    r["service_name"],
+                    r["service_code"],
+                    r["vendor_name"],
+                    r["category"],
+                    r["status"],
+                    str(r["list_price"]) if r["list_price"] is not None else "",
+                    r["currency"],
+                    r["billing_period"],
+                ])
+
+            filename = (
+                f"datanaut_report_services_catalog_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+    # ============================================================
+    # 3) Contracts renewals schedule
+    # ============================================================
+    if active_view == "contracts_renewals":
+        today = date.today()
+
+        qs = Contract.objects.select_related("vendor").all()
+
+        for c in qs:
+            vendor = getattr(c, "vendor", None)
+
+            end_date = (
+                getattr(c, "end_date", None)
+                or getattr(c, "valid_to", None)
+                or getattr(c, "renewal_date", None)
+            )
+            start_date = (
+                getattr(c, "start_date", None)
+                or getattr(c, "valid_from", None)
+            )
+
+            annual_value = (
+                getattr(c, "annual_value", None)
+                or getattr(c, "contract_value", None)
+            )
+            risk_flag = (
+                getattr(c, "risk_flag", "")
+                or getattr(c, "risk_level", "")
+                or ""
+            )
+
+            days_to_renewal = None
+            if isinstance(end_date, (datetime, date)):
+                end_date_date = end_date.date() if isinstance(end_date, datetime) else end_date
+                days_to_renewal = (end_date_date - today).days
+
+            contracts_renewals_rows.append({
+                "contract_code": (
+                    getattr(c, "reference", "")
+                    or getattr(c, "code", "")
+                    or str(getattr(c, "id", ""))
+                ),
+                "service_name": getattr(getattr(c, "service", None), "name", ""),
+                "vendor_name": getattr(vendor, "name", "") if vendor else "",
+                "legal_entity": getattr(c, "legal_entity", "") or "",
+                "start_date": start_date,
+                "end_date": end_date,
+                "status": getattr(c, "status", "") or "",
+                "annual_value": annual_value,
+                "currency": getattr(c, "currency", "") or "",
+                "risk_flag": risk_flag,
+                "days_to_renewal": days_to_renewal,
+            })
+
+        def _sort_key(r: dict):
+            end = r["end_date"]
+            if isinstance(end, datetime):
+                end = end.date()
+            if isinstance(end, date):
+                return (0, end)
+            return (1, date.max)
+
+        contracts_renewals_rows.sort(key=_sort_key)
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = [
+                "contract_code",
+                "service_name",
+                "vendor_name",
+                "legal_entity",
+                "start_date",
+                "end_date",
+                "status",
+                "annual_value",
+                "currency",
+                "risk_flag",
+                "days_to_renewal",
+            ]
+            rows = []
+            for r in contracts_renewals_rows:
+                rows.append([
+                    r["contract_code"],
+                    r["service_name"],
+                    r["vendor_name"],
+                    r["legal_entity"],
+                    r["start_date"].isoformat()
+                    if isinstance(r["start_date"], (date, datetime)) else "",
+                    r["end_date"].isoformat()
+                    if isinstance(r["end_date"], (date, datetime)) else "",
+                    r["status"],
+                    str(r["annual_value"]) if r["annual_value"] is not None else "",
+                    r["currency"],
+                    r["risk_flag"],
+                    "" if r["days_to_renewal"] is None else str(r["days_to_renewal"]),
+                ])
+
+            filename = (
+                f"datanaut_report_contracts_renewals_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+    # ============================================================
+    # 4) Vendor spend by year (Invoice-based)
+    # ============================================================
+    if active_view == "vendor_spend_year":
+        amount_field = _first_existing_field(
+            Invoice,
+            ["total_amount", "amount", "net_amount", "gross_amount", "value"],
+        )
+        date_field = _first_existing_field(
+            Invoice,
+            ["invoice_date", "date", "issue_date", "period_start", "period_end"],
+        )
+        currency_field = _first_existing_field(
+            Invoice,
+            ["currency", "currency_code"],
+        )
+
+        if amount_field and date_field and currency_field:
+            qs = (
+                Invoice.objects
+                .filter(owner=request.user)
+                .select_related("vendor")
+                .annotate(year=ExtractYear(date_field))
+                .values("year", "vendor__name", currency_field)
+                .annotate(total_spend=Sum(amount_field))
+                .order_by("-year", "vendor__name")
+            )
+
+            for row in qs:
+                vendor_spend_rows.append({
+                    "year": row.get("year"),
+                    "vendor_name": row.get("vendor__name") or "",
+                    "currency": row.get(currency_field) or "",
+                    "total_spend": row.get("total_spend") or Decimal("0"),
+                })
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = ["year", "vendor_name", "currency", "total_spend"]
+            rows = []
+            for r in vendor_spend_rows:
+                rows.append([
+                    str(r["year"]) if r["year"] is not None else "",
+                    r["vendor_name"],
+                    r["currency"],
+                    str(r["total_spend"]) if r["total_spend"] is not None else "",
+                ])
+            filename = (
+                f"datanaut_report_vendor_spend_year_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+    # ============================================================
+    # 5) User activity timeline
+    # ============================================================
+    if active_view == "user_activity_timeline":
+        today = date.today()
+        recent_window_days = 90
+        dormant_days = 60
+        recent_threshold = today - timedelta(days=recent_window_days)
+        dormant_threshold = today - timedelta(days=dormant_days)
+
+        users_qs = (
+            User.objects
+            .select_related("profile")
+            .order_by("username")
+        )
+
+        for u in users_qs:
+            profile = getattr(u, "profile", None)
+
+            if profile and getattr(profile, "full_name", ""):
+                full_name = profile.full_name
+            else:
+                fn = getattr(u, "get_full_name", lambda: "")()
+                full_name = fn or u.username
+
+            assignments = (
+                ServiceAssignment.objects
+                .select_related("service", "service__vendor")
+                .filter(user=u)
+            )
+            service_names = []
+            for a in assignments:
+                s = getattr(a, "service", None)
+                if s and getattr(s, "name", ""):
+                    service_names.append(s.name)
+            services_summary = ", ".join(sorted(set(service_names)))
+
+            last_login = u.last_login
+            last_activity_date = last_login.date() if last_login else None
+
+            if last_activity_date and last_activity_date >= recent_threshold:
+                active_days_90d = (today - last_activity_date).days
+            elif last_activity_date:
+                active_days_90d = 0
+            else:
+                active_days_90d = None
+
+            if last_activity_date and last_activity_date <= dormant_threshold:
+                dormant_since = last_activity_date
+            else:
+                dormant_since = None
+
+            user_activity_rows.append({
+                "username": u.username,
+                "full_name": full_name,
+                "last_activity": last_login,
+                "active_days_90d": active_days_90d,
+                "dormant_since": dormant_since,
+                "services_summary": services_summary,
+            })
+
+        def _ua_sort_key(row):
+            la = row["last_activity"]
+            if la is None:
+                return (2, "")  # никога не е логвал
+            return (0, la) if row["dormant_since"] else (1, la)
+
+        user_activity_rows.sort(key=_ua_sort_key, reverse=True)
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = [
+                "username",
+                "full_name",
+                "last_activity",
+                "active_days_90d",
+                "dormant_since",
+                "services_summary",
+            ]
+            rows = []
+            for r in user_activity_rows:
+                rows.append([
+                    r["username"],
+                    r["full_name"],
+                    r["last_activity"].isoformat() if r["last_activity"] else "",
+                    "" if r["active_days_90d"] is None else str(r["active_days_90d"]),
+                    r["dormant_since"].isoformat() if r["dormant_since"] else "",
+                    r["services_summary"],
+                ])
+            filename = (
+                f"datanaut_report_user_activity_timeline_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+    # ============================================================
+    # 6) Report builder (generic datasets)
+    # ============================================================
+    if active_view == "builder":
+        # 6.1 Users & profiles
+        if builder_active_dataset == "users_profiles":
+            builder_columns = [
+                {"key": "username",         "label": "Username"},
+                {"key": "full_name",        "label": "Full name"},
+                {"key": "email",            "label": "Email"},
+                {"key": "status",           "label": "Status"},
+                {"key": "cost_center_code", "label": "Cost center code"},
+                {"key": "cost_center_name", "label": "Cost center name"},
+                {"key": "manager",          "label": "Manager"},
+                {"key": "location",         "label": "Location"},
+                {"key": "legal_entity",     "label": "Legal entity"},
+            ]
+
+            qs = (
+                User.objects
+                .select_related("profile", "profile__cost_center", "profile__manager")
+                .order_by("username")
+            )
+
+            for u in qs:
+                profile = getattr(u, "profile", None)
+                cc = getattr(profile, "cost_center", None)
+
+                if profile and getattr(profile, "full_name", ""):
+                    full_name = profile.full_name
+                else:
+                    fn = getattr(u, "get_full_name", lambda: "")()
+                    full_name = fn or ""
+
+                builder_rows.append({
+                    "username": u.username,
+                    "full_name": full_name,
+                    "email": u.email or "",
+                    "status": "Active" if u.is_active else "Closed",
+                    "cost_center_code": getattr(cc, "code", "") if cc else "",
+                    "cost_center_name": getattr(cc, "name", "") if cc else "",
+                    "manager": getattr(
+                        getattr(profile, "manager", None),
+                        "username",
+                        "",
+                    ) if profile else "",
+                    "location": getattr(profile, "location", "") if profile else "",
+                    "legal_entity": getattr(profile, "legal_entity", "") if profile else "",
+                })
+
+        # 6.2 User · services
+        elif builder_active_dataset == "user_access":
+            builder_columns = [
+                {"key": "username",         "label": "Username"},
+                {"key": "full_name",        "label": "Full name"},
+                {"key": "email",            "label": "Email"},
+                {"key": "user_status",      "label": "User status"},
+                {"key": "service_name",     "label": "Service"},
+                {"key": "vendor_name",      "label": "Vendor"},
+                {"key": "service_category", "label": "Service category"},
+                {"key": "service_status",   "label": "Service status"},
+                {"key": "list_price",       "label": "List price"},
+                {"key": "currency",         "label": "Currency"},
+                {"key": "cost_center_code", "label": "Cost center code"},
+                {"key": "cost_center_name", "label": "Cost center name"},
+            ]
+
+            qs = (
+                ServiceAssignment.objects
+                .select_related(
+                    "user",
+                    "user__profile",
+                    "user__profile__cost_center",
+                    "service",
+                    "service__vendor",
+                )
+                .order_by("user__username", "service__vendor__name", "service__name")
+            )
+
+            for a in qs:
+                u = a.user
+                s = a.service
+                if not u or not s:
+                    continue
+
+                profile = getattr(u, "profile", None)
+                cc = getattr(profile, "cost_center", None)
+                vendor = getattr(s, "vendor", None)
+
+                if profile and getattr(profile, "full_name", ""):
+                    full_name = profile.full_name
+                else:
+                    fn = getattr(u, "get_full_name", lambda: "")()
+                    full_name = fn or ""
+
+                builder_rows.append({
+                    "username": u.username,
+                    "full_name": full_name,
+                    "email": u.email or "",
+                    "user_status": "Active" if u.is_active else "Closed",
+                    "service_name": s.name or "",
+                    "vendor_name": getattr(vendor, "name", "") if vendor else "",
+                    "service_category": getattr(s, "category", "") or "",
+                    "service_status": "Active" if getattr(s, "is_active", True) else "Closed",
+                    "list_price": str(getattr(s, "list_price", "") or ""),
+                    "currency": getattr(s, "default_currency", "") or "",
+                    "cost_center_code": getattr(cc, "code", "") if cc else "",
+                    "cost_center_name": getattr(cc, "name", "") if cc else "",
+                })
+
+        # избрани колони
+        builder_selected_cols = set(request.GET.getlist("col"))
+        if not builder_selected_cols and builder_columns:
+            builder_selected_cols = {c["key"] for c in builder_columns}
+
+        # per-column филтри f_<colkey>
+        for col in builder_columns:
+            raw = (request.GET.get(f"f_{col['key']}") or "").strip()
+            if raw:
+                builder_filters[col["key"]] = raw
+
+        def _row_matches(row: dict) -> bool:
+            for k, search in builder_filters.items():
+                val = str(row.get(k, "") or "")
+                if search.lower() not in val.lower():
+                    return False
+            return True
+
+        filtered_rows = [r for r in builder_rows if _row_matches(r)]
+        builder_total_count = len(filtered_rows)
+
+        # CSV export
+        if (request.GET.get("export") or "").lower() == "csv":
+            headers = [
+                c["label"]
+                for c in builder_columns
+                if c["key"] in builder_selected_cols
+            ]
+            rows = []
+            for r in filtered_rows:
+                rows.append([
+                    str(r.get(c["key"], "") or "")
+                    for c in builder_columns
+                    if c["key"] in builder_selected_cols
+                ])
+
+            filename = (
+                f"datanaut_report_builder_{builder_active_dataset}_"
+                f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+            )
+            return _csv_response(filename, headers, rows)
+
+        preview_rows = filtered_rows[:builder_preview_limit]
+        builder_preview_count = len(preview_rows)
+        builder_rows = preview_rows
+
+    # ============================================================
+    # 7) Картите за OVERVIEW
+    # ============================================================
+    base_url = reverse("portal:reports")
+    available_reports = [
+        {
+            "code": "users_cost",
+            "name": "Users · access cost",
+            "description": (
+                "Per-user view of assigned services and estimated run-rate "
+                "based on list prices."
+            ),
+            "url": f"{base_url}?view=users_cost",
+        },
+        {
+            "code": "services_catalog",
+            "name": "Services catalog (pricing)",
+            "description": "Flat catalog of services with vendor and list price.",
+            "url": f"{base_url}?view=services_catalog",
+        },
+        {
+            "code": "contracts_renewals",
+            "name": "Contracts renewals schedule",
+            "description": (
+                "Upcoming contract renewals with annual value and risk flags."
+            ),
+            "url": f"{base_url}?view=contracts_renewals",
+        },
+        {
+            "code": "vendor_spend_year",
+            "name": "Vendor spend by year",
+            "description": (
+                "Yearly spend per vendor based on invoice history; can power "
+                "dashboard spend widgets."
+            ),
+            "url": f"{base_url}?view=vendor_spend_year",
+        },
+        {
+            "code": "user_activity_timeline",
+            "name": "User activity timeline",
+            "description": (
+                "Login and usage signals per user; supports dormant/active "
+                "usage views."
+            ),
+            "url": f"{base_url}?view=user_activity_timeline",
+        },
+        {
+            "code": "builder",
+            "name": "Report builder",
+            "description": (
+                "Self-service tabular view over users, services and access. "
+                "Configure columns and export CSV."
+            ),
+            "url": f"{base_url}?view=builder",
+        },
+    ]
+
+    return render(
+        request,
+        "portal/reports.html",
+        {
+            "available_reports": available_reports,
+            "active_view": active_view,
+            "user_cost_rows": user_cost_rows,
+            "services_catalog_rows": services_catalog_rows,
+            "contracts_renewals_rows": contracts_renewals_rows,
+            "vendor_spend_rows": vendor_spend_rows,
+            "user_activity_rows": user_activity_rows,
+            # builder context
+            "builder_datasets": builder_datasets,
+            "builder_active_dataset": builder_active_dataset,
+            "builder_columns": builder_columns,
+            "builder_rows": builder_rows,
+            "builder_selected_cols": builder_selected_cols,
+            "builder_filters": builder_filters,
+            "builder_preview_limit": builder_preview_limit,
+            "builder_total_count": builder_total_count,
+            "builder_preview_count": builder_preview_count,
+        },
+    )
+
+
+# ----------
 # USAGE
 # ----------
 
+def _build_usage_snapshot():
+    """
+    Общ usage snapshot, който ползваме за:
+      - overview (desks)
+      - vendor inventory
+      - user inventory
+    """
+    UserModel = get_user_model()
+    for u in UserModel.objects.all().iterator():
+        UserProfile.objects.get_or_create(user=u)
+
+    now = timezone.now()
+    dormant_threshold_days = 60
+    window_90d = now - timedelta(days=90)
+
+    assignments = (
+        ServiceAssignment.objects
+        .select_related(
+            "user",
+            "user__profile",
+            "user__profile__cost_center",
+            "service",
+            "service__vendor",
+        )
+    )
+
+    desks_data: dict[int, dict] = {}
+    all_vendors = set()
+    dormant_users_map: dict[int, dict] = {}
+    vendor_stats: dict[int, dict] = {}
+    user_stats: dict[int, dict] = {}
+
+    total_licences = 0
+    total_dormant_licences = 0
+    potential_savings = Decimal("0")
+
+    for a in assignments:
+        user = a.user
+        svc = a.service
+        vendor = getattr(svc, "vendor", None)
+        profile = getattr(user, "profile", None)
+        cc = getattr(profile, "cost_center", None)
+
+        if not cc:
+            continue
+
+        desk_key = cc.pk
+        if cc.code and cc.name:
+            desk_label = f"{cc.code} – {cc.name}"
+        else:
+            desk_label = cc.code or cc.name or "Unmapped"
+
+        vendor_name = vendor.name if vendor else "—"
+        all_vendors.add(vendor_name)
+
+        list_price = getattr(svc, "list_price", None) or Decimal("0")
+        category = getattr(svc, "category", "") or ""
+
+        last_login = user.last_login
+        days_since_login = None
+        is_dormant = False
+        is_recent = False
+
+        if last_login:
+            days_since_login = (now.date() - last_login.date()).days
+            is_dormant = days_since_login > dormant_threshold_days
+            is_recent = last_login >= window_90d
+        else:
+            is_dormant = True
+
+        # ----- per desk -----
+        d = desks_data.setdefault(
+            desk_key,
+            {
+                "desk_label": desk_label,
+                "vendor_names": set(),
+                "licences": 0,
+                "dormant_licences": 0,
+                "recent_users": set(),
+                "all_users": set(),
+                "total_price": Decimal("0"),
+                "dormant_price": Decimal("0"),
+                "vendor_by_category": defaultdict(set),
+            },
+        )
+
+        d["vendor_names"].add(vendor_name)
+        d["licences"] += 1
+        d["all_users"].add(user.pk)
+        d["total_price"] += list_price
+        d["vendor_by_category"][category].add(vendor_name)
+
+        if is_recent:
+            d["recent_users"].add(user.pk)
+
+        if is_dormant:
+            d["dormant_licences"] += 1
+            d["dormant_price"] += list_price
+
+            du = dormant_users_map.get(user.pk)
+            prev_days = du["days_since_login"] if du else None
+            curr_days = days_since_login if days_since_login is not None else 9999
+            if prev_days is None or curr_days > prev_days:
+                dormant_users_map[user.pk] = {
+                    "username": user.username,
+                    "desk_label": desk_label,
+                    "vendor": vendor_name,
+                    "days_since_login": days_since_login,
+                }
+
+        total_licences += 1
+        if is_dormant:
+            total_dormant_licences += 1
+            potential_savings += list_price
+
+        # ----- per vendor -----
+        if vendor:
+            v = vendor_stats.setdefault(
+                vendor.pk,
+                {
+                    "vendor": vendor,
+                    "vendor_name": vendor_name,
+                    "licences": 0,
+                    "dormant_licences": 0,
+                    "total_price": Decimal("0"),
+                    "dormant_price": Decimal("0"),
+                    "desks": set(),
+                },
+            )
+            v["licences"] += 1
+            v["total_price"] += list_price
+            v["desks"].add(desk_label)
+            if is_dormant:
+                v["dormant_licences"] += 1
+                v["dormant_price"] += list_price
+
+        # ----- per user -----
+        ustat = user_stats.setdefault(
+            user.pk,
+            {
+                "user": user,
+                "username": user.username,
+                "desk_label": desk_label,
+                "services": 0,
+                "dormant_services": 0,
+                "total_price": Decimal("0"),
+                "last_login": None,
+            },
+        )
+        ustat["services"] += 1
+        ustat["total_price"] += list_price
+        if is_dormant:
+            ustat["dormant_services"] += 1
+        if last_login and (ustat["last_login"] is None or last_login > ustat["last_login"]):
+            ustat["last_login"] = last_login
+
+    # ---- KPIs ----
+    if total_licences > 0:
+        healthy_licences = total_licences - total_dormant_licences
+        healthy_percent = int(round(100 * healthy_licences / total_licences))
+    else:
+        healthy_percent = 0
+
+    vendors_count = len(all_vendors)
+    desks_count = len(desks_data)
+
+    # ---- desks table ----
+    desk_rows = []
+    overlapping_desks = 0
+    severity_order = {"high": 0, "medium": 1, "low": 2}
+
+    for d in desks_data.values():
+        licences = d["licences"]
+        dormant = d["dormant_licences"]
+        recent_users = len(d["recent_users"])
+        all_users = len(d["all_users"])
+        vendors = d["vendor_names"]
+
+        dormant_ratio = (dormant / licences) if licences else 0
+        recent_ratio = (recent_users / all_users) if all_users else 0
+
+        has_overlap = any(len(vs) > 1 for vs in d["vendor_by_category"].values())
+        if has_overlap:
+            overlapping_desks += 1
+
+        if len(vendors) == 1:
+            vendor_label = next(iter(vendors))
+        elif len(vendors) == 0:
+            vendor_label = "—"
+        else:
+            vendor_label = "Mixed vendors"
+
+        if dormant >= 3 and dormant_ratio >= 0.3:
+            severity = "high"
+            usage_signal = f"{dormant} dormant licences"
+            last_90_days_text = "No/low logins in last 90 days"
+        elif has_overlap:
+            severity = "medium"
+            usage_signal = "Overlap across vendors"
+            last_90_days_text = "Multiple vendors with similar coverage"
+        elif dormant > 0:
+            severity = "medium"
+            usage_signal = f"{dormant} low-usage licences"
+            last_90_days_text = "Mixed usage across users"
+        else:
+            severity = "low"
+            usage_signal = "Healthy usage"
+            last_90_days_text = (
+                "Stable, >90% active users" if recent_ratio >= 0.9 else "Mostly active users"
+            )
+
+        desk_rows.append(
+            {
+                "desk_label": d["desk_label"],
+                "vendor_label": vendor_label,
+                "licences": licences,
+                "usage_signal": usage_signal,
+                "last_90_days": last_90_days_text,
+                "severity": severity,
+                "severity_order": severity_order.get(severity, 3),
+            }
+        )
+
+    desk_rows.sort(key=lambda r: (r["severity_order"], -r["licences"]))
+
+    # ---- dormant users (side card) ----
+    dormant_users = list(dormant_users_map.values())
+    dormant_users.sort(key=lambda r: (r["days_since_login"] or 9999), reverse=True)
+
+    # ---- overlapping products (side card) ----
+    overlapping_rows = []
+    for d in desks_data.values():
+        desk_label = d["desk_label"]
+        for category, vendors in d["vendor_by_category"].items():
+            if len(vendors) < 2:
+                continue
+            vendors_label = " / ".join(sorted(vendors))
+            if category:
+                opportunity = f"Multiple vendors for {category} – review bundles."
+            else:
+                opportunity = "Multiple vendors for similar coverage – consider consolidation."
+            overlapping_rows.append(
+                {
+                    "desk_label": desk_label,
+                    "vendors_label": vendors_label,
+                    "opportunity": opportunity,
+                }
+            )
+
+    # ---- vendor inventory data ----
+    vendor_rows = []
+    for v in vendor_stats.values():
+        licences = v["licences"]
+        dormant = v["dormant_licences"]
+        active = licences - dormant
+        vendor_rows.append(
+            {
+                "vendor": v["vendor"],
+                "vendor_name": v["vendor_name"],
+                "licences": licences,
+                "active_licences": active,
+                "dormant_licences": dormant,
+                "total_price": v["total_price"],
+                "dormant_price": v["dormant_price"],
+                "desks_count": len(v["desks"]),
+            }
+        )
+    vendor_rows.sort(key=lambda r: r["vendor_name"].lower())
+
+    # ---- user inventory data ----
+    user_rows = []
+    for u in user_stats.values():
+        last_login = u["last_login"]
+        if last_login:
+            days_since = (now.date() - last_login.date()).days
+        else:
+            days_since = None
+        is_dormant = u["dormant_services"] > 0 and (
+            days_since is None or days_since > dormant_threshold_days
+        )
+        user_rows.append(
+            {
+                "user": u["user"],
+                "username": u["username"],
+                "desk_label": u["desk_label"],
+                "services": u["services"],
+                "dormant_services": u["dormant_services"],
+                "total_price": u["total_price"],
+                "last_login": last_login,
+                "days_since_login": days_since,
+                "status": "Dormant" if is_dormant else "Active",
+            }
+        )
+
+    user_rows.sort(
+        key=lambda r: (
+            0 if r["status"] == "Dormant" else 1,
+            -(r["services"]),
+        )
+    )
+
+    kpis = {
+        "licences_monitored": total_licences,
+        "potential_savings": potential_savings,
+        "healthy_percent": healthy_percent,
+        "overlapping_desks": overlapping_desks,
+        "vendors_count": vendors_count,
+        "desks_count": desks_count,
+    }
+
+    return {
+        "kpis": kpis,
+        "desk_rows": desk_rows,
+        "dormant_users": dormant_users,
+        "overlapping_rows": overlapping_rows,
+        "vendor_rows": vendor_rows,
+        "user_rows": user_rows,
+    }
+
+
 @login_required
 def usage_overview(request):
-    return render(request, "portal/usage.html")
+    """
+    Licence usage overview, базиран на реалните:
+    - ServiceAssignment (user × service)
+    - User.last_login
+    - UserProfile.cost_center (desk)
+    - Service.vendor, Service.category, Service.list_price
+    """
+    snapshot = _build_usage_snapshot()
+    desk_rows = snapshot["desk_rows"]
 
+    # ---------- CSV export на desk таблицата ----------
+    if (request.GET.get("export") or "").lower() == "csv":
+        headers = [
+            "desk_label",
+            "vendor_label",
+            "licences",
+            "usage_signal",
+            "last_90_days",
+            "severity",
+        ]
+        rows = []
+        for r in desk_rows:
+            rows.append([
+                r["desk_label"],
+                r["vendor_label"],
+                str(r["licences"]),
+                r["usage_signal"],
+                r["last_90_days"],
+                r["severity"],
+            ])
 
-@login_required
-def usage_invoices(request):
-    invoices = (
-        Invoice.objects.filter(owner=request.user)
-        .select_related("vendor")
-        .order_by("-invoice_date", "-id")
-    )
-    return render(request, "portal/usage_invoices.html", {"invoices": invoices})
+        filename = (
+            f"datanaut_usage_desks_"
+            f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        return _csv_response(filename, headers, rows)
+    # ---------------------------------------------------
 
+    context = {
+        "kpis": snapshot["kpis"],
+        "desk_rows": desk_rows,
+        "dormant_users": snapshot["dormant_users"][:10],
+        "overlapping_rows": snapshot["overlapping_rows"][:10],
+    }
+    return render(request, "portal/usage.html", context)
 
 @login_required
 def usage_contract(request):
     contracts = (
         Contract.objects.filter(owner=request.user)
-        .select_related("vendor")
+        .select_related("vendor", "owning_cost_center")
         .order_by("-start_date", "-created_at")
     )
-    return render(request, "portal/usage_contract.html", {"contracts": contracts})
+
+    # сумираме annual_value вместо несъществуващото total_value
+    agg = contracts.aggregate(total_annual=Sum("annual_value"))
+    total_annual = agg["total_annual"] or Decimal("0")
+
+    contract_count = contracts.count()
+
+    context = {
+        "contracts": contracts,
+        "contract_count": contract_count,
+        "total_annual": total_annual,
+        "active_tab": "contracts",   # за да свети правилния таб в менюто
+    }
+    return render(request, "portal/usage_contract.html", context)
 
 
 @login_required
 def usage_vendors(request):
-    vendors = (
-        Vendor.objects
-        .annotate(
-            contract_count=Count(
-                "contracts",
-                filter=Q(contracts__owner=request.user),
-                distinct=True,
-            ),
-            invoice_count=Count(
-                "invoices",
-                filter=Q(invoices__owner=request.user),
-                distinct=True,
-            ),
-        )
-        .order_by("name")
-    )
+    """
+    Vendor inventory, базирано на общия usage snapshot.
+    """
+    snapshot = _build_usage_snapshot()
+    vendor_rows = snapshot["vendor_rows"]
+    kpis = snapshot["kpis"]
 
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
-    if not show_closed and hasattr(Vendor, "is_active"):
-        vendors = vendors.filter(is_active=True)
 
-    return render(request, "portal/usage_vendors.html", {"vendors": vendors, "show_closed": show_closed})
+    if not show_closed:
+        filtered = []
+        for row in vendor_rows:
+            vendor = row.get("vendor")
+            if hasattr(vendor, "is_active"):
+                if vendor.is_active:
+                    filtered.append(row)
+            else:
+                filtered.append(row)
+        vendor_rows = filtered
+
+    context = {
+        "vendor_rows": vendor_rows,
+        "kpis": kpis,
+        "show_closed": show_closed,
+        "active_tab": "vendors",
+    }
+    return render(request, "portal/usage_vendors.html", context)
 
 
 @login_required
 def usage_users(request):
+    """
+    User inventory – списък с потребители от общия usage snapshot,
+    със сървърни филтри и контрол върху броя редове.
+    """
+    snapshot = _build_usage_snapshot()
+    user_rows = snapshot["user_rows"]
+
+    total_users = len(user_rows)
+
+    # --- филтри от query string ---
+    q = (request.GET.get("q") or "").strip()
+    status = (request.GET.get("status") or "all").lower()
+
+    filtered = user_rows
+
+    # статус филтър
+    if status == "active":
+        filtered = [u for u in filtered if u["status"] == "Active"]
+    elif status == "dormant":
+        filtered = [u for u in filtered if u["status"] == "Dormant"]
+
+    # текстово търсене по user / desk
+    if q:
+        q_lower = q.lower()
+        filtered = [
+            u
+            for u in filtered
+            if q_lower in (u["username"] or "").lower()
+            or q_lower in (u["desk_label"] or "").lower()
+        ]
+
+    filtered_count = len(filtered)
+
+    # --- колко реда да показваме ---
+    page_sizes = [10, 20, 30, 40, 50, 100]
+    page_size_param = request.GET.get("limit") or request.GET.get("page_size") or "20"
+    try:
+        page_size = int(page_size_param)
+        if page_size not in page_sizes:
+            page_size = 20
+    except (TypeError, ValueError):
+        page_size = 20
+
+    rows = filtered[:page_size]
+
+    # малко KPI за side card
+    dormant_users_count = len([u for u in user_rows if u["status"] == "Dormant"])
+    dormant_percent = (
+        int(round(100 * dormant_users_count / total_users)) if total_users else 0
+    )
+
+    context = {
+        "user_rows": rows,
+        "total_users": total_users,
+        "filtered_count": filtered_count,
+        "dormant_users_count": dormant_users_count,
+        "dormant_percent": dormant_percent,
+        "page_size": page_size,
+        "page_sizes": page_sizes,
+        "q": q,
+        "status": status,
+    }
+    return render(request, "portal/usage_users.html", context)
+
+@login_required
+def usage_invoices(request):
+    invoices = (
+        Invoice.objects.filter(owner=request.user)
+        .select_related("vendor", "contract")
+        .order_by("-invoice_date", "-id")
+    )
+
+    # агрегации по реалните полета total_amount и tax_amount
+    agg = invoices.aggregate(
+        total_amount_sum=Sum("total_amount"),
+        tax_amount_sum=Sum("tax_amount"),
+    )
+
+    total_amount = agg["total_amount_sum"] or Decimal("0")
+    tax_amount = agg["tax_amount_sum"] or Decimal("0")
+    invoice_count = invoices.count()
+
+    context = {
+        "invoices": invoices,
+        "invoice_count": invoice_count,
+        "total_amount": total_amount,
+        "tax_amount": tax_amount,
+        "active_tab": "invoices",  # за да светне правилния таб
+    }
+    return render(request, "portal/usage_invoices.html", context)
+
+
+@login_required
+def usage_vendors(request):
+    """
+    Vendor inventory, базирано на общия usage snapshot.
+    """
+    snapshot = _build_usage_snapshot()
+    vendor_rows = snapshot["vendor_rows"]
+    kpis = snapshot["kpis"]
+
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
 
-    users_seed = get_user_model().objects.all().order_by("username")
+    # ако не искаме "затворени" доставчици, филтрираме по vendor.is_active
     if not show_closed:
-        users_seed = users_seed.filter(is_active=True)
-    for u in users_seed:
-        UserProfile.objects.get_or_create(user=u)
+        filtered = []
+        for row in vendor_rows:
+            vendor = row.get("vendor")
+            # ако моделът няма is_active, приемаме че е активен
+            if hasattr(vendor, "is_active"):
+                if vendor.is_active:
+                    filtered.append(row)
+            else:
+                filtered.append(row)
+        vendor_rows = filtered
 
-    users_qs = (
-        get_user_model().objects
-        .select_related("profile", "profile__cost_center")
-        .order_by("username")
-    )
+    context = {
+        "vendor_rows": vendor_rows,
+        "kpis": kpis,
+        "show_closed": show_closed,
+    }
+    return render(request, "portal/usage_vendors.html", context)
+
+
+@login_required
+def usage_users(request):
+    """
+    User inventory, базирано на usage snapshot-а.
+    """
+    snapshot = _build_usage_snapshot()
+    user_rows = snapshot["user_rows"]
+
+    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
+
+    # ако show_closed е False – можеш да филтрираш по user.is_active, ако има такъв флаг
     if not show_closed:
-        users_qs = users_qs.filter(is_active=True)
+        filtered = []
+        for row in user_rows:
+            user = row.get("user")
+            if hasattr(user, "is_active"):
+                if user.is_active:
+                    filtered.append(row)
+            else:
+                filtered.append(row)
+        user_rows = filtered
 
-    return render(request, "portal/usage_users.html", {"users": users_qs, "show_closed": show_closed})
+    context = {
+        "user_rows": user_rows,
+        "show_closed": show_closed,
+    }
+    return render(request, "portal/usage_users.html", context)
+
 
 
 # ----------

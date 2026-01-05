@@ -1,0 +1,219 @@
+{% extends "portal/base_portal.html" %}
+{% block content %}
+
+<div class="row g-3">
+
+  <!-- LEFT: CURRENT ACCESS -->
+  <div class="col-lg-8">
+    <div class="portal-card">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div>
+          <div class="section-eyebrow">Provisioning Hub</div>
+          <h1 class="section-title mb-1">Overview</h1>
+          <p class="section-subtitle mb-0">Your current access and requests.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'portal:provisioning_my_requests' %}" class="btn btn-ghost btn-sm">Requests</a>
+          <a href="{% url 'portal:provisioning_catalog' %}" class="btn btn-ghost btn-sm">Catalog</a>
+          {% if is_prov_admin %}
+            <a href="{% url 'portal:provisioning_approvals' %}" class="btn btn-ghost btn-sm">Approvals</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if assigned_rows %}
+        <div class="table-responsive mt-3">
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width:28%;">Vendor</th>
+                <th>Service</th>
+                <th style="width:110px;">Status</th>
+                <th style="width:140px;" class="text-end">List price</th>
+                <th style="width:80px;">CCY</th>
+                <th style="width:120px;" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in assigned_rows %}
+                <tr>
+                  <td class="cell-muted">{{ r.vendor_name }}</td>
+                  <td>
+                    <a class="link-inline" href="{% url 'portal:service_detail' r.service.pk %}">
+                      {{ r.service.name }}
+                    </a>
+                    {% if r.is_active is not None and not r.is_active %}
+                      <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                    {% endif %}
+                  </td>
+                  <td class="cell-muted">{% if r.is_active %}Active{% else %}Closed{% endif %}</td>
+                  <td class="text-end">
+                    {% if r.list_price is not None %}
+                      {{ r.list_price|floatformat:2 }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="cell-muted">{{ r.currency|default:"—" }}</td>
+
+                  <td class="text-end">
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#removeAccessModal"
+                      data-service-id="{{ r.service.pk }}"
+                      data-service-name="{{ r.service.name }}"
+                      data-vendor-name="{{ r.vendor_name }}"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty mt-3">No assigned services yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: USER CARD -->
+  <div class="col-lg-4">
+    <div class="portal-card mb-3">
+      <h6 class="mb-2">User</h6>
+
+      <div class="row gy-3 small">
+        <div class="col-12">
+          <div class="metric-label mb-1">Name</div>
+          <div>{{ profile.full_name|default:request.user.username }}</div>
+        </div>
+
+        <div class="col-12">
+          <div class="metric-label mb-1">Cost center</div>
+          <div>
+            {% if profile.cost_center %}
+              {{ profile.cost_center.code }} – {{ profile.cost_center.name }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="metric-label mb-1">Line manager</div>
+          <div>
+            {% if profile.manager %}
+              {{ profile.manager.username }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="metric-label mb-1">Total cost (current access)</div>
+          <div class="metric-value" style="font-size:1.2rem;">
+            {{ total_cost|floatformat:2 }}
+          </div>
+          <div class="portal-card-muted" style="font-size:.82rem;margin-top:.15rem;">
+            Pricing is indicative (service list price). Split allocation will be added next.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- REMOVE ACCESS MODAL (Styled like Delete service) -->
+<div class="modal fade" id="removeAccessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+    <div class="modal-content portal-modal p-0" style="overflow:hidden;">
+
+      <!-- Header -->
+      <div class="px-4 pt-4 pb-3" style="border-bottom:1px solid rgba(148,163,184,.18);">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <div class="section-eyebrow">Provisioning Hub</div>
+            <div class="section-title" style="font-size:1.15rem; margin:0;">Remove access</div>
+            <div class="portal-card-muted" style="margin-top:6px; font-size:.9rem;">
+              You are about to remove your access to:
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn btn-ghost btn-sm"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  style="border-radius: 10px; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center;">
+            <span aria-hidden="true" style="font-size:1.05rem; line-height:1;">×</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="px-4 py-3">
+        <div class="dn-card p-3" style="background:rgba(2,6,23,.45); border:1px solid rgba(148,163,184,.18);">
+          <div class="metric-label mb-1">Service</div>
+          <div style="font-size:1.02rem; font-weight:700; color:var(--dn-strong);">
+            <span data-role="vendor">—</span> — <span data-role="svc">—</span>
+          </div>
+          <div class="portal-card-muted" style="margin-top:6px; font-size:.85rem;">
+            This will remove your current assignment. You can request access again from the catalog.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 py-3 d-flex justify-content-end gap-2"
+           style="border-top:1px solid rgba(148,163,184,.18); background:rgba(2,6,23,.25);">
+        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">
+          Cancel
+        </button>
+
+        <form method="post"
+              id="removeAccessForm"
+              class="m-0"
+              data-action-template="{% url 'portal:provisioning_access_remove' 0 %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-add btn-sm">
+            Remove
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modalEl = document.getElementById("removeAccessModal");
+  if (!modalEl) return;
+
+  modalEl.addEventListener("show.bs.modal", function (event) {
+    const btn = event.relatedTarget;
+    if (!btn) return;
+
+    const serviceId = btn.getAttribute("data-service-id");
+    const serviceName = btn.getAttribute("data-service-name") || "—";
+    const vendorName = btn.getAttribute("data-vendor-name") || "—";
+
+    const svcSpan = modalEl.querySelector('[data-role="svc"]');
+    const vendorSpan = modalEl.querySelector('[data-role="vendor"]');
+    if (svcSpan) svcSpan.textContent = serviceName;
+    if (vendorSpan) vendorSpan.textContent = vendorName;
+
+    const form = modalEl.querySelector("#removeAccessForm");
+    const tmpl = form ? form.getAttribute("data-action-template") : null;
+    if (form && tmpl && serviceId) {
+      form.action = tmpl.replace("0", serviceId);
+    }
+  });
+})();
+</script>
+
+{% endblock %}

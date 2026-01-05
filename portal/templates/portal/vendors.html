@@ -19,12 +19,17 @@
                     <div>
                         <div class="metric-label">Total vendors</div>
                         <div class="metric-value">
-                            {{ vendors|length }}
+                            {{ total_vendors }}
+                        </div>
+                        <div class="small text-muted">
+                            Showing {{ showing_count }} of {{ total_vendors }} vendors
                         </div>
                     </div>
 
-                    {# Show Closed toggle (drives ?show_closed=1) #}
-                    <form method="get" class="d-flex align-items-center gap-2 small" style="margin-bottom: .15rem;">
+                    {# Show Closed + Rows (GET: show_closed, rows) #}
+                    <form method="get"
+                          class="d-flex align-items-center gap-3 small"
+                          style="margin-bottom:.15rem;">
                         <div class="form-check form-switch m-0">
                             <input class="form-check-input"
                                    type="checkbox"
@@ -38,10 +43,20 @@
                             </label>
                         </div>
 
-                        {# keep other GET params here later (e.g. search/type), if you add them #}
-                        {# example:
-                        <input type="hidden" name="q" value="{{ request.GET.q }}">
-                        #}
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="text-muted">Rows:</span>
+                            <select name="rows"
+                                    class="form-select form-select-sm"
+                                    style="width:auto; min-width:80px;"
+                                    onchange="this.form.submit()">
+                                {% for opt in rows_options %}
+                                    <option value="{{ opt }}"
+                                            {% if opt == rows_limit %}selected{% endif %}>
+                                        {{ opt }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </form>
                 </div>
 
@@ -51,60 +66,66 @@
             </div>
 
             {% if vendors %}
+                {# вътрешен скрол за големи списъци – като при Users #}
                 <div class="table-responsive">
-                    <table class="portal-table align-middle">
-                        <thead>
-                        <tr>
-                            <th style="width: 26%;">Vendor</th>
-                            <th style="width: 16%;">Type</th>
-                            <th style="width: 20%;">Tags</th>
-                            <th style="width: 10%;">Contracts</th>
-                            <th style="width: 10%;">Invoices</th>
-                            <th style="width: 18%;">Website</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for vendor in vendors %}
+                    <div style="max-height: 520px; overflow-y: auto;">
+                        <table class="portal-table align-middle mb-0">
+                            <thead>
                             <tr>
-                                <td>
-                                    <a href="{% url 'portal:vendor_detail' vendor.pk %}" class="link-inline">
-                                        {{ vendor.name }}
-                                    </a>
- 
-                                    {% if vendor.is_active == False %}
-                                        <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="cell-muted">
-                                    {{ vendor.vendor_type|default:"—" }}
-                                </td>
-
-                                <td class="cell-muted">
-                                    {{ vendor.tags|default:"—" }}
-                                </td>
-
-                                <td class="cell-muted">
-                                    {{ vendor.contract_count|default:0 }}
-                                </td>
-
-                                <td class="cell-muted">
-                                    {{ vendor.invoice_count|default:0 }}
-                                </td>
-
-                                <td class="cell-muted">
-                                    {% if vendor.website %}
-                                        <a href="{{ vendor.website }}" target="_blank" rel="noopener" class="link-inline">
-                                            {{ vendor.website }}
-                                        </a>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
+                                <th style="width: 26%;">Vendor</th>
+                                <th style="width: 16%;">Type</th>
+                                <th style="width: 20%;">Tags</th>
+                                <th style="width: 10%;">Contracts</th>
+                                <th style="width: 10%;">Invoices</th>
+                                <th style="width: 18%;">Website</th>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {% for vendor in vendors %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'portal:vendor_detail' vendor.pk %}" class="link-inline">
+                                            {{ vendor.name }}
+                                        </a>
+
+                                        {% if vendor.is_active == False %}
+                                            <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {{ vendor.vendor_type|default:"—" }}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {{ vendor.tags|default:"—" }}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {{ vendor.contract_count|default:0 }}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {{ vendor.invoice_count|default:0 }}
+                                    </td>
+
+                                    <td class="cell-muted">
+                                        {% if vendor.website %}
+                                            <a href="{{ vendor.website }}"
+                                               target="_blank"
+                                               rel="noopener"
+                                               class="link-inline">
+                                                {{ vendor.website }}
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% else %}
                 <div class="empty d-flex flex-wrap align-items-center justify-content-between">

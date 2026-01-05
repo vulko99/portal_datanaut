@@ -15,13 +15,31 @@
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-3">
-                <div class="d-flex flex-wrap gap-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-2">
+                <div class="d-flex flex-wrap gap-3 align-items-end">
                     <div>
                         <div class="metric-label">Total services</div>
                         <div class="metric-value">
                             {{ services|length }}
                         </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 small">
+                        <span>
+                            Showing
+                            <span id="visibleCount">{{ services|length }}</span>
+                            of
+                            <span id="totalCount">{{ services|length }}</span>
+                            services
+                        </span>
+                        <span class="ms-2">Rows:</span>
+                        <select id="rowsPerPage" class="form-select form-select-sm" style="width:auto; min-width: 80px;">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250" selected>250</option>
+                            <option value="all">All</option>
+                        </select>
                     </div>
                 </div>
                 <div class="text-end small portal-card-muted">
@@ -57,7 +75,7 @@
                         <option value="other">Other</option>
                     </select>
 
-                    <!-- NEW: Show Closed toggle (server-side list filtering via ?show_closed=1) -->
+                    <!-- Show Closed toggle (query param show_closed=1) -->
                     <div class="form-check form-switch ms-1" style="user-select:none;">
                         <input class="form-check-input" type="checkbox" role="switch" id="showClosedToggle">
                         <label class="form-check-label small" for="showClosedToggle">Show closed</label>
@@ -67,8 +85,9 @@
 
             <!-- SERVICE GRID -->
             {% if services %}
-                <div class="table-responsive">
-                    <table class="portal-table align-middle">
+                <div class="table-responsive"
+                     style="max-height: 520px; overflow-y: auto; border-radius: 12px;">
+                    <table class="portal-table align-middle mb-0">
                         <thead>
                             <tr>
                                 <th style="width: 20%;">Service</th>
@@ -118,7 +137,7 @@
                                         {% if service.list_price %}
                                             {{ service.list_price }}
                                         {% else %}
-                                            —
+                                            — 
                                         {% endif %}
                                     </td>
                                     <td class="cell-muted">
@@ -131,7 +150,7 @@
                                         {% if service.primary_contract %}
                                             {{ service.primary_contract.contract_name }}
                                         {% else %}
-                                            —
+                                            — 
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -292,6 +311,11 @@
     const globalAddBtn = document.getElementById('globalAddButton');
     const addServiceModalEl = document.getElementById('addServiceModal');
     const showClosedToggle = document.getElementById('showClosedToggle');
+    const rowsSelect = document.getElementById('rowsPerPage');
+    const visibleCountSpan = document.getElementById('visibleCount');
+    const totalCountSpan = document.getElementById('totalCount');
+
+    const ROWS_KEY = 'services_rows_per_page';
 
     const addServiceModal =
         addServiceModalEl && window.bootstrap
@@ -301,7 +325,7 @@
     let rows = [];
     const vendors = new Set();
 
-    // ---- NEW: Show Closed toggle wiring (query param show_closed=1) ----
+    // ---- Show Closed toggle wiring (query param show_closed=1) ----
     function getShowClosedFromUrl() {
         try {
             const p = new URLSearchParams(window.location.search);
@@ -322,7 +346,6 @@
             p.delete('show_closed');
         }
 
-        // Preserve any other query params.
         url.search = p.toString();
         window.location.href = url.toString();
     }
@@ -334,8 +357,20 @@
         });
     }
 
+    function getRowLimit() {
+        if (!rowsSelect) return null;
+        const val = rowsSelect.value;
+        if (!val || val === 'all') return null;
+        const n = parseInt(val, 10);
+        return isNaN(n) ? null : n;
+    }
+
     if (tableBody) {
         rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        if (totalCountSpan) {
+            totalCountSpan.textContent = rows.length;
+        }
 
         // populate vendor filter from table rows
         rows.forEach(row => {
@@ -352,10 +387,26 @@
             });
         }
 
+        // restore rows-per-page from localStorage
+        if (rowsSelect) {
+            const stored = localStorage.getItem(ROWS_KEY);
+            if (stored && rowsSelect.querySelector(`option[value="${stored}"]`)) {
+                rowsSelect.value = stored;
+            }
+            rowsSelect.addEventListener('change', function () {
+                localStorage.setItem(ROWS_KEY, rowsSelect.value);
+                applyFilters();
+            });
+        }
+
         function applyFilters() {
             const query = (searchInput ? searchInput.value : '').toLowerCase();
             const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
             const categoryFilter = categorySelect ? categorySelect.value : '';
+            const limit = getRowLimit();
+
+            let matched = 0;
+            let shown = 0;
 
             rows.forEach(row => {
                 const serviceName = (row.dataset.serviceName || '').toLowerCase();
@@ -379,8 +430,29 @@
                 const matchesCategory =
                     !categoryFilter || category === categoryFilter;
 
-                row.style.display = (matchesText && matchesVendor && matchesCategory) ? '' : 'none';
+                const matches = matchesText && matchesVendor && matchesCategory;
+
+                if (!matches) {
+                    row.style.display = 'none';
+                    return;
+                }
+
+                matched += 1;
+
+                if (!limit || shown < limit) {
+                    row.style.display = '';
+                    shown += 1;
+                } else {
+                    row.style.display = 'none';
+                }
             });
+
+            if (visibleCountSpan) {
+                visibleCountSpan.textContent = shown;
+            }
+            if (totalCountSpan) {
+                totalCountSpan.textContent = rows.length;
+            }
         }
 
         if (searchInput) {
@@ -392,6 +464,9 @@
         if (categorySelect) {
             categorySelect.addEventListener('change', applyFilters);
         }
+
+        // initial render
+        applyFilters();
     }
 
     // Global "Add" button in topbar -> open this page's service modal

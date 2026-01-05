@@ -1,0 +1,375 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DataNaut · Reports{% block title_suffix %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+
+  {# Shared UI tokens/components #}
+  <link rel="stylesheet" href="{% static 'shared/dn-ui.css' %}">
+
+  <style>
+    :root{
+      --dn-bg: #070A12;
+      --dn-surface: rgba(15, 23, 42, .92);
+      --dn-surface-2: rgba(10, 15, 25, .90);
+      --dn-border: rgba(148,163,184,.22);
+      --dn-border-strong: rgba(148,163,184,.40);
+      --dn-text: #E5E7EB;
+      --dn-muted: #9CA3AF;
+      --dn-strong: #F9FAFB;
+      --dn-accent: #14F4D4;
+      --dn-accent-2: #60A5FA;
+      --dn-radius-lg: 18px;
+      --dn-radius-md: 12px;
+      --dn-radius-sm: 10px;
+      --dn-shadow: 0 22px 60px rgba(15,23,42,.65);
+    }
+
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      color: var(--dn-text);
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(20,244,212,.18), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(96,165,250,.16), transparent 55%),
+        radial-gradient(900px 500px at 50% 100%, rgba(147,51,234,.12), transparent 55%),
+        var(--dn-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .reports-layout{
+      min-height:100vh;
+      padding: 20px 24px 32px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .reports-shell{
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(147,51,234,0.18), transparent 55%),
+        rgba(2,6,23,.72);
+      border-radius: var(--dn-radius-lg);
+      border: 1px solid var(--dn-border-strong);
+      box-shadow: var(--dn-shadow);
+      padding: 18px 22px 22px;
+    }
+
+    .reports-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 10px;
+    }
+    .reports-brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .reports-brand img{
+      height:26px;
+      width:auto;
+    }
+    .reports-brand-title{
+      font-weight:700;
+      letter-spacing:.02em;
+      color:var(--dn-strong);
+    }
+    .reports-brand-sub{
+      font-size:.82rem;
+      color:var(--dn-muted);
+    }
+
+    .btn-ghost{
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.35);
+      color: var(--dn-strong);
+      border-radius: var(--dn-radius-sm);
+      font-size:.86rem;
+    }
+    .btn-ghost:hover{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+    }
+
+    .page-title{
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--dn-strong);
+      margin-bottom: 2px;
+      letter-spacing: .01em;
+    }
+    .page-subtitle{
+      color: var(--dn-muted);
+      font-size: .95rem;
+      margin-bottom: 16px;
+      max-width: 920px;
+    }
+
+    .reports-tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:16px;
+    }
+    .reports-tab{
+      border-radius:999px;
+      padding:6px 14px;
+      font-size:.86rem;
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(15,23,42,.55);
+      color: rgba(229,231,235,.88);
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .reports-tab:hover{
+      border-color: rgba(96,165,250,.8);
+      color:var(--dn-strong);
+    }
+    .reports-tab.active{
+      border-color: rgba(20,244,212,.85);
+      background: rgba(20,244,212,.16);
+      color: var(--dn-strong);
+      box-shadow: 0 10px 26px rgba(0,0,0,.5);
+    }
+
+    .portal-card{
+      background: var(--dn-surface);
+      border: 1px solid rgba(31,41,55,.95);
+      border-radius: var(--dn-radius-md);
+      box-shadow: var(--dn-shadow);
+      padding: 18px 18px 16px;
+      color: var(--dn-text);
+    }
+    .portal-card-muted{
+      color: var(--dn-muted);
+      font-size:.9rem;
+    }
+
+    .section-eyebrow{
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:rgba(156,163,175,.9);
+    }
+    .section-title{
+      font-size:1.15rem;
+      font-weight:700;
+      color:var(--dn-strong);
+    }
+
+    .dn-btn-primary{
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .86rem;
+      border: none;
+      background: linear-gradient(135deg, var(--dn-accent-2), var(--dn-accent));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(15,23,42,.6);
+      white-space: nowrap;
+      text-decoration:none;
+    }
+    .dn-btn-primary:hover{
+      filter: brightness(1.05);
+      box-shadow: 0 12px 35px rgba(15,23,42,.8);
+      color:#020617;
+    }
+
+    .portal-table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius: var(--dn-radius-md);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.35);
+    }
+    .portal-table thead th{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      padding:10px 12px;
+      background: rgba(2,6,23,.9);
+      color:rgba(156,163,175,.95);
+      border-bottom:1px solid rgba(148,163,184,.25);
+      white-space:nowrap;
+    }
+    .portal-table tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      font-size:.9rem;
+      color:rgba(229,231,235,.92);
+    }
+    .portal-table tbody tr:hover{
+      background:rgba(20,244,212,.06);
+    }
+
+    /* scrollable контейнер за големи таблици */
+    .reports-table-shell{
+      max-height: 520px;      /* тук контролираш „видимите“ ~30 реда */
+      overflow-y: auto;
+    }
+
+    /* toolbar над таблицата: rows-per-page */
+    .reports-table-toolbar{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+      font-size:.8rem;
+      color:var(--dn-muted);
+    }
+    .dn-rows-select{
+      width:auto;
+      min-width:90px;
+      background-color: rgba(15,23,42,.96);
+      border-color: rgba(148,163,184,.45);
+      color: var(--dn-text);
+      padding:2px 10px;
+      font-size:.8rem;
+      border-radius:999px;
+    }
+
+    .cell-muted{ color: var(--dn-muted); }
+
+    .empty{
+      border: 1px dashed rgba(148,163,184,.30);
+      border-radius: var(--dn-radius-md);
+      padding: 18px;
+      background: rgba(15,23,42,.25);
+      color: rgba(229,231,235,.88);
+    }
+
+    .table-caption{
+      margin-top:8px;
+      font-size:.8rem;
+      color:var(--dn-muted);
+    }
+
+    .alert-stack{ margin-bottom: 14px; }
+    .alert-portal{
+      border-radius: 12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:
+        radial-gradient(220% 220% at 0% 0%, rgba(20,244,212,.18), rgba(15,23,42,.96));
+      color: var(--dn-strong);
+      font-size:.9rem;
+      padding:10px 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.4);
+    }
+
+    /* Contracts renewals badges */
+    .risk-badge{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:.75rem;
+      border:1px solid rgba(148,163,184,.45);
+    }
+    .risk-high{ background:rgba(220,38,38,.16); border-color:rgba(248,113,113,.9); }
+    .risk-medium{ background:rgba(234,179,8,.14); border-color:rgba(250,204,21,.9); }
+    .risk-low{ background:rgba(22,163,74,.14); border-color:rgba(34,197,94,.9); }
+
+    /* --- по-четими muted текстове и лейбъли вътре в репортите --- */
+
+    .portal-card .small.text-muted,
+    .portal-card .form-label,
+    .portal-card .form-label.small,
+    .portal-card .form-text,
+    .portal-card details > summary.small,
+    .portal-card details > summary.small.text-muted {
+      color: rgba(209,213,219,.96) !important;
+    }
+
+    .portal-card .text-muted {
+      color: rgba(209,213,219,.9) !important;
+    }
+
+    .portal-card .form-control,
+    .portal-card .form-select {
+      color: var(--dn-text);
+      background-color: rgba(15,23,42,.96);
+      border-color: rgba(148,163,184,.45);
+    }
+
+    .portal-card .form-control::placeholder {
+      color: rgba(148,163,184,.88);
+    }
+
+    @media (max-width: 991px){
+      .reports-shell{ padding:16px; }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="reports-layout">
+  <div class="reports-shell">
+
+    <header class="reports-header">
+      <div class="reports-brand">
+        <img src="{% static 'landing/logo.png' %}" alt="DataNaut">
+        <div>
+          <div class="reports-brand-title">DataNaut</div>
+          <div class="reports-brand-sub">Client Portal · Reports</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'portal:dashboard' %}" class="btn btn-ghost btn-sm">
+          Back to portal
+        </a>
+      </div>
+    </header>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+  // универсален контрол: select[data-rows-control] + таблица с дадено id
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-rows-control]").forEach(function (selectEl) {
+      const targetId = selectEl.dataset.target;
+      const table = document.getElementById(targetId);
+      if (!table || !table.tBodies.length) {
+        return;
+      }
+
+      const tbody = table.tBodies[0];
+
+      function applyLimit() {
+        const limit = parseInt(selectEl.value || "0", 10) || 0;
+        const rows = Array.from(tbody.rows || []);
+
+        rows.forEach(function (tr, idx) {
+          tr.style.display = (!limit || idx < limit) ? "" : "none";
+        });
+      }
+
+      selectEl.addEventListener("change", applyLimit);
+      applyLimit();
+    });
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models import Q  # <-- ADD
 
 User = get_user_model()
 
@@ -287,6 +288,77 @@ class ServiceAssignment(models.Model):
     def __str__(self) -> str:
         return f"{self.user} → {self.service}"
 
+
+# ---------- PROVISIONING REQUEST (NEW) ----------
+
+class ProvisioningRequest(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+    STATUS_CANCELLED = "cancelled"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_APPROVED, "Approved"),
+        (STATUS_REJECTED, "Rejected"),
+        (STATUS_CANCELLED, "Cancelled"),
+    ]
+
+    requester = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="provisioning_requests",
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.PROTECT,
+        related_name="provisioning_requests",
+    )
+
+    reason = models.TextField(blank=True, default="")
+
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        db_index=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    decided_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="provisioning_decisions",
+    )
+    decision_note = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            # Only 1 pending request per (requester, service)
+            models.UniqueConstraint(
+                fields=["requester", "service"],
+                condition=Q(status="pending"),
+                name="uniq_pending_provisioning_request_per_service",
+            )
+        ]
+
+    def __str__(self) -> str:
+        svc = getattr(self.service, "name", "Service")
+        return f"{self.requester} → {svc} ({self.status})"
+
+created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="provisioning_requests_created",
+        help_text="Who submitted the request (could be manager acting on behalf).",
+    )
 
 # ---------- CONTRACT ----------
 
