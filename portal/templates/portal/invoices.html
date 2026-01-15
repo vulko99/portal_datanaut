@@ -4,259 +4,904 @@
 
 {% block content %}
 <div class="row g-3">
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="section-header mb-2">
-                <div class="section-eyebrow">Invoicing</div>
-                <h1 class="section-title mb-0">Invoices</h1>
-                <p class="section-subtitle mb-0">
-                    Upload invoices to keep a record of billed amounts and link them to contracts.
-                </p>
-            </div>
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Invoicing</div>
+        <h1 class="section-title mb-0">Invoices</h1>
+        <p class="section-subtitle mb-0">
+          Upload invoices to keep a record of billed amounts and link them to contracts.
+        </p>
+      </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-3">
-                <div class="d-flex flex-wrap gap-3">
-                    <div>
-                        <div class="metric-label">Total invoices</div>
-                        <div class="metric-value">
-                            {{ invoices|length }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="metric-label">Total amount</div>
-                        <div class="metric-value">
-                            {% if total_amount %}{{ total_amount }}{% else %}—{% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="text-end small portal-card-muted">
-                    Use the <strong>Add</strong> button in the top bar to upload a new invoice.
-                </div>
-            </div>
-
-            {# TOOLBAR: search + filters + rows/Showing #}
-            {% if invoices %}
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                    <div class="d-flex flex-wrap gap-2">
-                        <div class="input-group input-group-sm" style="max-width: 320px;">
-                            <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
-                                Search
-                            </span>
-                            <input
-                                type="search"
-                                id="invoiceSearch"
-                                class="form-control"
-                                placeholder="Invoice, vendor, contract…">
-                        </div>
-
-                        <select id="invoiceVendorFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                            <option value="">All vendors</option>
-                        </select>
-
-                        <select id="invoiceContractFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                            <option value="">All contracts</option>
-                        </select>
-
-                        <select id="invoiceCurrencyFilter" class="form-select form-select-sm" style="min-width: 120px;">
-                            <option value="">All currencies</option>
-                        </select>
-                    </div>
-
-                    <div class="d-flex flex-wrap align-items-center gap-2 small mt-2 mt-md-0">
-                        <span id="invoiceShowingLabel">
-                            Showing {{ invoices|length }} of {{ invoices|length }} invoices
-                        </span>
-                        <span class="ms-1">Rows:</span>
-                        <select id="invoiceRowsPerPage" class="form-select form-select-sm" style="width:auto; min-width: 80px;">
-                            <option value="25">25</option>
-                            <option value="50" selected>50</option>
-                            <option value="100">100</option>
-                            <option value="250">250</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if invoices %}
-                <div class="table-responsive" style="max-height: 540px; overflow-y: auto;">
-                    <table class="portal-table align-middle">
-                        <thead>
-                        <tr>
-                            <th style="width: 18%;">Invoice</th>
-                            <th style="width: 18%;">Vendor</th>
-                            <th style="width: 14%;">Contract</th>
-                            <th style="width: 10%;">Date</th>
-                            <th style="width: 8%;">Currency</th>
-                            <th style="width: 12%; text-align:right;">Total</th>
-                            <th style="width: 8%;">Tax</th>
-                            <th style="width: 12%;">Period</th>
-                        </tr>
-                        </thead>
-                        <tbody id="invoicesTableBody">
-                        {% for i in invoices %}
-                            <tr
-                                data-invoice-number="{{ i.invoice_number|default_if_none:'' }}"
-                                data-vendor="{{ i.vendor.name|default_if_none:'' }}"
-                                data-contract="{% if i.contract %}{{ i.contract.contract_name }}{% endif %}"
-                                data-currency="{{ i.currency|default_if_none:'' }}"
-                            >
-                                <td>
-                                    <a href="{% url 'portal:invoice_detail' i.pk %}" class="link-table">
-                                        {{ i.invoice_number }}
-                                    </a>
-                                    {% if i.file %}
-                                        <div class="cell-muted small">
-                                            <a href="{{ i.file.url }}" target="_blank" rel="noopener" class="link-inline">
-                                                PDF
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td class="cell-muted">{{ i.vendor.name }}</td>
-                                <td class="cell-muted">
-                                    {% if i.contract %}
-                                        {{ i.contract.contract_name }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                                <td class="cell-muted">{{ i.invoice_date }}</td>
-                                <td class="cell-muted">{{ i.currency }}</td>
-                                <td class="cell-muted" style="text-align:right;">{{ i.total_amount }}</td>
-                                <td class="cell-muted">
-                                    {% if i.tax_amount %}{{ i.tax_amount }}{% else %}—{% endif %}
-                                </td>
-                                <td class="cell-muted">
-                                    {% if i.period_start and i.period_end %}
-                                        {{ i.period_start }} → {{ i.period_end }}
-                                    {% elif i.period_start %}
-                                        From {{ i.period_start }}
-                                    {% elif i.period_end %}
-                                        Until {{ i.period_end }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <p class="portal-card-muted mt-2 mb-0">
-                    Over time you can extend this grid with invoice status, payment date, cost centre splits and
-                    links back to the contract record.
-                </p>
-            {% else %}
-                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
-                    <div>
-                        No invoices yet for this user. Use the
-                        <span class="fw-semibold">Add</span> button in the top bar to upload invoice PDFs.
-                    </div>
-                    <div class="mt-2 mt-sm-0">
-                        <button type="button"
-                                class="btn btn-add btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addInvoiceModal">
-                            + Add invoice
-                        </button>
-                    </div>
-                </div>
-            {% endif %}
+      {# HEADER META – като services/contracts #}
+      <div class="d-flex flex-wrap align-items-end justify-content-between mt-1 mb-2">
+        <div class="small text-muted">
+          <span class="me-3">
+            Total invoices: <strong>{{ total_invoices }}</strong>
+          </span>
+          <span class="me-3">
+            Showing {{ invoices|length }} on this page
+          </span>
+          <span>
+            Total amount:
+            <strong>{% if total_amount %}{{ total_amount }}{% else %}—{% endif %}</strong>
+          </span>
         </div>
+        <div class="text-end small text-muted">
+          Use the global <strong>Add</strong> button in the top bar to upload a new invoice.
+        </div>
+      </div>
+
+      {# TOOLBAR: Show closed + Rows #}
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+
+          {# Show closed toggle – пазим page/rows/selected #}
+          <form method="get" class="small d-flex align-items-center gap-3">
+            <input type="hidden" name="show_closed" value="0">
+            <input type="hidden" name="page" value="{{ page_obj.number|default:1 }}">
+            <input type="hidden" name="rows" value="{{ rows_per_page|default_if_none:50 }}">
+            {% if selected_invoice %}
+              <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+            {% endif %}
+
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input"
+                     type="checkbox"
+                     id="invoices-show-closed-toggle"
+                     name="show_closed"
+                     value="1"
+                     {% if show_closed %}checked{% endif %}
+                     onchange="this.form.submit()">
+              <label class="form-check-label" for="invoices-show-closed-toggle">
+                Show closed
+              </label>
+            </div>
+          </form>
+
+          {# Rows selector – отделна форма, както при services #}
+          <form method="get" class="small d-flex align-items-center gap-2">
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+            {% if selected_invoice %}
+              <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+            {% endif %}
+
+            <span class="text-muted">Rows:</span>
+            <select name="rows"
+                    class="form-select form-select-sm"
+                    style="width:auto; min-width: 90px;"
+                    onchange="this.form.submit()">
+              {% for opt in rows_options %}
+                <option value="{{ opt }}" {% if rows_per_page == opt %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </form>
+
+        </div>
+      </div>
+
+      {# INVOICES GRID #}
+      {% if invoices %}
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width: 18%;">Invoice</th>
+                <th style="width: 18%;">Vendor</th>
+                <th style="width: 16%;">Contract</th>
+                <th style="width: 10%;">Date</th>
+                <th style="width: 8%;">Currency</th>
+                <th style="width: 12%; text-align:right;">Total</th>
+                <th style="width: 8%;">Tax</th>
+                <th style="width: 14%;">Period</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% with sc=show_closed|yesno:"1,0" %}
+                {% for i in invoices %}
+                  <tr {% if selected_invoice and i.id == selected_invoice.id %}style="background: rgba(20,244,212,.06);"{% endif %}>
+                    <td>
+                      <a
+                        href="?page={{ page_obj.number|default:1 }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ i.id }}#invoice-details"
+                        class="link-table"
+                      >
+                        {{ i.invoice_number }}
+                      </a>
+                      {% if i.file %}
+                        <div class="cell-muted small">
+                          <a href="{{ i.file.url }}" target="_blank" rel="noopener" class="link-inline">PDF</a>
+                        </div>
+                      {% endif %}
+                    </td>
+                    <td class="cell-muted">{{ i.vendor.name }}</td>
+                    <td class="cell-muted">
+                      {% if i.contract %}
+                        {{ i.contract.contract_name }}
+                      {% else %}
+                        — 
+                      {% endif %}
+                    </td>
+                    <td class="cell-muted">
+                      {% if i.invoice_date %}{{ i.invoice_date }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">{{ i.currency|default:"—" }}</td>
+                    <td class="cell-muted text-end">{{ i.total_amount|default:"—" }}</td>
+                    <td class="cell-muted">
+                      {% if i.tax_amount %}{{ i.tax_amount }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">
+                      {% if i.period_start and i.period_end %}
+                        {{ i.period_start }} → {{ i.period_end }}
+                      {% elif i.period_start %}
+                        From {{ i.period_start }}
+                      {% elif i.period_end %}
+                        Until {{ i.period_end }}
+                      {% else %}
+                        — 
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% endwith %}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="portal-card-muted mt-2 mb-0">
+          Over time you can extend this grid with invoice status, payment date, cost centre splits and links back to the contract record.
+        </p>
+
+        {# PAGINATION #}
+        {% if page_obj %}
+          {% with sc=show_closed|yesno:"1,0" %}
+            <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Invoices pagination">
+              <div class="small text-muted">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </div>
+
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                  {% if page_obj.has_previous %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_invoice %}&selected={{ selected_invoice.id }}{% endif %}#invoices">
+                      Prev
+                    </a>
+                  {% else %}
+                    <span class="page-link">Prev</span>
+                  {% endif %}
+                </li>
+
+                {% for p in page_obj.paginator.page_range %}
+                  {% if p == 1 or p == page_obj.paginator.num_pages or p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                    <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                      <a class="page-link"
+                         href="?page={{ p }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_invoice %}&selected={{ selected_invoice.id }}{% endif %}#invoices">
+                        {{ p }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                  {% if page_obj.has_next %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_invoice %}&selected={{ selected_invoice.id }}{% endif %}#invoices">
+                      Next
+                    </a>
+                  {% else %}
+                    <span class="page-link">Next</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </nav>
+          {% endwith %}
+        {% endif %}
+
+      {% else %}
+        <div class="portal-card-muted mb-0">
+          No invoices yet. Use the <strong>Add</strong> button in the top bar to upload invoice PDFs.
+        </div>
+      {% endif %}
     </div>
+  </div>
+
+  {# INLINE INVOICE DETAILS + AUDIT #}
+  <div class="col-12" id="invoice-details">
+    {% if selected_invoice %}
+      <div class="portal-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <button id="invoiceDetailsTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Invoice details
+              </button>
+              <button id="invoiceAuditTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Audit · Change log
+              </button>
+            </div>
+            <div class="section-title mb-0">{{ selected_invoice.invoice_number }}</div>
+            <div class="section-subtitle mb-0">
+              {{ selected_invoice.vendor.name }}
+              {% if selected_invoice.contract %}
+                · {{ selected_invoice.contract.contract_name }}
+              {% endif %}
+            </div>
+          </div>
+          <div class="small text-muted text-end">
+            Make changes below and <strong>Save</strong>.
+          </div>
+        </div>
+
+        {# AUDIT PANEL #}
+        <div class="mb-3 d-none" id="invoiceAuditPanel">
+          <div class="portal-card" style="padding:14px;">
+            <div class="section-eyebrow mb-1">Audit</div>
+            <div class="section-title" style="font-size:1.05rem;">Change log</div>
+            <div class="portal-card-muted mb-2">
+              Latest changes for this invoice.
+            </div>
+
+            {% if audit_events %}
+              <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                <table class="portal-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width:22%;">When</th>
+                      <th style="width:18%;">Actor</th>
+                      <th style="width:60%;">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ev in audit_events %}
+                      <tr>
+                        <td class="cell-muted">
+                          {% if ev.occurred_at %}
+                            {{ ev.occurred_at|date:"Y-m-d H:i" }}
+                          {% elif ev.created_at %}
+                            {{ ev.created_at|date:"Y-m-d H:i" }}
+                          {% elif ev.timestamp %}
+                            {{ ev.timestamp|date:"Y-m-d H:i" }}
+                          {% else %}
+                            — 
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {% if ev.actor_display %}
+                            {{ ev.actor_display }}
+                          {% elif ev.actor %}
+                            {{ ev.actor }}
+                          {% else %}
+                            — 
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {{ ev.description|default:"—" }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="portal-card-muted">No audit events yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# INVOICE DETAILS PANEL #}
+        <div id="invoiceDetailsPanel">
+          <div class="row g-3">
+            <div class="col-12 col-xl-8">
+              <form method="post" enctype="multipart/form-data" id="invoice-header-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="invoice-action-field" value="update">
+                <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+                <input type="hidden" name="page" value="{{ page_obj.number|default:1 }}">
+                <input type="hidden" name="rows" value="{{ rows_per_page }}">
+                <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Vendor</label>
+                    <select name="vendor_id" class="form-select form-select-sm bg-white text-dark">
+                      <option value="">Select vendor…</option>
+                      {% for v in vendors %}
+                        <option value="{{ v.id }}" {% if selected_invoice.vendor_id == v.id %}selected{% endif %}>
+                          {{ v.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Contract</label>
+                    <select name="contract_id" class="form-select form-select-sm bg-white text-dark">
+                      <option value="">—</option>
+                      {% for c in contracts %}
+                        <option value="{{ c.id }}" {% if selected_invoice.contract_id == c.id %}selected{% endif %}>
+                          {{ c.vendor.name }} · {{ c.contract_name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Invoice number</label>
+                    <input class="form-control form-control-sm bg-white text-dark"
+                           name="invoice_number"
+                           value="{{ selected_invoice.invoice_number|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Invoice date</label>
+                    <input class="form-control form-control-sm bg-white text-dark"
+                           name="invoice_date"
+                           value="{{ selected_invoice.invoice_date|date:'Y-m-d' }}">
+                    <div class="form-text text-muted small">Format: YYYY-MM-DD</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Currency</label>
+                    <input id="invoice-currency-input"
+                           class="form-control form-control-sm bg-white text-dark"
+                           name="currency"
+                           value="{{ selected_invoice.currency|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Total amount</label>
+                    <input id="invoice-total-input"
+                           class="form-control form-control-sm bg-white text-dark"
+                           name="total_amount"
+                           value="{{ selected_invoice.total_amount|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Tax amount</label>
+                    <input id="invoice-tax-input"
+                           class="form-control form-control-sm bg-white text-dark"
+                           name="tax_amount"
+                           value="{{ selected_invoice.tax_amount|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted">Replace PDF (optional)</label>
+                    <input type="file" name="file" class="form-control form-control-sm bg-white text-dark">
+                    {% if selected_invoice.file %}
+                      <div class="form-text text-muted small">
+                        Current:
+                        <a href="{{ selected_invoice.file.url }}" target="_blank" rel="noopener" class="link-inline">PDF</a>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Period start</label>
+                    <input id="invoice-period-start-input"
+                           class="form-control form-control-sm bg-white text-dark"
+                           name="period_start"
+                           value="{{ selected_invoice.period_start|date:'Y-m-d' }}">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Period end</label>
+                    <input id="invoice-period-end-input"
+                           class="form-control form-control-sm bg-white text-dark"
+                           name="period_end"
+                           value="{{ selected_invoice.period_end|date:'Y-m-d' }}">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label small text-muted">Notes</label>
+                    <textarea class="form-control form-control-sm bg-white text-dark"
+                              name="notes"
+                              rows="3">{{ selected_invoice.notes|default_if_none:'' }}</textarea>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                  {% with sc=show_closed|yesno:"1,0" %}
+                    <a class="btn btn-sm btn-ghost"
+                       href="?page={{ page_obj.number|default:1 }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ selected_invoice.id }}#invoice-details">
+                      Discard
+                    </a>
+                  {% endwith %}
+                  <button type="submit" class="btn btn-sm dn-btn-primary">
+                    Save
+                  </button>
+                  <button type="button"
+                          id="invoice-delete-btn"
+                          class="btn btn-sm btn-outline-danger"
+                          data-confirm-message="Delete this invoice?">
+                    Delete
+                  </button>
+                </div>
+              </form>
+
+              {# --- LINES & SPLITS секция --- #}
+              <hr class="my-4 border-secondary-subtle">
+
+              <div>
+                <div class="section-eyebrow mb-1">Lines &amp; splits</div>
+                <div class="portal-card-muted small mb-2">
+                  Each line allocates part of the invoice to a service, cost center and user.
+                  This section is backed by <code>InvoiceLine</code>.
+                </div>
+
+                {# Generate splits from assignments #}
+                <form method="post" class="mb-3">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="generate_from_assignments">
+                  <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+                  <input type="hidden" name="page" value="{{ page_obj.number|default:1 }}">
+                  <input type="hidden" name="rows" value="{{ rows_per_page }}">
+                  <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+                  <div class="dn-card" style="padding: 10px 12px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="small text-muted">Generate splits from assignments</div>
+                    </div>
+                    <div class="row g-2 align-items-end">
+                      <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1">Service</label>
+                        <select name="gen_service_id" class="form-select form-select-sm bg-white text-dark">
+                          <option value="">Select service...</option>
+                          {% for s in services %}
+                            <option value="{{ s.id }}">
+                              {{ s.vendor.name }} · {{ s.name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                        <div class="form-text small text-muted">
+                          Only assignments for this service will be used.
+                        </div>
+                      </div>
+
+                      <div class="col-md-5">
+                        <label class="form-label small text-muted mb-1">Description pattern</label>
+                        <input name="gen_description_pattern"
+                               class="form-control form-control-sm bg-white text-dark"
+                               value="{service_name} – {username}">
+                        <div class="form-text small text-muted">
+                          Placeholders: <code>{service_name}</code>, <code>{username}</code>, <code>{full_name}</code>, <code>{cost_center}</code>.
+                        </div>
+                      </div>
+
+                      <div class="col-md-3">
+                        <div class="form-check form-switch small mb-1">
+                          <input class="form-check-input"
+                                 type="checkbox"
+                                 id="gen-use-net"
+                                 name="gen_use_net"
+                                 value="1"
+                                 checked>
+                          <label class="form-check-label" for="gen-use-net">
+                            Use net (total – tax)
+                          </label>
+                        </div>
+                        <div class="form-check form-switch small mb-1">
+                          <input class="form-check-input"
+                                 type="checkbox"
+                                 id="gen-clear-existing"
+                                 name="gen_clear_existing"
+                                 value="1">
+                          <label class="form-check-label" for="gen-clear-existing">
+                            Clear existing lines
+                          </label>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                          <button type="submit" class="btn btn-sm dn-btn-primary">
+                            Generate splits from assignments
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                {# Lines table #}
+                {% if invoice_lines %}
+                  <div class="table-responsive" style="max-height: 260px; overflow-y:auto;">
+                    <table class="portal-table align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th style="width: 20%;">Service</th>
+                          <th style="width: 16%;">Vendor</th>
+                          <th style="width: 18%;">Cost center</th>
+                          <th style="width: 16%;">User</th>
+                          <th style="width: 14%; text-align:right;">Amount</th>
+                          <th style="width: 12%;">Description</th>
+                          <th style="width: 4%; text-align:right;">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for line in invoice_lines %}
+                          <tr>
+                            <td class="cell-muted">
+                              {% if line.service %}
+                                {{ line.service.name }}
+                              {% else %}
+                                — 
+                              {% endif %}
+                            </td>
+                            <td class="cell-muted">
+                              {% if line.service and line.service.vendor %}
+                                {{ line.service.vendor.name }}
+                              {% else %}
+                                — 
+                              {% endif %}
+                            </td>
+                            <td class="cell-muted">
+                              {% if line.cost_center %}
+                                {{ line.cost_center.code }} – {{ line.cost_center.name }}
+                              {% else %}
+                                — 
+                              {% endif %}
+                            </td>
+                            <td class="cell-muted">
+                              {% if line.user %}
+                                {{ line.user.username }}
+                              {% else %}
+                                — 
+                              {% endif %}
+                            </td>
+                            <td class="cell-muted text-end">
+                              {{ line.line_amount|default:"—" }}
+                            </td>
+                            <td class="cell-muted small">
+                              {{ line.description|default:"" }}
+                            </td>
+                            <td class="text-end">
+                              <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_line">
+                                <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+                                <input type="hidden" name="line_id" value="{{ line.id }}">
+                                <input type="hidden" name="page" value="{{ page_obj.number|default:1 }}">
+                                <input type="hidden" name="rows" value="{{ rows_per_page }}">
+                                <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-delete-line-btn"
+                                        data-confirm-message="Delete this line?">
+                                  Delete
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="portal-card-muted small mb-2">
+                    No invoice lines captured yet. Header totals are used for reporting.
+                  </div>
+                {% endif %}
+
+                {# Add line форма #}
+                <form method="post" class="mt-3">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="add_line">
+                  <input type="hidden" name="selected" value="{{ selected_invoice.id }}">
+                  <input type="hidden" name="page" value="{{ page_obj.number|default:1 }}">
+                  <input type="hidden" name="rows" value="{{ rows_per_page }}">
+                  <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+                  <div class="dn-card" style="padding: 10px 12px;">
+                    <div class="small text-muted mb-2">Add a new line</div>
+                    <div class="row g-2 align-items-end">
+                      <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Service</label>
+                        <select name="line_service_id" class="form-select form-select-sm bg-white text-dark">
+                          <option value="">—</option>
+                          {% for s in services %}
+                            <option value="{{ s.id }}">
+                              {{ s.vendor.name }} · {{ s.name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1">Description</label>
+                        <input name="line_description"
+                               class="form-control form-control-sm bg-white text-dark"
+                               placeholder="As on invoice…">
+                      </div>
+
+                      <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1">Cost center</label>
+                        <select name="line_cost_center_id" class="form-select form-select-sm bg-white text-dark">
+                          <option value="">—</option>
+                          {% for cc in cost_centers %}
+                            <option value="{{ cc.id }}">{{ cc.code }} – {{ cc.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1">User</label>
+                        <select name="line_user_id" class="form-select form-select-sm bg-white text-dark">
+                          <option value="">—</option>
+                          {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.username }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="col-md-1">
+                        <label class="form-label small text-muted mb-1">Qty</label>
+                        <input name="line_quantity"
+                               class="form-control form-control-sm bg-white text-dark"
+                               value="1">
+                      </div>
+
+                      <div class="col-md-1">
+                        <label class="form-label small text-muted mb-1">Amount</label>
+                        <input name="line_amount"
+                               class="form-control form-control-sm bg-white text-dark"
+                               placeholder="0.00">
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                      <button type="submit" class="btn btn-sm dn-btn-primary">
+                        + Add line
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-4">
+              <div class="portal-card" style="padding: 14px;">
+                <div class="section-eyebrow mb-1">Breakdown</div>
+                <div class="section-title" style="font-size: 1.05rem;">Lines summary</div>
+                <div class="portal-card-muted mb-2">
+                  Cost center and service totals (from lines).
+                </div>
+
+                {# Основни нет/такс/тотал – малко по-enterprise #}
+                <div class="dn-card mb-2" style="padding: 8px 10px;">
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Currency</span>
+                    <span id="invoice-summary-ccy">
+                      {{ selected_invoice.currency|default:"—" }}
+                    </span>
+                  </div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Net</span>
+                    <span id="invoice-net-display">
+                      — 
+                    </span>
+                  </div>
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-muted">Tax</span>
+                    <span id="invoice-tax-display">
+                      {{ selected_invoice.tax_amount|default:"—" }}
+                    </span>
+                  </div>
+                  <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Total (header)</span>
+                    <span id="invoice-total-display">
+                      {{ selected_invoice.total_amount|default:"—" }}
+                    </span>
+                  </div>
+
+                  {% if invoice_lines %}
+                    <div class="d-flex justify-content-between small mt-1">
+                      <span class="text-muted">Total (lines)</span>
+                      <span>
+                        {{ lines_total|default:"—" }}
+                        {% if selected_invoice.total_amount and lines_total and selected_invoice.total_amount != lines_total %}
+                          <span class="badge rounded-pill bg-warning text-dark ms-1">≠ header</span>
+                        {% endif %}
+                      </span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if allocation_by_cost_center %}
+                  <div class="dn-card" style="padding: 10px 12px; margin-bottom: 10px;">
+                    <div class="small text-muted mb-1">By cost center</div>
+                    <div class="d-flex flex-column gap-1">
+                      {% for r in allocation_by_cost_center %}
+                        <div class="d-flex justify-content-between">
+                          <div class="small">{{ r.cost_center__code }} – {{ r.cost_center__name }}</div>
+                          <div class="small" style="font-weight:700;">{{ r.total }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="portal-card-muted mb-2">No line data yet.</div>
+                {% endif %}
+
+                {% if service_breakdown %}
+                  <div class="dn-card" style="padding: 10px 12px; margin-bottom: 10px;">
+                    <div class="small text-muted mb-1">By service</div>
+                    <div class="d-flex flex-column gap-1">
+                      {% for r in service_breakdown %}
+                        <div class="d-flex justify-content-between">
+                          <div class="small">{{ r.service__vendor__name }} · {{ r.service__name }}</div>
+                          <div class="small" style="font-weight:700;">{{ r.total }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {# Лека имитация на workflow стъпките от screenshot-а #}
+                <div class="dn-card" style="padding: 8px 10px;">
+                  <div class="small text-muted mb-1">Processing (status: Entered)</div>
+                  <div class="d-flex flex-column gap-1 small">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>1) Predictions</span>
+                      <span class="badge rounded-pill bg-secondary-subtle text-muted">n/a</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>2) Variance</span>
+                      <span class="badge rounded-pill bg-secondary-subtle text-muted">n/a</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>3) Transactions</span>
+                      <span class="badge rounded-pill bg-secondary-subtle text-muted">Draft</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>4) Authorisation</span>
+                      <span class="badge rounded-pill bg-secondary-subtle text-muted">Not started</span>
+                    </div>
+                  </div>
+                  <div class="portal-card-muted mt-2 small">
+                    These workflow steps can be wired to your approval engine in a later phase.
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% else %}
+      <div class="portal-card">
+        <div class="portal-card-muted mb-0">
+          Select an invoice from the table above to view and edit details inline.
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
-{# Modal за качване на Invoice – активира се от глобалния Add бутон #}
+{# ADD INVOICE MODAL #}
 <div class="modal fade" id="addInvoiceModal" tabindex="-1" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
-            <div class="modal-header border-0 pt-3 pb-1 px-4">
-                <div>
-                    <h5 class="modal-title" id="addInvoiceModalLabel">Add invoice</h5>
-                    <div class="small text-muted">
-                        Upload invoice header details and the PDF. Line-level splits can be added later.
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body px-4 pb-4">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            {{ form.vendor.label_tag }}
-                            {{ form.vendor }}
-                            {{ form.vendor.errors }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.contract.label_tag }}
-                            {{ form.contract }}
-                            {{ form.contract.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            {{ form.invoice_number.label_tag }}
-                            {{ form.invoice_number }}
-                            {{ form.invoice_number.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form.invoice_date.label_tag }}
-                            {{ form.invoice_date }}
-                            {{ form.invoice_date.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form.currency.label_tag }}
-                            {{ form.currency }}
-                            {{ form.currency.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            {{ form.total_amount.label_tag }}
-                            {{ form.total_amount }}
-                            {{ form.total_amount.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form.tax_amount.label_tag }}
-                            {{ form.tax_amount }}
-                            {{ form.tax_amount.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form.file.label_tag }}
-                            {{ form.file }}
-                            {{ form.file.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-2">
-                        <div class="col-md-6">
-                            {{ form.period_start.label_tag }}
-                            {{ form.period_start }}
-                            {{ form.period_start.errors }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.period_end.label_tag }}
-                            {{ form.period_end }}
-                            {{ form.period_end.errors }}
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-add btn-sm">Save and close</button>
-                    </div>
-                </form>
-            </div>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+      <div class="modal-header border-0 pt-3 pb-1 px-4">
+        <div>
+          <h5 class="modal-title" id="addInvoiceModalLabel">Add invoice</h5>
+          <div class="small text-muted">
+            Upload invoice header details and the PDF. Line-level splits can be added later.
+          </div>
         </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body px-4 pb-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create">
+          {{ form.non_field_errors }}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              {{ form.vendor.label_tag }}
+              {{ form.vendor }}
+              {{ form.vendor.errors }}
+            </div>
+            <div class="col-md-6">
+              {{ form.contract.label_tag }}
+              {{ form.contract }}
+              {{ form.contract.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              {{ form.invoice_number.label_tag }}
+              {{ form.invoice_number }}
+              {{ form.invoice_number.errors }}
+            </div>
+            <div class="col-md-4">
+              {{ form.invoice_date.label_tag }}
+              {{ form.invoice_date }}
+              {{ form.invoice_date.errors }}
+            </div>
+            <div class="col-md-4">
+              {{ form.currency.label_tag }}
+              {{ form.currency }}
+              {{ form.currency.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              {{ form.total_amount.label_tag }}
+              {{ form.total_amount }}
+              {{ form.total_amount.errors }}
+            </div>
+            <div class="col-md-4">
+              {{ form.tax_amount.label_tag }}
+              {{ form.tax_amount }}
+              {{ form.tax_amount.errors }}
+            </div>
+            <div class="col-md-4">
+              {{ form.file.label_tag }}
+              {{ form.file }}
+              {{ form.file.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-2">
+            <div class="col-md-6">
+              {{ form.period_start.label_tag }}
+              {{ form.period_start }}
+              {{ form.period_start.errors }}
+            </div>
+            <div class="col-md-6">
+              {{ form.period_end.label_tag }}
+              {{ form.period_end }}
+              {{ form.period_end.errors }}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-add btn-sm">Save and close</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
+
+{# UNIVERSAL CONFIRM DELETE MODAL (invoice + lines) #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: rgba(15,23,42,.98); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+      <div class="modal-header border-0 pb-1 px-4">
+        <h5 class="modal-title small text-danger" id="confirmDeleteModalLabel">
+          Confirm delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-1 pb-3 px-4">
+        <div class="small portal-card-muted" id="confirmDeleteModalMessage">
+          Are you sure you want to delete?
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 pb-3 px-4">
+        <button type="button"
+                class="btn btn-sm btn-ghost"
+                id="confirmDeleteModalCancel"
+                data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button"
+                class="btn btn-sm btn-outline-danger"
+                id="confirmDeleteModalConfirm">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -264,165 +909,186 @@
 {{ block.super }}
 <script>
 (function () {
-    const tableBody = document.getElementById('invoicesTableBody');
-    const searchInput = document.getElementById('invoiceSearch');
-    const vendorSelect = document.getElementById('invoiceVendorFilter');
-    const contractSelect = document.getElementById('invoiceContractFilter');
-    const currencySelect = document.getElementById('invoiceCurrencyFilter');
-    const rowsSelect = document.getElementById('invoiceRowsPerPage');
-    const showingLabel = document.getElementById('invoiceShowingLabel');
+  // Global Add button -> Add Invoice modal
+  const globalAddBtn = document.getElementById('globalAddButton');
+  const modalEl = document.getElementById('addInvoiceModal');
+  const modal = modalEl && window.bootstrap ? new bootstrap.Modal(modalEl) : null;
 
-    const globalAddBtn = document.getElementById('globalAddButton');
-    const modalEl = document.getElementById('addInvoiceModal');
-    const modal =
-        modalEl && window.bootstrap
-            ? new bootstrap.Modal(modalEl)
-            : null;
+  if (globalAddBtn && modal) {
+    globalAddBtn.addEventListener('click', function () {
+      modal.show();
+    });
+  }
 
-    let rows = [];
-    const vendors = new Set();
-    const contracts = new Set();
-    const currencies = new Set();
+  // Auto-open modal if POST form has errors
+  const hasErrors = document.querySelector('#addInvoiceModal .errorlist') !== null;
+  const addFormHasErrors = JSON.parse('{{ add_form_has_errors|yesno:"true,false"|default:"false"|escapejs }}');
+  if ((hasErrors || addFormHasErrors) && modal) {
+    modal.show();
+  }
 
-    if (tableBody) {
-        rows = Array.from(tableBody.querySelectorAll('tr'));
+  // Tabs за Invoice details / Audit
+  const detailsTab = document.getElementById('invoiceDetailsTab');
+  const auditTab = document.getElementById('invoiceAuditTab');
+  const detailsPanel = document.getElementById('invoiceDetailsPanel');
+  const auditPanel = document.getElementById('invoiceAuditPanel');
 
-        // Попълваме филтрите от наличните редове
-        rows.forEach(row => {
-            const v = (row.dataset.vendor || '').trim();
-            const c = (row.dataset.contract || '').trim();
-            const cur = (row.dataset.currency || '').trim();
-            if (v) vendors.add(v);
-            if (c) contracts.add(c);
-            if (cur) currencies.add(cur);
-        });
+  function activateInvoiceTab(tabName) {
+    if (!detailsTab || !auditTab || !detailsPanel || !auditPanel) return;
 
-        if (vendorSelect) {
-            Array.from(vendors).sort().forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v;
-                opt.textContent = v;
-                vendorSelect.appendChild(opt);
-            });
-        }
+    const showDetails = tabName === 'details';
 
-        if (contractSelect) {
-            Array.from(contracts).sort().forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                contractSelect.appendChild(opt);
-            });
-        }
+    detailsPanel.classList.toggle('d-none', !showDetails);
+    auditPanel.classList.toggle('d-none', showDetails);
 
-        if (currencySelect) {
-            Array.from(currencies).sort().forEach(cur => {
-                const opt = document.createElement('option');
-                opt.value = cur;
-                opt.textContent = cur;
-                currencySelect.appendChild(opt);
-            });
-        }
+    if (showDetails) {
+      detailsTab.classList.add('active');
+      auditTab.classList.remove('active');
+    } else {
+      auditTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      auditPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
-        function applyFilters() {
-            const query = (searchInput ? searchInput.value : '').toLowerCase();
-            const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
-            const contractFilter = contractSelect ? contractSelect.value.toLowerCase() : '';
-            const currencyFilter = currencySelect ? currencySelect.value.toLowerCase() : '';
+  if (detailsTab && auditTab && detailsPanel && auditPanel) {
+    detailsTab.addEventListener('click', function () {
+      activateInvoiceTab('details');
+    });
+    auditTab.addEventListener('click', function () {
+      activateInvoiceTab('audit');
+    });
 
-            let limit = Infinity;
-            if (rowsSelect && rowsSelect.value && rowsSelect.value !== 'all') {
-                const parsed = parseInt(rowsSelect.value, 10);
-                if (!isNaN(parsed) && parsed > 0) {
-                    limit = parsed;
-                }
-            }
+    // стартово – Invoice details
+    activateInvoiceTab('details');
+  }
 
-            let totalMatching = 0;
-            let shown = 0;
+  // --- Mini "calero-style" live breakdown net/tax/total ---
+  function safeParseFloat(v) {
+    if (typeof v !== 'string') return NaN;
+    v = v.replace(',', '.');
+    return parseFloat(v);
+  }
 
-            rows.forEach(row => {
-                const invoiceNumber = (row.dataset.invoiceNumber || '').toLowerCase();
-                const vendor = (row.dataset.vendor || '').toLowerCase();
-                const contract = (row.dataset.contract || '').toLowerCase();
-                const currency = (row.dataset.currency || '').toLowerCase();
-                const fullText = (row.textContent || '').toLowerCase();
+  const totalInput = document.getElementById('invoice-total-input');
+  const taxInput = document.getElementById('invoice-tax-input');
+  const netDisplay = document.getElementById('invoice-net-display');
+  const taxDisplay = document.getElementById('invoice-tax-display');
+  const totalDisplay = document.getElementById('invoice-total-display');
+  const ccyInput = document.getElementById('invoice-currency-input');
+  const ccyDisplay = document.getElementById('invoice-summary-ccy');
 
-                const matchesText =
-                    !query ||
-                    invoiceNumber.includes(query) ||
-                    vendor.includes(query) ||
-                    contract.includes(query) ||
-                    fullText.includes(query);
+  function recalcBreakdown() {
+    if (!totalDisplay || !taxDisplay || !netDisplay) return;
 
-                const matchesVendor =
-                    !vendorFilter || vendor === vendorFilter;
+    const totalVal = totalInput ? safeParseFloat(totalInput.value) : NaN;
+    const taxVal = taxInput ? safeParseFloat(taxInput.value) : NaN;
 
-                const matchesContract =
-                    !contractFilter || contract === contractFilter;
-
-                const matchesCurrency =
-                    !currencyFilter || currency === currencyFilter;
-
-                const matches =
-                    matchesText && matchesVendor && matchesContract && matchesCurrency;
-
-                if (!matches) {
-                    row.style.display = 'none';
-                    return;
-                }
-
-                totalMatching += 1;
-
-                if (shown < limit) {
-                    row.style.display = '';
-                    shown += 1;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            if (showingLabel) {
-                if (totalMatching === 0) {
-                    showingLabel.textContent = 'Showing 0 of 0 invoices';
-                } else {
-                    showingLabel.textContent = `Showing ${shown} of ${totalMatching} invoices`;
-                }
-            }
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', applyFilters);
-        }
-        if (vendorSelect) {
-            vendorSelect.addEventListener('change', applyFilters);
-        }
-        if (contractSelect) {
-            contractSelect.addEventListener('change', applyFilters);
-        }
-        if (currencySelect) {
-            currencySelect.addEventListener('change', applyFilters);
-        }
-        if (rowsSelect) {
-            rowsSelect.addEventListener('change', applyFilters);
-        }
-
-        // първоначално изчисление
-        applyFilters();
+    if (!isNaN(totalVal)) {
+      totalDisplay.textContent = totalVal.toFixed(2);
+    }
+    if (!isNaN(taxVal)) {
+      taxDisplay.textContent = taxVal.toFixed(2);
     }
 
-    // Глобалният Add бутон в topbar -> отваря този invoice modal
-    if (globalAddBtn && modal) {
-        globalAddBtn.addEventListener('click', function () {
-            modal.show();
-        });
+    if (!isNaN(totalVal) && !isNaN(taxVal)) {
+      const net = totalVal - taxVal;
+      netDisplay.textContent = net.toFixed(2);
+    } else {
+      netDisplay.textContent = '—';
     }
+  }
 
-    // Auto-open modal ако POST-натата форма е върнала грешки
-    const hasErrors = document.querySelector('#addInvoiceModal .errorlist') !== null;
-    if (hasErrors && modal) {
-        modal.show();
-    }
+  if (totalInput) {
+    totalInput.addEventListener('input', recalcBreakdown);
+  }
+  if (taxInput) {
+    taxInput.addEventListener('input', recalcBreakdown);
+  }
+
+  if (ccyInput && ccyDisplay) {
+    ccyInput.addEventListener('input', function () {
+      ccyDisplay.textContent = ccyInput.value || '—';
+    });
+  }
+
+  recalcBreakdown();
+
+  // --- Custom delete modal (invoice + lines) ---
+  const deleteModalEl = document.getElementById('confirmDeleteModal');
+  let deleteModal = null;
+  let pendingDeleteForm = null;
+  let originalInvoiceActionValue = null;
+
+  if (deleteModalEl && window.bootstrap) {
+    deleteModal = new bootstrap.Modal(deleteModalEl);
+  }
+
+  const deleteMessageEl = document.getElementById('confirmDeleteModalMessage');
+  const deleteConfirmBtn = document.getElementById('confirmDeleteModalConfirm');
+  const deleteCancelBtn = document.getElementById('confirmDeleteModalCancel');
+
+  // DELETE invoice (header)
+  const invoiceDeleteBtn = document.getElementById('invoice-delete-btn');
+  const invoiceHeaderForm = document.getElementById('invoice-header-form');
+  const invoiceActionField = document.getElementById('invoice-action-field');
+
+  if (invoiceDeleteBtn && invoiceHeaderForm && deleteModal) {
+    invoiceDeleteBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      originalInvoiceActionValue = invoiceActionField ? invoiceActionField.value : null;
+      if (invoiceActionField) {
+        invoiceActionField.value = 'delete';
+      }
+
+      pendingDeleteForm = invoiceHeaderForm;
+      if (deleteMessageEl) {
+        deleteMessageEl.textContent = invoiceDeleteBtn.getAttribute('data-confirm-message') || 'Delete this invoice?';
+      }
+      deleteModal.show();
+    });
+  }
+
+  // DELETE line buttons
+  const lineDeleteButtons = document.querySelectorAll('.js-delete-line-btn');
+  if (lineDeleteButtons && deleteModal) {
+    lineDeleteButtons.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const form = btn.closest('form');
+        if (!form) return;
+
+        pendingDeleteForm = form;
+        if (deleteMessageEl) {
+          deleteMessageEl.textContent = btn.getAttribute('data-confirm-message') || 'Delete this line?';
+        }
+        deleteModal.show();
+      });
+    });
+  }
+
+  // Confirm delete
+  if (deleteConfirmBtn) {
+    deleteConfirmBtn.addEventListener('click', function () {
+      if (pendingDeleteForm) {
+        pendingDeleteForm.submit();
+        pendingDeleteForm = null;
+      }
+      if (deleteModal) {
+        deleteModal.hide();
+      }
+    });
+  }
+
+  // Cancel delete -> reset invoice action ако е за invoice
+  if (deleteCancelBtn) {
+    deleteCancelBtn.addEventListener('click', function () {
+      if (invoiceActionField && originalInvoiceActionValue !== null) {
+        invoiceActionField.value = originalInvoiceActionValue;
+      }
+      pendingDeleteForm = null;
+    });
+  }
 })();
 </script>
 {% endblock %}

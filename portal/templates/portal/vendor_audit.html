@@ -1,0 +1,77 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title_suffix %} · Vendor audit{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Audit</div>
+        <h1 class="section-title mb-0">Change log</h1>
+        <p class="section-subtitle mb-0">
+          {{ vendor.name }} — all recorded changes.
+        </p>
+      </div>
+
+      {% if audit_events %}
+        <div class="table-responsive" style="max-height: 640px; overflow-y:auto;">
+          <table class="portal-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 22%;">When</th>
+                <th style="width: 18%;">Actor</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in audit_events %}
+                <tr>
+                  <td class="cell-muted">
+                    {# смени created_at ако полето е друго #}
+                    {{ e.created_at|date:"Y-m-d H:i" }}
+                  </td>
+                  <td class="cell-muted">
+                    {{ e.actor|default:"—" }}
+                  </td>
+                  <td>
+                    {{ e.description|default:"—" }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj %}
+          <nav class="d-flex justify-content-between align-items-center mt-3">
+            <div class="small text-muted">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                {% if page_obj.has_previous %}
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                {% else %}
+                  <span class="page-link">Prev</span>
+                {% endif %}
+              </li>
+
+              <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                {% if page_obj.has_next %}
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                {% else %}
+                  <span class="page-link">Next</span>
+                {% endif %}
+              </li>
+            </ul>
+          </nav>
+        {% endif %}
+      {% else %}
+        <p class="portal-card-muted mb-0">No audit events yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

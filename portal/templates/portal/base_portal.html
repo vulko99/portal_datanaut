@@ -1,4 +1,5 @@
-{% load static %} 
+{% load static %}
+{% load portal_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,6 +47,11 @@
       /* layout */
       --dn-sidebar: 260px;
 
+      /* NEW: responsive content width tokens */
+      --dn-content-gutter: 24px;
+      --dn-content-max: 1680px; /* default max for large screens */
+      --dn-content-max-xl: 1920px; /* ultrawide cap */
+
       /* legacy aliases */
       --bg: var(--dn-bg);
       --panel: var(--dn-surface-2);
@@ -74,20 +80,24 @@
     }
 
     /* ---- Bootstrap modal: make background fully opaque / non-readable ---- */
+    .modal-backdrop.show{
+      opacity: .82 !important;
+      background-color: #020617 !important;
+    }
 
-.modal-backdrop.show{
-  opacity: .82 !important;              /* default is ~.5 */
-  background-color: #020617 !important;  /* very dark */
-}
+    .portal-modal{
+      background: #0B1220 !important;
+      border: 1px solid rgba(148,163,184,.28) !important;
+      box-shadow: 0 30px 90px rgba(0,0,0,.75) !important;
+    }
 
-.portal-modal{
-  /* override previous radial/transparent look */
-  background: #0B1220 !important;              /* solid panel */
-  border: 1px solid rgba(148,163,184,.28) !important;
-  box-shadow: 0 30px 90px rgba(0,0,0,.75) !important;
-}
-
+    /* ------------------------------------------------------------
+       Shell layout
+       ------------------------------------------------------------ */
     .layout { min-height:100vh; display:flex; }
+
+    /* Ensure main can shrink properly next to sidebar (important for tables) */
+    .main{ flex:1; min-width:0; }
 
     /* ------------------------------------------------------------
        DataNaut primitives
@@ -257,8 +267,6 @@
     /* ------------------------------------------------------------
        Main / topbar
        ------------------------------------------------------------ */
-    .main{ flex:1; min-width:0; }
-
     .topbar{
       height: 64px;
       display:flex;
@@ -272,12 +280,14 @@
       position: sticky;
       top:0;
       z-index: 10;
+      min-width: 0; /* helps flex children */
     }
 
     /* Search in topbar */
     .topbar-search{
       max-width: 360px;
       width: 100%;
+      min-width: 220px;
     }
     .topbar-search .input-group-text{
       background: rgba(15,23,42,.9);
@@ -349,7 +359,7 @@
       background: rgba(20,244,212,.10);
     }
 
-    /* NEW: Reports button in topbar */
+    /* NEW: Icon buttons in topbar (Reports, Provisioning Hub) */
     .btn-report{
       border-radius: 999px;
       padding: 6px 14px;
@@ -430,10 +440,19 @@
       border-top-color: rgba(148,163,184,.18) !important;
     }
 
+    /* ------------------------------------------------------------
+       CONTENT (RESPONSIVE WIDTH FIX)
+       ------------------------------------------------------------ */
     .content{
       padding: 22px;
-      max-width: 1440px;
+      width: min(var(--dn-content-max), calc(100% - (var(--dn-content-gutter) * 2)));
       margin: 0 auto;
+    }
+
+    /* Make wide tables safe without breaking layout */
+    .portal-table,
+    .dn-table{
+      width: 100%;
     }
 
     /* Flash messages */
@@ -593,18 +612,122 @@
       color:rgba(156,163,175,.95) !important;
     }
 
-    .portal-modal{
-      background: radial-gradient(160% 200% at 0% 0%, rgba(20,244,212,.12), #020617);
-      border-radius: var(--dn-radius-lg);
-      border:1px solid rgba(148,163,184,.35);
-      color:var(--dn-text);
+    /* Keep modal panel consistent + responsive sizing without changing markup */
+    .modal-dialog .portal-modal{
+      width: min(980px, 92vw);
+      max-height: 85vh;
+      overflow: auto;
     }
 
+    /* ------------------------------------------------------------
+       Responsive
+       ------------------------------------------------------------ */
     @media (max-width: 991px){
       .sidebar{ display:none; }
-      .content{ padding: 16px; }
-      .topbar-search{ max-width: 100%; }
+      .content{
+        padding: 16px;
+        width: min(var(--dn-content-max), calc(100% - 24px));
+      }
+      .topbar{
+        padding: 0 14px;
+        gap: 8px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 64px;
+        justify-content: flex-start;
+      }
+      .topbar-search{
+        max-width: 100%;
+        min-width: 0;
+        flex: 1 1 100%;
+        order: 3;
+      }
     }
+
+    /* Ultrawide: use more width, but still keep a cap for readability */
+    @media (min-width: 1600px){
+      .content{
+        width: min(var(--dn-content-max-xl), calc(100% - (var(--dn-content-gutter) * 2)));
+      }
+      .topbar-search{
+        max-width: 520px;
+      }
+    }
+
+    /* ============================================================
+   FULL-WIDTH MODE (use the whole screen, no max-width boxing)
+   Put this at the VERY END of the <style> block.
+   ============================================================ */
+
+/* 1) Remove the "cap" and center boxing */
+:root{
+  --dn-content-max: 100%;
+  --dn-content-max-xl: 100%;
+  --dn-content-gutter: 16px; /* side padding inside main content */
+}
+
+/* 2) Make main content take full available width */
+.content{
+  max-width: none !important;
+  width: calc(100% - (var(--dn-content-gutter) * 2)) !important;
+  margin: 0 !important;          /* no centering */
+  padding-left: var(--dn-content-gutter) !important;
+  padding-right: var(--dn-content-gutter) !important;
+}
+
+/* 3) If any templates use Bootstrap containers, uncap them too */
+.content .container,
+.content .container-sm,
+.content .container-md,
+.content .container-lg,
+.content .container-xl,
+.content .container-xxl{
+  max-width: 100% !important;
+}
+
+/* 4) Optional: on ultrawide give a bit more breathing room */
+@media (min-width: 1600px){
+  :root{ --dn-content-gutter: 24px; }
+}
+
+/* ============================================================
+   CHARTS: prevent canvas overflow on browser zoom
+   ============================================================ */
+
+/* Cards should clip their contents (charts were spilling out on zoom-out) */
+.portal-card,
+.dn-card,
+.dn-shell{
+  overflow: hidden;
+}
+
+/* If charts are inside a card, never allow them to exceed the card width */
+.portal-card canvas,
+.dn-card canvas{
+  max-width: 100% !important;
+}
+
+/* Optional helper class for chart wrappers (won't break anything if unused) */
+.chart-wrap{
+  position: relative;
+  width: 100%;
+  height: 320px;   /* stable height so responsive charts don't blow up */
+}
+
+/* If you already have a wrapper div, you can add class="chart-wrap" around the canvas */
+.chart-wrap canvas{
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Responsive chart height */
+@media (max-width: 991px){
+  .chart-wrap{ height: 260px; }
+}
+@media (min-width: 1600px){
+  .chart-wrap{ height: 360px; }
+}
+
   </style>
 
   {% block extra_head %}{% endblock %}
@@ -817,9 +940,20 @@
           </div>
         </form>
 
-        {# Provisioning Hub button #}
-        <a href="{% url 'portal:provisioning_hub' %}" class="btn btn-ghost btn-sm me-2">
-          Provisioning Hub
+        {# Provisioning Hub icon button (self-service, opens in new tab) #}
+        <a href="{% url 'portal:provisioning_hub' %}"
+           class="btn btn-report btn-sm me-2"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="Provisioning Hub · Self-service">
+          <span class="btn-report-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="6" height="6" rx="1.2" ry="1.2" stroke="currentColor" stroke-width="1.4"/>
+              <rect x="14" y="4" width="6" height="6" rx="1.2" ry="1.2" stroke="currentColor" stroke-width="1.4"/>
+              <rect x="9" y="14" width="6" height="6" rx="1.2" ry="1.2" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          </span>
+          <span class="visually-hidden">Provisioning Hub</span>
         </a>
 
         {# Permissions button #}
@@ -880,6 +1014,7 @@
             </button>
           {% elif current_view == 'invoices' or current_view == 'usage_invoices' %}
             <button type="button"
+                    id="globalAddButton"
                     class="btn-add btn-sm"
                     data-bs-toggle="modal"
                     data-bs-target="#addInvoiceModal">

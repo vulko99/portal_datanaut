@@ -1,4 +1,5 @@
-{% extends "portal/base_portal.html" %}
+{% extends "portal/base_provisioning.html" %}
+
 {% block content %}
 
 <div class="portal-card">
@@ -6,71 +7,133 @@
     <div>
       <div class="section-eyebrow">Provisioning Hub</div>
       <div class="section-title">Catalog</div>
-      <div class="section-subtitle">Select services and submit a single request batch.</div>
+      <div class="section-subtitle">
+        Select services and submit a single request batch.
+      </div>
+      {% if acting_user %}
+        <div class="portal-card-muted small mt-1">
+          You are requesting access for:
+          <strong>{{ acting_user.username }}</strong>
+          {% if acting_user.profile.full_name %}
+            · {{ acting_user.profile.full_name }}
+          {% endif %}
+        </div>
+      {% endif %}
     </div>
     <a href="{% url 'portal:provisioning_hub' %}" class="btn btn-ghost btn-sm">Back</a>
   </div>
 
-  <form method="post" action="{% url 'portal:provisioning_catalog_request_bulk' %}" class="mt-3">
+  <form id="catalogForm"
+        method="post"
+        action="{% url 'portal:provisioning_catalog_request_bulk' %}"
+        class="mt-3">
     {% csrf_token %}
-
-    <div class="d-flex justify-content-end mb-2">
-      <button type="submit" class="btn-add btn-sm">
-        Request selected
-      </button>
-    </div>
+    <input type="hidden" name="reason" id="bulkReasonField">
 
     {% if services_by_vendor %}
-      {% for vendor, rows in services_by_vendor.items %}
-        <div class="mt-3">
-          <div class="metric-label mb-2">{{ vendor }}</div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+        <div class="small text-muted">
+          <span id="catalog-selected-count">0 selected</span>
+          <span class="ms-2 d-none d-sm-inline">· Only available services can be requested.</span>
+        </div>
 
-          <table class="portal-table align-middle">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="input-group input-group-sm" style="min-width: 220px;">
+            <span class="input-group-text">Search</span>
+            <input type="search"
+                   id="catalog-search"
+                   class="form-control form-control-sm bg-white text-dark"
+                   placeholder="Service or vendor...">
+          </div>
+
+          <div class="form-check form-switch small m-0">
+            <input class="form-check-input" type="checkbox" id="catalog-hide-assigned" checked>
+            <label class="form-check-label" for="catalog-hide-assigned">
+              Hide already assigned
+            </label>
+          </div>
+
+          <div class="d-flex justify-content-end mb-2">
+            <button type="button" class="btn-add btn-sm" id="btnRequestSelected">
+              Request selected
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {% for vendor, rows in services_by_vendor.items %}
+        <div class="mt-3 catalog-vendor-section">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="metric-label mb-0">{{ vendor }}</div>
+            <button type="button"
+                    class="btn btn-ghost btn-sm btn-toggle-vendor"
+                    data-vendor="{{ vendor|slugify }}">
+              Collapse
+            </button>
+          </div>
+
+          <table class="portal-table align-middle catalog-table" data-vendor="{{ vendor|slugify }}">
             <thead>
               <tr>
                 <th style="width:44px;"></th>
                 <th>Service</th>
                 <th>Category</th>
                 <th>List price</th>
-                <th style="width:160px;">Status</th>
+                <th style="width:180px;">Status</th>
               </tr>
             </thead>
             <tbody>
               {% for r in rows %}
                 {% with s=r.service %}
-                <tr>
-                  <td>
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      name="service_ids"
-                      value="{{ s.pk }}"
-                      {% if r.is_assigned or r.is_pending %}disabled{% endif %}
-                    >
-                  </td>
+                  <tr class="catalog-row"
+                      data-service-name="{{ s.name|lower }}"
+                      data-vendor-name="{{ vendor|lower }}"
+                      data-status="{% if r.is_assigned %}assigned{% elif r.is_pending %}pending{% else %}available{% endif %}">
+                    <td>
+                      <input
+                        class="form-check-input catalog-checkbox"
+                        type="checkbox"
+                        name="service_ids"
+                        value="{{ s.pk }}"
+                        {% if r.is_assigned or r.is_pending %}disabled{% endif %}
+                      >
+                    </td>
 
-                  <td>{{ s.name }}</td>
+                    <td>
+                      {{ s.name }}
+                      {% if s.service_code %}
+                        <span class="small text-muted d-block">
+                          {{ s.service_code }}
+                        </span>
+                      {% endif %}
+                    </td>
 
-                  <td class="cell-muted">{{ s.category|default:"—" }}</td>
+                    <td class="cell-muted">{{ s.category|default:"—" }}</td>
 
-                  <td class="cell-muted">
-                    {% if s.list_price %}
-                      {{ s.list_price|floatformat:2 }} {{ s.default_currency|default:"" }}
-                    {% else %}
-                      —
-                    {% endif %}
-                  </td>
+                    <td class="cell-muted">
+                      {% if s.list_price %}
+                        {{ s.list_price|floatformat:2 }} {{ s.default_currency|default:"" }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
 
-                  <td class="cell-muted">
-                    {% if r.is_assigned %}
-                      Already assigned
-                    {% elif r.is_pending %}
-                      Pending request
-                    {% else %}
-                      Available
-                    {% endif %}
-                  </td>
-                </tr>
+                    <td>
+                      {% if r.is_assigned %}
+                        <span class="badge rounded-pill bg-secondary-subtle text-muted">
+                          Already assigned
+                        </span>
+                      {% elif r.is_pending %}
+                        <span class="badge rounded-pill bg-warning text-dark">
+                          Pending request
+                        </span>
+                      {% else %}
+                        <span class="badge rounded-pill bg-success">
+                          Available
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
                 {% endwith %}
               {% endfor %}
             </tbody>
@@ -85,4 +148,147 @@
   </form>
 </div>
 
+{# ---------- Reason modal for bulk request ---------- #}
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+    <div class="modal-content portal-modal p-0" style="overflow:hidden;">
+      <div class="px-4 pt-4 pb-3" style="border-bottom:1px solid rgba(148,163,184,.18);">
+        <div class="section-eyebrow">Provisioning Hub</div>
+        <div class="section-title" style="font-size:1.1rem;">Request access</div>
+        <div class="portal-card-muted" style="margin-top:6px;font-size:.9rem;">
+          Please provide a short business reason for this request. It will be saved on all selected services.
+        </div>
+      </div>
+
+      <div class="px-4 py-3">
+        <label for="reasonTextarea" class="metric-label mb-1">Business reason</label>
+        <textarea id="reasonTextarea"
+                  class="form-control"
+                  rows="4"
+                  placeholder="E.g. New hire on desk X, needs same access as user Y."
+                  required></textarea>
+      </div>
+
+      <div class="px-4 py-3 d-flex justify-content-end gap-2"
+           style="border-top:1px solid rgba(148,163,184,.18);background:rgba(2,6,23,.25);">
+        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-add btn-sm" id="reasonModalConfirm">
+          Submit request
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function(){
+  const searchInput = document.getElementById('catalog-search');
+  const hideAssignedToggle = document.getElementById('catalog-hide-assigned');
+  const rows = Array.from(document.querySelectorAll('.catalog-row'));
+  const checkboxes = Array.from(document.querySelectorAll('.catalog-checkbox'));
+  const selectedCountEl = document.getElementById('catalog-selected-count');
+  const vendorToggleButtons = Array.from(document.querySelectorAll('.btn-toggle-vendor'));
+
+  function updateSelectedCount() {
+    if (!selectedCountEl) return;
+    const selected = checkboxes.filter(cb => cb.checked && !cb.disabled).length;
+    selectedCountEl.textContent =
+      selected + (selected === 1 ? ' service selected' : ' services selected');
+  }
+
+  function applyFilters() {
+    const term = (searchInput && searchInput.value || '').toLowerCase().trim();
+    const hideAssigned = hideAssignedToggle ? hideAssignedToggle.checked : false;
+
+    rows.forEach(row => {
+      const service = row.dataset.serviceName || '';
+      const vendor = row.dataset.vendorName || '';
+      const status = row.dataset.status || '';
+
+      let visible = true;
+
+      if (term) {
+        visible = service.includes(term) || vendor.includes(term);
+      }
+
+      if (hideAssigned && status === 'assigned') {
+        visible = false;
+      }
+
+      row.style.display = visible ? '' : 'none';
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+  }
+  if (hideAssignedToggle) {
+    hideAssignedToggle.addEventListener('change', applyFilters);
+  }
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+  });
+
+  vendorToggleButtons.forEach(btn => {
+    btn.addEventListener('click', function(){
+      const vendorSlug = this.getAttribute('data-vendor');
+      const table = document.querySelector(
+        'table.catalog-table[data-vendor="' + vendorSlug + '"]'
+      );
+      if (!table) return;
+      const isHidden = table.style.display === 'none';
+      table.style.display = isHidden ? '' : 'none';
+      this.textContent = isHidden ? 'Collapse' : 'Expand';
+    });
+  });
+
+  // Initial state
+  updateSelectedCount();
+  applyFilters();
+})();
+
+// ---------- Reason modal logic ----------
+(function(){
+  const form = document.getElementById("catalogForm");
+  const btnRequest = document.getElementById("btnRequestSelected");
+  const hiddenReason = document.getElementById("bulkReasonField");
+  const modalEl = document.getElementById("reasonModal");
+  const reasonTextarea = document.getElementById("reasonTextarea");
+  const confirmBtn = document.getElementById("reasonModalConfirm");
+
+  if (!form || !btnRequest || !hiddenReason || !modalEl || !reasonTextarea || !confirmBtn) return;
+
+  const modal = new bootstrap.Modal(modalEl);
+
+  function selectedCount(){
+    return form.querySelectorAll('input[name="service_ids"]:checked:not(:disabled)').length;
+  }
+
+  btnRequest.addEventListener("click", function(){
+    if (!selectedCount()){
+      alert("Select at least one service from the catalog.");
+      return;
+    }
+    reasonTextarea.value = "";
+    modal.show();
+    reasonTextarea.focus();
+  });
+
+  confirmBtn.addEventListener("click", function(){
+    const txt = reasonTextarea.value.trim();
+    if (!txt){
+      reasonTextarea.focus();
+      return;
+    }
+    hiddenReason.value = txt;
+    modal.hide();
+    form.submit();
+  });
+})();
+</script>
 {% endblock %}

@@ -1,4 +1,91 @@
-{% extends "portal/base_portal.html" %}
+{% extends "portal/base_provisioning.html" %}
+
+{% block extra_head %}
+<style>
+  .ph-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
+  .ph-filter-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .78rem;
+    border: 1px solid rgba(148,163,184,.40);
+    background: rgba(15,23,42,.85);
+    color: #E5E7EB;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ph-filter-pill.active {
+    border-color: rgba(20,244,212,.80);
+    background: radial-gradient(circle at top left,
+                rgba(20,244,212,.28),
+                rgba(15,23,42,.96));
+    box-shadow: 0 10px 26px rgba(0,0,0,.55);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    margin-right: 6px;
+  }
+  .status-pending {
+    background: rgba(250,204,21,.10);
+    border-color: rgba(250,204,21,.65);
+    color: #FEF9C3;
+  }
+  .status-pending .dot { background:#FACC15; }
+
+  .status-approved {
+    background: rgba(34,197,94,.10);
+    border-color: rgba(34,197,94,.70);
+    color: #BBF7D0;
+  }
+  .status-approved .dot { background:#22C55E; }
+
+  .status-rejected {
+    background: rgba(248,113,113,.10);
+    border-color: rgba(248,113,113,.75);
+    color: #FECACA;
+  }
+  .status-rejected .dot { background:#F97373; }
+
+  .status-cancelled {
+    background: rgba(148,163,184,.12);
+    border-color: rgba(148,163,184,.60);
+    color: #E5E7EB;
+  }
+  .status-cancelled .dot { background:#9CA3AF; }
+
+  .ph-note {
+    font-size: .84rem;
+    color: #E5E7EB; /* не е толкова бледо вече */
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ph-note-muted {
+    color: rgba(156,163,175,.95);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="portal-card">
@@ -6,38 +93,131 @@
     <div>
       <div class="section-eyebrow">Provisioning Hub</div>
       <div class="section-title">My requests</div>
-      <div class="section-subtitle">Requests you have submitted.</div>
+      <div class="section-subtitle">
+        Access requests you have submitted for market data and services.
+      </div>
     </div>
     <a href="{% url 'portal:provisioning_hub' %}" class="btn btn-ghost btn-sm">Back</a>
   </div>
 
-  <div class="mt-3">
+  {# Филтри по статус (работят с ?status=pending и т.н.) #}
+  {% with current_status=current_status %}
+  <div class="ph-filter-bar">
+    <a href="{% url 'portal:provisioning_my_requests' %}"
+       class="ph-filter-pill {% if not current_status %}active{% endif %}">
+      All
+    </a>
+    <a href="{% url 'portal:provisioning_my_requests' %}?status=pending"
+       class="ph-filter-pill {% if current_status == 'pending' %}active{% endif %}">
+      Pending
+    </a>
+    <a href="{% url 'portal:provisioning_my_requests' %}?status=approved"
+       class="ph-filter-pill {% if current_status == 'approved' %}active{% endif %}">
+      Approved
+    </a>
+    <a href="{% url 'portal:provisioning_my_requests' %}?status=rejected"
+       class="ph-filter-pill {% if current_status == 'rejected' %}active{% endif %}">
+      Rejected
+    </a>
+    <a href="{% url 'portal:provisioning_my_requests' %}?status=cancelled"
+       class="ph-filter-pill {% if current_status == 'cancelled' %}active{% endif %}">
+      Cancelled
+    </a>
+  </div>
+{% endwith %}
+
+  <div class="mt-2">
     {% if requests and requests|length %}
-      <table class="portal-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Service</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in requests %}
-          <tr>
-            <td>{{ r.id }}</td>
-            <td>{{ r.service }}</td>
-            <td>{{ r.status }}</td>
-            <td>{{ r.created_at }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="portal-table align-middle">
+          <thead>
+            <tr>
+              <th style="width:70px;">ID</th>
+              <th>Service</th>
+              <th style="width:140px;">Status</th>
+              <th style="width:160px;">Created</th>
+              <th style="width:160px;">Last update</th>
+              <th style="width:260px;">Decision note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in requests %}
+              <tr>
+                <td class="cell-muted">#{{ r.id }}</td>
+
+                <td>
+                  {{ r.service.vendor.name }} – {{ r.service.name }}
+                </td>
+
+                <td>
+  {% if r.status == status_approved %}
+    <span class="status-pill status-approved">
+      <span class="dot"></span>Approved
+    </span>
+  {% elif r.status == status_rejected %}
+    <span class="status-pill status-rejected">
+      <span class="dot"></span>Rejected
+    </span>
+  {% elif status_cancelled and r.status == status_cancelled %}
+    <span class="status-pill status-cancelled">
+      <span class="dot"></span>Cancelled
+    </span>
+  {% elif r.status == status_pending %}
+    <span class="status-pill status-pending">
+      <span class="dot"></span>Pending
+    </span>
+  {% else %}
+    <span class="status-pill status-pending">
+      <span class="dot"></span>{{ r.status }}
+    </span>
+  {% endif %}
+</td>
+
+                <td class="cell-muted">
+                  {% if r.created_at %}
+                    {{ r.created_at|date:"Y-m-d H:i" }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+
+                <td class="cell-muted">
+                  {% if r.decided_at %}
+                    {{ r.decided_at|date:"Y-m-d H:i" }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if r.decision_note %}
+                    <span class="ph-note" title="{{ r.decision_note }}">
+                      {{ r.decision_note }}
+                    </span>
+                  {% elif r.status == 'pending' %}
+                    <span class="ph-note ph-note-muted">Awaiting approval…</span>
+                  {% else %}
+                    <span class="ph-note ph-note-muted">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-caption mt-2">
+        Use the <a href="{% url 'portal:provisioning_catalog' %}" class="link-inline">Catalog</a>
+        to request new access, and track approval decisions here.
+      </div>
     {% else %}
       <div class="empty mt-3">
         No requests yet.
         <div class="mt-2">
-          <a class="link-inline" href="{% url 'portal:provisioning_catalog' %}">Open catalog</a> to request access.
+          <a class="link-inline" href="{% url 'portal:provisioning_catalog' %}">
+            Open catalog
+          </a>
+          to request access.
         </div>
       </div>
     {% endif %}

@@ -4,285 +4,284 @@
 
 {% block content %}
 <div class="row g-3">
-    <!-- HEADER / SUMMARY -->
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="section-header mb-2">
-                <div class="section-eyebrow">Inventory</div>
-                <h1 class="section-title mb-0">Cost centers</h1>
-                <p class="section-subtitle mb-0">
-                    Basic allocation model for contracts, invoices and licences – by desk, business unit or region.
-                    Used as a backbone for approvals, chargebacks and reporting.
-                </p>
-            </div>
+  <div class="col-12">
+    <div class="portal-card">
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-3">
-                <div class="d-flex flex-wrap gap-4">
-                    <div>
-                        <div class="metric-label">Total cost centers</div>
-                        <div class="metric-value">
-                            {{ cost_centers|length }}
-                        </div>
-                    </div>
-                </div>
-                <div class="text-end small text-muted">
-                    In later releases, approvals and licence requests will route via these cost centers,
-                    with automatic mapping to GL and management reports.
-                </div>
-            </div>
+      {# HEADER – същият патърн като Contracts/Services #}
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Inventory</div>
+        <h1 class="section-title mb-0">Cost centers</h1>
+        <p class="section-subtitle mb-0">
+          Basic allocation model for contracts, invoices and licences – by desk, business unit or region.
+          Used as a backbone for approvals, chargebacks and reporting.
+        </p>
+      </div>
+
+      {# META РЕД – копира стил от Contracts #}
+      <div class="d-flex flex-wrap align-items-end justify-content-between mt-1 mb-2">
+        <div class="small text-muted">
+          <span class="me-3">
+            Total cost centers:
+            <strong>
+              {% if total_cost_centers %}
+                {{ total_cost_centers }}
+              {% else %}
+                {{ cost_centers|length }}
+              {% endif %}
+            </strong>
+          </span>
+          <span>
+            Showing
+            <strong id="ccShownOnPage">
+              {{ cost_centers|length }}
+            </strong>
+            on this page
+          </span>
         </div>
-    </div>
-
-    <!-- LIST + FILTERS -->
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="d-flex flex-wrap justify-content-between align-items-start mb-2">
-                <div>
-                    <h6 class="mb-1">Cost center list</h6>
-                    <p class="portal-card-muted mb-0">
-                        High-level structure only. Codes can be aligned with your GL, internal reporting model
-                        or trading desk hierarchy.
-                    </p>
-                </div>
-            </div>
-
-            {# FILTER BAR #}
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                <div class="d-flex flex-wrap gap-2 flex-grow-1">
-                    <div class="input-group input-group-sm" style="max-width: 360px;">
-                        <span class="input-group-text">Search</span>
-                        <input
-                            type="search"
-                            id="ccSearch"
-                            class="form-control"
-                            placeholder="Code, name, BU, region, approver…">
-                    </div>
-                    <select id="buFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                        <option value="">All business units</option>
-                    </select>
-                    <select id="regionFilter" class="form-select form-select-sm" style="min-width: 160px;">
-                        <option value="">All regions</option>
-                    </select>
-                </div>
-
-                <div class="d-flex align-items-center gap-2 mt-2 mt-md-0 ms-md-3 small">
-                    <span id="ccTableSummary" class="portal-card-muted">
-                        Showing {{ cost_centers|length }} of {{ cost_centers|length }} cost centers.
-                    </span>
-                    <div class="d-flex align-items-center">
-                        <span class="me-1 portal-card-muted">Rows:</span>
-                        <select id="ccPageSize" class="form-select form-select-sm" style="width:auto;">
-                            <option value="10">10</option>
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {% if cost_centers %}
-                {# FIXED-HEIGHT SCROLLABLE TABLE SHELL #}
-                <div class="inventory-table-shell" style="max-height: 460px; overflow-y: auto;">
-                    <div class="table-responsive">
-                        <table class="portal-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th style="width: 14%;">Code</th>
-                                    <th style="width: 30%;">Name</th>
-                                    <th style="width: 22%;">Business unit</th>
-                                    <th style="width: 14%;">Region</th>
-                                    <th style="width: 20%;">Default approver</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ccTableBody">
-                                {% for cc in cost_centers %}
-                                    <tr
-                                        data-code="{{ cc.code|default_if_none:'' }}"
-                                        data-name="{{ cc.name|default_if_none:'' }}"
-                                        data-bu="{{ cc.business_unit|default_if_none:'' }}"
-                                        data-region="{{ cc.region|default_if_none:'' }}"
-                                        data-approver="{% if cc.default_approver %}{{ cc.default_approver.get_full_name|default:cc.default_approver.username }}{% endif %}"
-                                    >
-                                        <td>{{ cc.code }}</td>
-                                        <td class="cell-muted">{{ cc.name }}</td>
-                                        <td class="cell-muted" data-role="bu">
-                                            {{ cc.business_unit|default:"—" }}
-                                        </td>
-                                        <td class="cell-muted" data-role="region">
-                                            {{ cc.region|default:"—" }}
-                                        </td>
-                                        <td class="cell-muted">
-                                            {% if cc.default_approver %}
-                                                {{ cc.default_approver.get_full_name|default:cc.default_approver.username }}
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <p class="portal-card-muted mb-0 mt-2">
-                    This model can be further enriched with cost centre hierarchies, internal IDs and linkage to HR or
-                    finance master data for fully automated allocations.
-                </p>
-            {% else %}
-                <p class="portal-card-muted mb-0">
-                    No cost centers configured yet. You can add them in the Django admin and they will appear here.
-                </p>
-            {% endif %}
+        <div class="text-end small text-muted">
+          In later releases, approvals and licence requests will route via these cost centers,
+          with automatic mapping to GL and management reports.
         </div>
+      </div>
+
+      {# TOOLBAR – Search + BU/Region + Rows (визуално подредено като при Contracts) #}
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap gap-2 flex-grow-1">
+
+          <div class="input-group input-group-sm" style="max-width: 360px;">
+            <span class="input-group-text">Search</span>
+            <input
+              type="search"
+              id="ccSearch"
+              class="form-control"
+              placeholder="Code, name, BU, region, approver…">
+          </div>
+
+          <select id="buFilter" class="form-select form-select-sm" style="min-width: 190px;">
+            <option value="">All business units</option>
+          </select>
+
+          <select id="regionFilter" class="form-select form-select-sm" style="min-width: 150px;">
+            <option value="">All regions</option>
+          </select>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mt-2 mt-md-0 ms-md-3 small">
+          <span id="ccTableSummary" class="portal-card-muted">
+            Showing {{ cost_centers|length }} of {{ cost_centers|length }} cost centers.
+          </span>
+          <div class="d-flex align-items-center">
+            <span class="me-1 portal-card-muted">Rows:</span>
+            <select id="ccPageSize" class="form-select form-select-sm" style="width:auto; min-width: 90px;">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {# TABLE – височина и стил като другите inventory grid-ове #}
+      {% if cost_centers %}
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+          <table class="portal-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 14%;">Code</th>
+                <th style="width: 30%;">Name</th>
+                <th style="width: 22%;">Business unit</th>
+                <th style="width: 14%;">Region</th>
+                <th style="width: 20%;">Default approver</th>
+              </tr>
+            </thead>
+            <tbody id="ccTableBody">
+              {% for cc in cost_centers %}
+                <tr
+                  data-code="{{ cc.code|default_if_none:'' }}"
+                  data-name="{{ cc.name|default_if_none:'' }}"
+                  data-bu="{{ cc.business_unit|default_if_none:'' }}"
+                  data-region="{{ cc.region|default_if_none:'' }}"
+                  data-approver="{% if cc.default_approver %}{{ cc.default_approver.get_full_name|default:cc.default_approver.username }}{% endif %}"
+                >
+                  <td>{{ cc.code }}</td>
+                  <td class="cell-muted">{{ cc.name }}</td>
+                  <td class="cell-muted">
+                    {{ cc.business_unit|default:"—" }}
+                  </td>
+                  <td class="cell-muted">
+                    {{ cc.region|default:"—" }}
+                  </td>
+                  <td class="cell-muted">
+                    {% if cc.default_approver %}
+                      {{ cc.default_approver.get_full_name|default:cc.default_approver.username }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="portal-card-muted mb-0 mt-2">
+          This model can be further enriched with cost centre hierarchies, internal IDs and linkage to HR or
+          finance master data for fully automated allocations.
+        </p>
+      {% else %}
+        <p class="portal-card-muted mb-0">
+          No cost centers configured yet. You can add them in the Django admin and they will appear here.
+        </p>
+      {% endif %}
     </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 (function () {
-    const searchInput = document.getElementById('ccSearch');
-    const buSelect = document.getElementById('buFilter');
-    const regionSelect = document.getElementById('regionFilter');
-    const tableBody = document.getElementById('ccTableBody');
-    const pageSizeSelect = document.getElementById('ccPageSize');
-    const summaryEl = document.getElementById('ccTableSummary');
+  const searchInput   = document.getElementById('ccSearch');
+  const buSelect      = document.getElementById('buFilter');
+  const regionSelect  = document.getElementById('regionFilter');
+  const tableBody     = document.getElementById('ccTableBody');
+  const pageSizeSelect= document.getElementById('ccPageSize');
+  const summaryEl     = document.getElementById('ccTableSummary');
+  const shownOnPageEl = document.getElementById('ccShownOnPage');
 
-    if (!tableBody || !buSelect || !regionSelect) return;
+  if (!tableBody || !buSelect || !regionSelect) return;
 
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-    const totalCount = rows.length;
+  const rows = Array.from(tableBody.querySelectorAll('tr'));
+  const totalCount = rows.length;
 
-    const buSet = new Set();
-    const regionSet = new Set();
+  const buSet = new Set();
+  const regionSet = new Set();
 
-    // Collect distinct BUs and regions
+  // distinct BU и Region за dropdown-ите
+  rows.forEach(row => {
+    const bu = (row.dataset.bu || '').trim();
+    const region = (row.dataset.region || '').trim();
+    if (bu) buSet.add(bu);
+    if (region) regionSet.add(region);
+  });
+
+  Array.from(buSet).sort().forEach(bu => {
+    const opt = document.createElement('option');
+    opt.value = bu;
+    opt.textContent = bu;
+    buSelect.appendChild(opt);
+  });
+
+  Array.from(regionSet).sort().forEach(region => {
+    const opt = document.createElement('option');
+    opt.value = region;
+    opt.textContent = region;
+    regionSelect.appendChild(opt);
+  });
+
+  // rows per page от localStorage
+  if (pageSizeSelect) {
+    try {
+      const saved = localStorage.getItem('costCentersRowsPerPage');
+      if (saved) {
+        const optionExists = Array.from(pageSizeSelect.options)
+          .some(o => o.value === saved);
+        if (optionExists) {
+          pageSizeSelect.value = saved;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function applyFiltersAndLimit() {
+    const query = (searchInput ? searchInput.value : '').toLowerCase();
+    const buFilter = buSelect.value;
+    const regionFilter = regionSelect.value;
+
+    let matchedRows = [];
+
     rows.forEach(row => {
-        const bu = (row.dataset.bu || '').trim();
-        const region = (row.dataset.region || '').trim();
-        if (bu) buSet.add(bu);
-        if (region) regionSet.add(region);
+      const code     = (row.dataset.code || '').toLowerCase();
+      const name     = (row.dataset.name || '').toLowerCase();
+      const bu       = (row.dataset.bu || '');
+      const region   = (row.dataset.region || '');
+      const approver = (row.dataset.approver || '').toLowerCase();
+      const fullText = (row.textContent || '').toLowerCase();
+
+      const matchesText =
+        !query ||
+        code.includes(query) ||
+        name.includes(query) ||
+        approver.includes(query) ||
+        fullText.includes(query);
+
+      const matchesBu = !buFilter || bu === buFilter;
+      const matchesRegion = !regionFilter || region === regionFilter;
+
+      if (matchesText && matchesBu && matchesRegion) {
+        matchedRows.push(row);
+      }
     });
 
-    Array.from(buSet).sort().forEach(bu => {
-        const opt = document.createElement('option');
-        opt.value = bu;
-        opt.textContent = bu;
-        buSelect.appendChild(opt);
-    });
-
-    Array.from(regionSet).sort().forEach(region => {
-        const opt = document.createElement('option');
-        opt.value = region;
-        opt.textContent = region;
-        regionSelect.appendChild(opt);
-    });
-
-    // Restore page size from localStorage, if any
+    // лимит според rows dropdown
+    let limit = matchedRows.length;
     if (pageSizeSelect) {
-        try {
-            const saved = localStorage.getItem('costCentersRowsPerPage');
-            if (saved) {
-                const optionExists = Array.from(pageSizeSelect.options).some(o => o.value === saved);
-                if (optionExists) {
-                    pageSizeSelect.value = saved;
-                }
-            }
-        } catch (e) {
-            // ignore storage errors
+      const val = pageSizeSelect.value;
+      if (val !== 'all') {
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          limit = Math.min(parsed, matchedRows.length);
         }
+      }
     }
 
-    function applyFiltersAndLimit() {
-        const query = (searchInput ? searchInput.value : '').toLowerCase();
-        const buFilter = buSelect.value;
-        const regionFilter = regionSelect.value;
+    rows.forEach(r => { r.style.display = 'none'; });
+    matchedRows.slice(0, limit).forEach(r => { r.style.display = ''; });
 
-        let matchedRows = [];
+    const filteredCount = matchedRows.length;
+    const shownCount = limit;
 
-        rows.forEach(row => {
-            const code = (row.dataset.code || '').toLowerCase();
-            const name = (row.dataset.name || '').toLowerCase();
-            const bu = (row.dataset.bu || '');
-            const region = (row.dataset.region || '');
-            const approver = (row.dataset.approver || '').toLowerCase();
-            const fullText = (row.textContent || '').toLowerCase();
-
-            const matchesText =
-                !query ||
-                code.includes(query) ||
-                name.includes(query) ||
-                approver.includes(query) ||
-                fullText.includes(query);
-
-            const matchesBu =
-                !buFilter || bu === buFilter;
-
-            const matchesRegion =
-                !regionFilter || region === regionFilter;
-
-            if (matchesText && matchesBu && matchesRegion) {
-                matchedRows.push(row);
-            }
-        });
-
-        // Determine limit
-        let limit = matchedRows.length;
-        if (pageSizeSelect) {
-            const val = pageSizeSelect.value;
-            if (val !== 'all') {
-                const parsed = parseInt(val, 10);
-                if (!isNaN(parsed) && parsed > 0) {
-                    limit = Math.min(parsed, matchedRows.length);
-                }
-            }
-        }
-
-        // Hide all rows, then show only first N of matched
-        rows.forEach(r => {
-            r.style.display = 'none';
-        });
-        matchedRows.slice(0, limit).forEach(r => {
-            r.style.display = '';
-        });
-
-        const filteredCount = matchedRows.length;
-        const shownCount = limit;
-
-        if (summaryEl) {
-            if (filteredCount === totalCount) {
-                summaryEl.textContent =
-                    'Showing ' + shownCount + ' of ' + totalCount + ' cost centers.';
-            } else {
-                summaryEl.textContent =
-                    'Showing ' + shownCount + ' of ' + filteredCount +
-                    ' matching cost centers (out of ' + totalCount + ' total).';
-            }
-        }
+    // update summary (дясно в toolbar-а)
+    if (summaryEl) {
+      if (filteredCount === totalCount && !query && !buFilter && !regionFilter) {
+        summaryEl.textContent =
+          'Showing ' + shownCount + ' of ' + totalCount + ' cost centers.';
+      } else {
+        summaryEl.textContent =
+          'Showing ' + shownCount + ' of ' + filteredCount +
+          ' matching cost centers (out of ' + totalCount + ' total).';
+      }
     }
 
-    if (searchInput) {
-        searchInput.addEventListener('input', applyFiltersAndLimit);
+    // update meta реда „Showing X on this page“
+    if (shownOnPageEl) {
+      shownOnPageEl.textContent = shownCount;
     }
-    buSelect.addEventListener('change', applyFiltersAndLimit);
-    regionSelect.addEventListener('change', applyFiltersAndLimit);
+  }
 
-    if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', function () {
-            try {
-                localStorage.setItem('costCentersRowsPerPage', pageSizeSelect.value);
-            } catch (e) {
-                // ignore storage errors
-            }
-            applyFiltersAndLimit();
-        });
-    }
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFiltersAndLimit);
+  }
+  buSelect.addEventListener('change', applyFiltersAndLimit);
+  regionSelect.addEventListener('change', applyFiltersAndLimit);
 
-    // Initial render
-    applyFiltersAndLimit();
+  if (pageSizeSelect) {
+    pageSizeSelect.addEventListener('change', function () {
+      try {
+        localStorage.setItem('costCentersRowsPerPage', pageSizeSelect.value);
+      } catch (e) {
+        // ignore
+      }
+      applyFiltersAndLimit();
+    });
+  }
+
+  // initial
+  applyFiltersAndLimit();
 })();
 </script>
 {% endblock %}

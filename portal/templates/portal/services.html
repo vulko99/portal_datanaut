@@ -4,299 +4,540 @@
 
 {% block content %}
 <div class="row g-3">
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="section-header mb-2">
-                <div class="section-eyebrow">Inventory</div>
-                <h1 class="section-title mb-0">Services</h1>
-                <p class="section-subtitle mb-0">
-                    What each vendor actually sells – data feeds, terminals, analytics, index licences and other services.
-                    This catalogue links commercial details to contracts and invoices.
-                </p>
-            </div>
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Inventory</div>
+        <h1 class="section-title mb-0">Services</h1>
+        <p class="section-subtitle mb-0">
+          What each vendor actually sells – data feeds, terminals, analytics, index licences and other services.
+          This catalogue links commercial details to contracts and invoices.
+        </p>
+      </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-2">
-                <div class="d-flex flex-wrap gap-3 align-items-end">
-                    <div>
-                        <div class="metric-label">Total services</div>
-                        <div class="metric-value">
-                            {{ services|length }}
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 small">
-                        <span>
-                            Showing
-                            <span id="visibleCount">{{ services|length }}</span>
-                            of
-                            <span id="totalCount">{{ services|length }}</span>
-                            services
-                        </span>
-                        <span class="ms-2">Rows:</span>
-                        <select id="rowsPerPage" class="form-select form-select-sm" style="width:auto; min-width: 80px;">
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="250" selected>250</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="text-end small portal-card-muted">
-                    Use the <strong>Add</strong> button in the top bar to register a new service.
-                </div>
-            </div>
-
-            <!-- TOOLBAR: search + filters -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <div class="input-group input-group-sm" style="max-width: 320px;">
-                        <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
-                            Search
-                        </span>
-                        <input
-                            type="search"
-                            id="serviceSearch"
-                            class="form-control"
-                            placeholder="Service, vendor, owner, contract…">
-                    </div>
-
-                    <select id="vendorFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                        <option value="">All vendors</option>
-                    </select>
-
-                    <select id="categoryFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                        <option value="">All categories</option>
-                        <option value="data_feed">Data feed</option>
-                        <option value="terminal">Terminal</option>
-                        <option value="analytics">Analytics</option>
-                        <option value="index_license">Index license</option>
-                        <option value="connectivity">Connectivity</option>
-                        <option value="other">Other</option>
-                    </select>
-
-                    <!-- Show Closed toggle (query param show_closed=1) -->
-                    <div class="form-check form-switch ms-1" style="user-select:none;">
-                        <input class="form-check-input" type="checkbox" role="switch" id="showClosedToggle">
-                        <label class="form-check-label small" for="showClosedToggle">Show closed</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SERVICE GRID -->
-            {% if services %}
-                <div class="table-responsive"
-                     style="max-height: 520px; overflow-y: auto; border-radius: 12px;">
-                    <table class="portal-table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width: 20%;">Service</th>
-                                <th style="width: 16%;">Vendor</th>
-                                <th style="width: 11%;">Category</th>
-                                <th style="width: 11%;">Billing</th>
-                                <th style="width: 8%;">Currency</th>
-                                <th style="width: 10%; text-align:right;">Price</th>
-                                <th style="width: 10%;">Split</th>
-                                <th style="width: 7%;">Owner</th>
-                                <th style="width: 7%;">Contract</th>
-                            </tr>
-                        </thead>
-                        <tbody id="servicesTableBody">
-                            {% for service in services %}
-                                <tr
-                                    data-service-name="{{ service.name|default_if_none:'' }}"
-                                    data-vendor="{{ service.vendor.name|default_if_none:'' }}"
-                                    data-category="{{ service.category|default_if_none:'' }}"
-                                    data-owner="{{ service.owner_display|default_if_none:'' }}"
-                                    data-contract="{% if service.primary_contract %}{{ service.primary_contract.contract_name }}{% endif %}"
-                                    data-is-active="{{ service.is_active|yesno:'1,0' }}"
-                                >
-                                    <td>
-                                        <a href="{% url 'portal:service_detail' service.pk %}" class="link-inline">
-                                            {{ service.name }}
-                                        </a>
-
-                                        {% if service.is_active == False %}
-                                            <span class="badge rounded-pill ms-2"
-                                                  style="background: rgba(148,163,184,.18); border:1px solid rgba(148,163,184,.35); color:#cbd5e1; font-weight:600;">
-                                                Closed
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">{{ service.vendor.name }}</td>
-                                    <td class="cell-muted">
-                                        {{ service.get_category_display|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ service.get_default_billing_frequency_display|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ service.default_currency|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted" style="text-align:right;">
-                                        {% if service.list_price %}
-                                            {{ service.list_price }}
-                                        {% else %}
-                                            — 
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ service.allocation_split|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {{ service.owner_display|default:"—" }}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if service.primary_contract %}
-                                            {{ service.primary_contract.contract_name }}
-                                        {% else %}
-                                            — 
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <p class="portal-card-muted mb-0 mt-2">
-                    Over time this catalogue can drive licence allocation, renewal bundles and optimisation analysis across desks and cost centres.
-                </p>
-            {% else %}
-                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
-                    <div>
-                        No services yet. Once you add services to vendors (via this portal or admin), they will appear here.
-                    </div>
-                    <div class="mt-2 mt-sm-0">
-                        <button type="button"
-                                class="btn btn-add btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addServiceModal">
-                            + Add service
-                        </button>
-                    </div>
-                </div>
-            {% endif %}
+      {# COMPACT HEADER META – като при Vendors #}
+      <div class="d-flex flex-wrap align-items-end justify-content-between mt-1 mb-2">
+        <div class="small text-muted">
+          <span class="me-3">
+            Total services: <strong>{{ total_services }}</strong>
+          </span>
+          <span>
+            Showing {{ services|length }} on this page
+          </span>
         </div>
+        <div class="text-end small text-muted">
+          Use the global <strong>Add</strong> button in the top bar to register a new service.
+        </div>
+      </div>
+
+      {# TOOLBAR: Show closed + Rows – копие от Vendors #}
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+
+          {# Show closed toggle #}
+          <form method="get" class="small d-flex align-items-center gap-3">
+            <input type="hidden" name="show_closed" value="0">
+            <input type="hidden" name="page" value="{{ current_page|default:1 }}">
+            <input type="hidden" name="rows" value="{{ rows_per_page|default:50 }}">
+            {% if selected_service %}
+              <input type="hidden" name="selected" value="{{ selected_service.id }}">
+            {% endif %}
+
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input"
+                     type="checkbox"
+                     id="services-show-closed-toggle"
+                     name="show_closed"
+                     value="1"
+                     {% if show_closed %}checked{% endif %}
+                     onchange="this.form.submit()">
+              <label class="form-check-label" for="services-show-closed-toggle">
+                Show closed
+              </label>
+            </div>
+          </form>
+
+          {# Rows selector #}
+          <form method="get" class="small d-flex align-items-center gap-2">
+            <input type="hidden" name="page" value="{{ current_page|default:1 }}">
+            <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+            {% if selected_service %}
+              <input type="hidden" name="selected" value="{{ selected_service.id }}">
+            {% endif %}
+
+            <span class="text-muted">Rows:</span>
+            <select name="rows"
+                    class="form-select form-select-sm"
+                    style="width:auto; min-width: 90px;"
+                    onchange="this.form.submit()">
+              {% for opt in rows_options %}
+                <option value="{{ opt }}" {% if opt == rows_per_page %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </form>
+
+        </div>
+      </div>
+
+      {# SERVICE GRID #}
+      {% if services %}
+        {# Височина като при Vendors – max-height 420px #}
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+          <table class="portal-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 20%;">Service</th>
+                <th style="width: 16%;">Vendor</th>
+                <th style="width: 11%;">Category</th>
+                <th style="width: 11%;">Billing</th>
+                <th style="width: 8%;">Currency</th>
+                <th style="width: 10%; text-align:right;">Price</th>
+                <th style="width: 10%;">Split</th>
+                <th style="width: 7%;">Owner</th>
+                <th style="width: 7%;">Contract</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% with sc=show_closed|yesno:"1,0" %}
+                {% for service in services %}
+                  <tr {% if selected_service and service.id == selected_service.id %}style="background: rgba(20,244,212,.06);"{% endif %}>
+                    <td>
+                      <a
+                        href="?page={{ current_page|default:1 }}&rows={{ rows_per_page|default:50 }}&show_closed={{ sc }}&selected={{ service.id }}#service-details"
+                        class="link-table"
+                      >
+                        {{ service.name }}
+                        {% if service.is_active == False %}
+                          <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                        {% endif %}
+                      </a>
+                    </td>
+                    <td class="cell-muted">{{ service.vendor.name }}</td>
+                    <td class="cell-muted">{{ service.get_category_display|default:"—" }}</td>
+                    <td class="cell-muted">{{ service.get_default_billing_frequency_display|default:"—" }}</td>
+                    <td class="cell-muted">{{ service.default_currency|default:"—" }}</td>
+                    <td class="cell-muted" style="text-align:right;">
+                      {% if service.list_price %}{{ service.list_price }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">{{ service.allocation_split|default:"—" }}</td>
+                    <td class="cell-muted">{{ service.owner_display|default:"—" }}</td>
+                    <td class="cell-muted">
+                      {% if service.primary_contract %}
+                        {{ service.primary_contract.contract_name }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% endwith %}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="portal-card-muted mb-0 mt-2">
+          Over time this catalogue can drive licence allocation, renewal bundles and optimisation analysis across desks and cost centres.
+        </p>
+
+        {# PAGINATION – копирано от Vendors #}
+        {% if page_obj %}
+          {% with sc=show_closed|yesno:"1,0" %}
+            <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Services pagination">
+              <div class="small text-muted">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </div>
+
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                  {% if page_obj.has_previous %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_service %}&selected={{ selected_service.id }}{% endif %}">
+                      Prev
+                    </a>
+                  {% else %}
+                    <span class="page-link">Prev</span>
+                  {% endif %}
+                </li>
+
+                {% for p in page_obj.paginator.page_range %}
+                  {% if p == 1 or p == page_obj.paginator.num_pages or p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                    <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                      <a class="page-link"
+                         href="?page={{ p }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_service %}&selected={{ selected_service.id }}{% endif %}">
+                        {{ p }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                  {% if page_obj.has_next %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_service %}&selected={{ selected_service.id }}{% endif %}">
+                      Next
+                    </a>
+                  {% else %}
+                    <span class="page-link">Next</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </nav>
+          {% endwith %}
+        {% endif %}
+
+      {% else %}
+        <p class="portal-card-muted mb-0">
+          No services yet. Once you add services to vendors (via this portal or admin), they will appear here.
+        </p>
+      {% endif %}
     </div>
+  </div>
+
+  {# INLINE SERVICE DETAILS + AUDIT #}
+  <div class="col-12" id="service-details">
+    {% if selected_service %}
+      <div class="portal-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <button id="serviceDetailsTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Service details
+              </button>
+              <button id="serviceAuditTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Audit · Change log
+              </button>
+            </div>
+            <div class="section-title mb-0">{{ selected_service.name }}</div>
+            <div class="section-subtitle mb-0">
+              {{ selected_service.vendor.name }}{% if selected_service.category %} · {{ selected_service.get_category_display }}{% endif %}
+            </div>
+          </div>
+          <div class="small text-muted text-end">
+            Make changes below and <strong>Save</strong>.
+          </div>
+        </div>
+
+        {# AUDIT PANEL (shown when Audit tab is active) #}
+        <div class="mb-3 d-none" id="serviceAuditPanel">
+          <div class="portal-card" style="padding: 14px;">
+            <div class="section-eyebrow mb-1">Audit</div>
+            <div class="section-title" style="font-size: 1.05rem;">Change log</div>
+            <div class="portal-card-muted mb-2">
+              Latest changes for this service.
+            </div>
+
+            {% if audit_events %}
+              <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                <table class="portal-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">When</th>
+                      <th style="width: 18%;">Actor</th>
+                      <th style="width: 60%;">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ev in audit_events %}
+                      <tr>
+                        <td class="cell-muted">
+                          {% if ev.created_at %}
+                            {{ ev.created_at|date:"Y-m-d H:i" }}
+                          {% elif ev.timestamp %}
+                            {{ ev.timestamp|date:"Y-m-d H:i" }}
+                          {% elif ev.created %}
+                            {{ ev.created|date:"Y-m-d H:i" }}
+                          {% elif ev.history_date %}
+                            {{ ev.history_date|date:"Y-m-d H:i" }}
+                          {% elif ev.occurred_at %}
+                            {{ ev.occurred_at|date:"Y-m-d H:i" }}
+                          {% elif ev.when %}
+                            {{ ev.when }}
+                          {% elif ev.changed_at %}
+                            {{ ev.changed_at }}
+                          {% elif ev.updated_at %}
+                            {{ ev.updated_at }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {% if ev.actor_display %}
+                            {{ ev.actor_display }}
+                          {% elif ev.actor %}
+                            {{ ev.actor }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {% if ev.description %}
+                            {{ ev.description }}
+                          {% elif ev.action %}
+                            {{ ev.action|capfirst }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="portal-card-muted">No audit events yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# SERVICE DETAILS PANEL (shown when Service details tab is active) #}
+        <div id="serviceDetailsPanel">
+          <form method="post">
+            {% csrf_token %}
+
+            <input type="hidden" name="action" value="update_selected">
+            <input type="hidden" name="selected" value="{{ selected_service.id }}">
+            <input type="hidden" name="page" value="{{ current_page|default:1 }}">
+            <input type="hidden" name="rows" value="{{ rows_per_page|default:50 }}">
+            <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+            <div class="row g-3">
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Service name</label>
+                <input class="form-control form-control-sm" name="name" value="{{ selected_service.name|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Vendor</label>
+                <select class="form-select form-select-sm" name="vendor_id">
+                  {% for v in vendors %}
+                    <option value="{{ v.id }}" {% if selected_service.vendor_id == v.id %}selected{% endif %}>
+                      {{ v.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select form-select-sm" name="is_active">
+                  <option value="1" {% if selected_service.is_active %}selected{% endif %}>Active</option>
+                  <option value="0" {% if not selected_service.is_active %}selected{% endif %}>Closed</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Category</label>
+                <select class="form-select form-select-sm" name="category">
+                  <option value="">Select…</option>
+                  <option value="data_feed" {% if selected_service.category == "data_feed" %}selected{% endif %}>Data feed</option>
+                  <option value="terminal" {% if selected_service.category == "terminal" %}selected{% endif %}>Terminal</option>
+                  <option value="analytics" {% if selected_service.category == "analytics" %}selected{% endif %}>Analytics</option>
+                  <option value="index_license" {% if selected_service.category == "index_license" %}selected{% endif %}>Index license</option>
+                  <option value="connectivity" {% if selected_service.category == "connectivity" %}selected{% endif %}>Connectivity</option>
+                  <option value="other" {% if selected_service.category == "other" %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Billing frequency</label>
+                <select class="form-select form-select-sm" name="billing_frequency">
+                  <option value="">Select…</option>
+                  <option value="monthly" {% if selected_service.default_billing_frequency == "monthly" %}selected{% endif %}>Monthly</option>
+                  <option value="quarterly" {% if selected_service.default_billing_frequency == "quarterly" %}selected{% endif %}>Quarterly</option>
+                  <option value="yearly" {% if selected_service.default_billing_frequency == "yearly" %}selected{% endif %}>Yearly</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Default currency</label>
+                <input class="form-control form-control-sm" name="default_currency" value="{{ selected_service.default_currency|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Service code / SKU</label>
+                <input class="form-control form-control-sm" name="service_code" value="{{ selected_service.service_code|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Price (annual / unit)</label>
+                <input class="form-control form-control-sm" name="list_price" value="{{ selected_service.list_price|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Allocation split</label>
+                <input class="form-control form-control-sm" name="allocation_split" value="{{ selected_service.allocation_split|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small text-muted">Service owner</label>
+                <input class="form-control form-control-sm" name="owner_display" value="{{ selected_service.owner_display|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small text-muted">Primary contract</label>
+                <input class="form-control form-control-sm"
+                       name="primary_contract_id"
+                       value="{% if selected_service.primary_contract_id %}{{ selected_service.primary_contract_id }}{% endif %}"
+                       placeholder="Contract ID (optional)">
+                <div class="small text-muted mt-1">
+                  Matches contract by ID (for now).
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              {% with sc=show_closed|yesno:"1,0" %}
+                <a class="btn btn-sm btn-ghost"
+                   href="?page={{ current_page|default:1 }}&rows={{ rows_per_page|default:50 }}&show_closed={{ sc }}&selected={{ selected_service.id }}#service-details">
+                  Discard
+                </a>
+              {% endwith %}
+              <button type="submit" class="btn btn-sm dn-btn-primary">
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="portal-card">
+        <div class="portal-card-muted mb-0">
+          Select a service from the table above to view and edit details inline.
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
-<!-- ADD SERVICE MODAL -->
+{# ADD SERVICE MODAL (оставям както е) #}
 <div class="modal fade" id="addServiceModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content"
-             style="background:#020617; border-radius:18px; border:1px solid rgba(148,163,184,.35); color:#E5E7EB;">
-            <div class="modal-header border-0" style="border-bottom-color:rgba(148,163,184,.25);">
-                <div>
-                    <h5 class="modal-title">Add new service</h5>
-                    <div class="small text-muted">
-                        Register a service with its commercial details, owner and primary contract.
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pb-4">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="row g-3 small">
-                        <div class="col-md-5">
-                            <label class="form-label form-label-sm mb-1">Service name</label>
-                            <input type="text" name="name" class="form-control form-control-sm"
-                                   placeholder="e.g. Real-time FX feed"
-                                   value="{{ add_form_data.name|default:'' }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Vendor</label>
-                            <select name="vendor_id" class="form-select form-select-sm">
-                                <option value="">Select vendor…</option>
-                                {% for vendor in vendors %}
-                                    <option value="{{ vendor.id }}"
-                                        {% if add_form_data.vendor_id == vendor.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ vendor.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm mb-1">Service code / SKU</label>
-                            <input type="text" name="service_code" class="form-control form-control-sm"
-                                   placeholder="Vendor product code"
-                                   value="{{ add_form_data.service_code|default:'' }}">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Category</label>
-                            <select class="form-select form-select-sm" name="category">
-                                <option value="">Select…</option>
-                                <option value="data_feed" {% if add_form_data.category == "data_feed" %}selected{% endif %}>Data feed</option>
-                                <option value="terminal" {% if add_form_data.category == "terminal" %}selected{% endif %}>Terminal</option>
-                                <option value="analytics" {% if add_form_data.category == "analytics" %}selected{% endif %}>Analytics</option>
-                                <option value="index_license" {% if add_form_data.category == "index_license" %}selected{% endif %}>Index license</option>
-                                <option value="connectivity" {% if add_form_data.category == "connectivity" %}selected{% endif %}>Connectivity</option>
-                                <option value="other" {% if add_form_data.category == "other" %}selected{% endif %}>Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Billing frequency</label>
-                            <select class="form-select form-select-sm" name="billing_frequency">
-                                <option value="">Select…</option>
-                                <option value="monthly" {% if add_form_data.billing_frequency == "monthly" %}selected{% endif %}>Monthly</option>
-                                <option value="quarterly" {% if add_form_data.billing_frequency == "quarterly" %}selected{% endif %}>Quarterly</option>
-                                <option value="yearly" {% if add_form_data.billing_frequency == "yearly" %}selected{% endif %}>Yearly</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Default currency</label>
-                            <input type="text" name="default_currency" class="form-control form-control-sm"
-                                   placeholder="e.g. USD, EUR, CHF"
-                                   value="{{ add_form_data.default_currency|default:'' }}">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Price (annual / unit)</label>
-                            <input type="number" step="0.01" name="list_price"
-                                   class="form-control form-control-sm" placeholder="e.g. 120000"
-                                   value="{{ add_form_data.list_price|default:'' }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Allocation split</label>
-                            <input type="text" name="allocation_split"
-                                   class="form-control form-control-sm"
-                                   placeholder="e.g. 60% Trading / 40% Research"
-                                   value="{{ add_form_data.allocation_split|default:'' }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label form-label-sm mb-1">Service owner</label>
-                            <input type="text" name="service_owner"
-                                   class="form-control form-control-sm"
-                                   placeholder="Name / team (business owner)"
-                                   value="{{ add_form_data.owner_display|default:'' }}">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm mb-1">Primary contract</label>
-                            <input type="text" name="contract_ref"
-                                   class="form-control form-control-sm"
-                                   placeholder="Contract name or ID (optional)"
-                                   value="{{ add_form_data.contract_ref|default:'' }}">
-                            <div class="form-text text-muted small">
-                                Matches contract name, vendor contract ID or internal ID for the selected vendor.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-add btn-sm">
-                            Save and close
-                        </button>
-                    </div>
-                </form>
-            </div>
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content"
+         style="background:#020617; border-radius:18px; border:1px solid rgba(148,163,184,.35); color:#E5E7EB;">
+      <div class="modal-header border-0" style="border-bottom-color:rgba(148,163,184,.25);">
+        <div>
+          <h5 class="modal-title">Add new service</h5>
+          <div class="small text-muted">
+            Register a service with its commercial details, owner and primary contract.
+          </div>
         </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body pb-4">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create">
+
+          <div class="row g-3 small">
+            <div class="col-md-5">
+              <label class="form-label form-label-sm mb-1">Service name</label>
+              <input type="text" name="name" class="form-control form-control-sm"
+                     placeholder="e.g. Real-time FX feed"
+                     value="{{ add_form_data.name|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Vendor</label>
+              <select name="vendor_id" class="form-select form-select-sm">
+                <option value="">Select vendor…</option>
+                {% for vendor in vendors %}
+                  <option value="{{ vendor.id }}"
+                    {% if add_form_data.vendor_id == vendor.id|stringformat:"s" %}selected{% endif %}>
+                    {{ vendor.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label form-label-sm mb-1">Service code / SKU</label>
+              <input type="text" name="service_code" class="form-control form-control-sm"
+                     placeholder="Vendor product code"
+                     value="{{ add_form_data.service_code|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Category</label>
+              <select class="form-select form-select-sm" name="category">
+                <option value="">Select…</option>
+                <option value="data_feed" {% if add_form_data.category == "data_feed" %}selected{% endif %}>Data feed</option>
+                <option value="terminal" {% if add_form_data.category == "terminal" %}selected{% endif %}>Terminal</option>
+                <option value="analytics" {% if add_form_data.category == "analytics" %}selected{% endif %}>Analytics</option>
+                <option value="index_license" {% if add_form_data.category == "index_license" %}selected{% endif %}>Index license</option>
+                <option value="connectivity" {% if add_form_data.category == "connectivity" %}selected{% endif %}>Connectivity</option>
+                <option value="other" {% if add_form_data.category == "other" %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Billing frequency</label>
+              <select class="form-select form-select-sm" name="billing_frequency">
+                <option value="">Select…</option>
+                <option value="monthly" {% if add_form_data.billing_frequency == "monthly" %}selected{% endif %}>Monthly</option>
+                <option value="quarterly" {% if add_form_data.billing_frequency == "quarterly" %}selected{% endif %}>Quarterly</option>
+                <option value="yearly" {% if add_form_data.billing_frequency == "yearly" %}selected{% endif %}>Yearly</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Default currency</label>
+              <input type="text" name="default_currency" class="form-control form-control-sm"
+                     placeholder="e.g. USD, EUR, CHF"
+                     value="{{ add_form_data.default_currency|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Price (annual / unit)</label>
+              <input type="number" step="0.01" name="list_price"
+                     class="form-control form-control-sm" placeholder="e.g. 120000"
+                     value="{{ add_form_data.list_price|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Allocation split</label>
+              <input type="text" name="allocation_split"
+                     class="form-control form-control-sm"
+                     placeholder="e.g. 60% Trading / 40% Research"
+                     value="{{ add_form_data.allocation_split|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm mb-1">Service owner</label>
+              <input type="text" name="service_owner"
+                     class="form-control form-control-sm"
+                     placeholder="Name / team (business owner)"
+                     value="{{ add_form_data.owner_display|default:'' }}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label form-label-sm mb-1">Primary contract</label>
+              <input type="text" name="contract_ref"
+                     class="form-control form-control-sm"
+                     placeholder="Contract name or ID (optional)"
+                     value="{{ add_form_data.contract_ref|default:'' }}">
+              <div class="form-text text-muted small">
+                Matches contract name, vendor contract ID or internal ID for the selected vendor.
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-add btn-sm">
+              Save and close
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -304,183 +545,60 @@
 {{ block.super }}
 <script>
 (function () {
-    const searchInput = document.getElementById('serviceSearch');
-    const vendorSelect = document.getElementById('vendorFilter');
-    const categorySelect = document.getElementById('categoryFilter');
-    const tableBody = document.getElementById('servicesTableBody');
-    const globalAddBtn = document.getElementById('globalAddButton');
-    const addServiceModalEl = document.getElementById('addServiceModal');
-    const showClosedToggle = document.getElementById('showClosedToggle');
-    const rowsSelect = document.getElementById('rowsPerPage');
-    const visibleCountSpan = document.getElementById('visibleCount');
-    const totalCountSpan = document.getElementById('totalCount');
+  const globalAddBtn = document.getElementById('globalAddButton');
+  const addServiceModalEl = document.getElementById('addServiceModal');
 
-    const ROWS_KEY = 'services_rows_per_page';
+  if (globalAddBtn && addServiceModalEl && window.bootstrap) {
+    const modalInstance = new bootstrap.Modal(addServiceModalEl);
+    globalAddBtn.addEventListener('click', function () {
+      modalInstance.show();
+    });
+  }
 
-    const addServiceModal =
-        addServiceModalEl && window.bootstrap
-            ? new bootstrap.Modal(addServiceModalEl)
-            : null;
+  const hasErrors = document.querySelector('#addServiceModal .errorlist') !== null;
+  if (hasErrors && addServiceModalEl && window.bootstrap) {
+    const modal = new bootstrap.Modal(addServiceModalEl);
+    modal.show();
+  }
 
-    let rows = [];
-    const vendors = new Set();
+  // Tabs inside Service details: Service details vs Audit
+  const detailsTab = document.getElementById('serviceDetailsTab');
+  const auditTab = document.getElementById('serviceAuditTab');
+  const detailsPanel = document.getElementById('serviceDetailsPanel');
+  const auditPanel = document.getElementById('serviceAuditPanel');
 
-    // ---- Show Closed toggle wiring (query param show_closed=1) ----
-    function getShowClosedFromUrl() {
-        try {
-            const p = new URLSearchParams(window.location.search);
-            const v = (p.get('show_closed') || '').toLowerCase();
-            return (v === '1' || v === 'true' || v === 'on' || v === 'yes');
-        } catch (e) {
-            return false;
-        }
+  function activateServiceTab(tabName) {
+    if (!detailsPanel || !auditPanel || !detailsTab || !auditTab) return;
+
+    const showDetails = tabName === 'details';
+
+    // Toggle panels
+    detailsPanel.classList.toggle('d-none', !showDetails);
+    auditPanel.classList.toggle('d-none', showDetails);
+
+    // Visual state for tabs
+    if (showDetails) {
+      detailsTab.classList.add('active');
+      auditTab.classList.remove('active');
+    } else {
+      auditTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      // Scroll audit panel into view for better UX
+      auditPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
 
-    function setShowClosedInUrl(enabled) {
-        const url = new URL(window.location.href);
-        const p = url.searchParams;
+  if (detailsTab && auditTab && detailsPanel && auditPanel) {
+    detailsTab.addEventListener('click', function () {
+      activateServiceTab('details');
+    });
+    auditTab.addEventListener('click', function () {
+      activateServiceTab('audit');
+    });
 
-        if (enabled) {
-            p.set('show_closed', '1');
-        } else {
-            p.delete('show_closed');
-        }
-
-        url.search = p.toString();
-        window.location.href = url.toString();
-    }
-
-    if (showClosedToggle) {
-        showClosedToggle.checked = getShowClosedFromUrl();
-        showClosedToggle.addEventListener('change', function () {
-            setShowClosedInUrl(showClosedToggle.checked);
-        });
-    }
-
-    function getRowLimit() {
-        if (!rowsSelect) return null;
-        const val = rowsSelect.value;
-        if (!val || val === 'all') return null;
-        const n = parseInt(val, 10);
-        return isNaN(n) ? null : n;
-    }
-
-    if (tableBody) {
-        rows = Array.from(tableBody.querySelectorAll('tr'));
-
-        if (totalCountSpan) {
-            totalCountSpan.textContent = rows.length;
-        }
-
-        // populate vendor filter from table rows
-        rows.forEach(row => {
-            const v = (row.dataset.vendor || '').trim();
-            if (v) vendors.add(v);
-        });
-
-        if (vendorSelect) {
-            Array.from(vendors).sort().forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v;
-                opt.textContent = v;
-                vendorSelect.appendChild(opt);
-            });
-        }
-
-        // restore rows-per-page from localStorage
-        if (rowsSelect) {
-            const stored = localStorage.getItem(ROWS_KEY);
-            if (stored && rowsSelect.querySelector(`option[value="${stored}"]`)) {
-                rowsSelect.value = stored;
-            }
-            rowsSelect.addEventListener('change', function () {
-                localStorage.setItem(ROWS_KEY, rowsSelect.value);
-                applyFilters();
-            });
-        }
-
-        function applyFilters() {
-            const query = (searchInput ? searchInput.value : '').toLowerCase();
-            const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
-            const categoryFilter = categorySelect ? categorySelect.value : '';
-            const limit = getRowLimit();
-
-            let matched = 0;
-            let shown = 0;
-
-            rows.forEach(row => {
-                const serviceName = (row.dataset.serviceName || '').toLowerCase();
-                const vendor = (row.dataset.vendor || '').toLowerCase();
-                const owner = (row.dataset.owner || '').toLowerCase();
-                const contract = (row.dataset.contract || '').toLowerCase();
-                const category = (row.dataset.category || '');
-                const fullText = (row.textContent || '').toLowerCase();
-
-                const matchesText =
-                    !query ||
-                    serviceName.includes(query) ||
-                    vendor.includes(query) ||
-                    owner.includes(query) ||
-                    contract.includes(query) ||
-                    fullText.includes(query);
-
-                const matchesVendor =
-                    !vendorFilter || vendor === vendorFilter;
-
-                const matchesCategory =
-                    !categoryFilter || category === categoryFilter;
-
-                const matches = matchesText && matchesVendor && matchesCategory;
-
-                if (!matches) {
-                    row.style.display = 'none';
-                    return;
-                }
-
-                matched += 1;
-
-                if (!limit || shown < limit) {
-                    row.style.display = '';
-                    shown += 1;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            if (visibleCountSpan) {
-                visibleCountSpan.textContent = shown;
-            }
-            if (totalCountSpan) {
-                totalCountSpan.textContent = rows.length;
-            }
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', applyFilters);
-        }
-        if (vendorSelect) {
-            vendorSelect.addEventListener('change', applyFilters);
-        }
-        if (categorySelect) {
-            categorySelect.addEventListener('change', applyFilters);
-        }
-
-        // initial render
-        applyFilters();
-    }
-
-    // Global "Add" button in topbar -> open this page's service modal
-    if (globalAddBtn && addServiceModal) {
-        globalAddBtn.addEventListener('click', function () {
-            addServiceModal.show();
-        });
-    }
-
-    // If POST returned errors – auto-open modal for corrections
-    const addFormHasErrors = JSON.parse('{{ add_form_has_errors|yesno:"true,false"|default:"false"|escapejs }}');
-    if (addFormHasErrors && addServiceModal) {
-        addServiceModal.show();
-    }
+    // Initial state – always land on Service details
+    activateServiceTab('details');
+  }
 })();
 </script>
 {% endblock %}
