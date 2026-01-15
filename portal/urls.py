@@ -12,18 +12,11 @@ urlpatterns = [
     # Inventory
     path("vendors/", views.vendor_list, name="vendors"),
     path("vendors/<int:pk>/", views.vendor_detail, name="vendor_detail"),
-
     path("services/", views.service_list, name="services"),
-    path("services/add/", views.service_create, name="service_create"),
     path("services/<int:pk>/", views.service_detail, name="service_detail"),
-    path("services/<int:pk>/edit/", views.service_edit, name="service_edit"),
-
     path("contracts/", views.contract_list, name="contracts"),
     path("contracts/<int:pk>/", views.contract_detail, name="contract_detail"),
-
     path("invoices/", views.invoice_list, name="invoices"),
-    path("invoices/<int:pk>/", views.invoice_detail, name="invoice_detail"),
-
     path("users/", views.users_list, name="users"),
     path("users/<int:pk>/", views.user_detail, name="user_detail"),
 
@@ -52,11 +45,11 @@ urlpatterns = [
     path("provisioning-hub/approvals/", views.provisioning_approvals, name="provisioning_approvals"),
     path("provisioning-hub/request/<int:service_pk>/", views.provisioning_request_create, name="provisioning_request_create"),
     path("provisioning-hub/approvals/<int:pk>/decide/", views.provisioning_approval_decide, name="provisioning_approval_decide"),
-path("provisioning-hub/catalog/request-bulk/", views.provisioning_catalog_request_bulk, name="provisioning_catalog_request_bulk"),
-path("provisioning-hub/access/<int:service_pk>/remove/", views.provisioning_access_remove, name="provisioning_access_remove",),    
-path("provisioning-hub/approvals/decide/", views.provisioning_approvals_decide_bulk, name="provisioning_approvals_decide_bulk",),    
-path("provisioning-hub/acting/set/", views.provisioning_acting_set, name="provisioning_acting_set"), 
-path("provisioning-hub/acting/clear/", views.provisioning_acting_clear, name="provisioning_acting_clear"), 
+    path("provisioning-hub/catalog/request-bulk/", views.provisioning_catalog_request_bulk, name="provisioning_catalog_request_bulk"),
+    path("provisioning-hub/access/<int:service_pk>/remove/", views.provisioning_access_remove, name="provisioning_access_remove",),    
+    path("provisioning-hub/approvals/decide/", views.provisioning_approvals_decide_bulk, name="provisioning_approvals_decide_bulk",),    
+    path("provisioning-hub/acting/set/", views.provisioning_acting_set, name="provisioning_acting_set"), 
+    path("provisioning-hub/acting/clear/", views.provisioning_acting_clear, name="provisioning_acting_clear"), 
 
     # Reports
     path("reports/", views.report_center, name="reports"),

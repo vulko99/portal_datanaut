@@ -1,0 +1,665 @@
+{% load static %}
+{% load portal_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DataNaut · Provisioning Hub{% block title_suffix %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+
+  {# Shared UI tokens/components #}
+  <link rel="stylesheet" href="{% static 'shared/dn-ui.css' %}">
+
+  <style>
+    /* ------------------------------------------------------------
+       Същите tokens / layout, както в base_portal.html
+       (копирани за да не чупим нищо в съществуващите шаблони)
+       ------------------------------------------------------------ */
+
+    :root{
+      --dn-bg: #070A12;
+      --dn-surface: rgba(15, 23, 42, .92);
+      --dn-surface-2: rgba(10, 15, 25, .85);
+      --dn-border: rgba(148,163,184,.22);
+      --dn-border-strong: rgba(148,163,184,.40);
+
+      --dn-text: #E5E7EB;
+      --dn-muted: #9CA3AF;
+      --dn-strong: #F9FAFB;
+
+      --dn-accent: #14F4D4;
+      --dn-accent-2: #60A5FA;
+      --dn-violet: rgba(147,51,234,0.25);
+
+      --dn-radius-lg: 18px;
+      --dn-radius-md: 12px;
+      --dn-radius-sm: 10px;
+      --dn-shadow: 0 22px 60px rgba(15,23,42,.65);
+
+      --dn-sidebar: 260px;
+
+      --dn-content-gutter: 24px;
+      --dn-content-max: 1680px;
+      --dn-content-max-xl: 1920px;
+    }
+
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      color: var(--dn-text);
+      background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(20,244,212,.18), transparent 60%),
+        radial-gradient(1200px 600px at 100% 0%, rgba(96,165,250,.16), transparent 55%),
+        radial-gradient(900px 500px at 50% 100%, rgba(147,51,234,.12), transparent 55%),
+        var(--dn-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .modal-backdrop.show{
+      opacity: .82 !important;
+      background-color: #020617 !important;
+    }
+
+    .portal-modal{
+      background: #0B1220 !important;
+      border: 1px solid rgba(148,163,184,.28) !important;
+      box-shadow: 0 30px 90px rgba(0,0,0,.75) !important;
+    }
+
+    .layout { min-height:100vh; display:flex; }
+    .main{ flex:1; min-width:0; }
+
+    .dn-shell{
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(147,51,234,0.18), transparent 55%),
+        rgba(2,6,23,.55);
+      border: 1px solid var(--dn-border-strong);
+      border-radius: var(--dn-radius-lg);
+      box-shadow: var(--dn-shadow);
+    }
+
+    .dn-card{
+      background: var(--dn-surface);
+      border: 1px solid rgba(31,41,55,.95);
+      border-radius: var(--dn-radius-md);
+      color: var(--dn-text);
+    }
+
+    .dn-pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .85rem;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--dn-strong);
+    }
+
+    .dn-btn-primary{
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .86rem;
+      border: none;
+      background: linear-gradient(135deg, var(--dn-accent-2), var(--dn-accent));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(15,23,42,.6);
+      white-space: nowrap;
+    }
+    .dn-btn-primary:hover{
+      filter: brightness(1.05);
+      box-shadow: 0 12px 35px rgba(15,23,42,.8);
+    }
+    .dn-btn-primary:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .dn-btn-ghost,
+    .btn-ghost{
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.35);
+      color: var(--dn-strong);
+      border-radius: var(--dn-radius-sm);
+      font-size:.86rem;
+    }
+    .dn-btn-ghost:hover,
+    .btn-ghost:hover{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+    }
+
+    .dn-table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius: var(--dn-radius-md);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.35);
+    }
+    .dn-table thead th{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      padding:10px 12px;
+      background: rgba(2,6,23,.85);
+      color: rgba(156,163,175,.95);
+      border-bottom: 1px solid rgba(148,163,184,.25);
+      white-space:nowrap;
+    }
+    .dn-table tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      font-size:.9rem;
+      color: rgba(229,231,235,.92);
+    }
+    .dn-table tbody tr:hover{
+      background: rgba(20,244,212,.06);
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width: var(--dn-sidebar);
+      background: linear-gradient(180deg, rgba(5,8,18,.92), rgba(5,8,18,.75));
+      border-right: 1px solid var(--dn-border);
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px 16px;
+      border-bottom:1px solid rgba(148,163,184,.18);
+      margin-bottom: 14px;
+    }
+    .brand img{ height:26px; width:auto; }
+    .brand .t1{ font-weight:700; letter-spacing:.02em; }
+    .brand .t2{ font-size:.82rem; color:var(--dn-muted); margin-top:2px; }
+
+    .nav-section{
+      margin-top: 14px;
+      font-size: .72rem;
+      letter-spacing: .10em;
+      color: rgba(156,163,175,.85);
+      text-transform: uppercase;
+      padding: 0 10px;
+    }
+
+    .side-nav{ margin-top: 8px; }
+    .side-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      margin: 6px 6px;
+      border-radius: 12px;
+      color: rgba(229,231,235,.86);
+      text-decoration:none;
+      border: 1px solid transparent;
+      background: transparent;
+      font-size:.9rem;
+    }
+    .side-link:hover{
+      border-color: rgba(20,244,212,.35);
+      background: rgba(20,244,212,.08);
+      color: var(--dn-strong);
+    }
+    .side-link.active{
+      border-color: rgba(20,244,212,.55);
+      background: rgba(20,244,212,.10);
+      color: var(--dn-strong);
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+    .side-footer{
+      margin-top: 18px;
+      padding: 14px 10px 0;
+      border-top:1px solid rgba(148,163,184,.18);
+      color: var(--dn-muted);
+      font-size:.85rem;
+    }
+    .side-footer a{ color: var(--dn-accent-2); text-decoration:none; }
+    .side-footer a:hover{ text-decoration:underline; }
+
+    /* Topbar */
+    .topbar{
+      height: 64px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap: 10px;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--dn-border);
+      background: rgba(6,10,18,.55);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top:0;
+      z-index: 10;
+      min-width: 0;
+    }
+
+    .topbar-search{
+      max-width: 360px;
+      width: 100%;
+      min-width: 220px;
+    }
+    .topbar-search .input-group-text{
+      background: rgba(15,23,42,.9);
+      border-color: var(--dn-border);
+      color: var(--dn-muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .topbar-search .form-control{
+      background: rgba(15,23,42,.85);
+      border-color: var(--dn-border);
+      color: var(--dn-text);
+      font-size:.86rem;
+    }
+    .topbar-search .form-control::placeholder{
+      color: rgba(148,163,184,.75);
+    }
+    .topbar-search .form-control:focus{
+      box-shadow: 0 0 0 .15rem rgba(96,165,250,.3);
+      border-color: var(--dn-accent-2);
+    }
+
+    .btn-add{
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .86rem;
+      border: none;
+      background: linear-gradient(135deg, var(--dn-accent-2), var(--dn-accent));
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(15,23,42,.6);
+      white-space: nowrap;
+    }
+    .btn-add:hover{
+      filter: brightness(1.05);
+      box-shadow: 0 12px 35px rgba(15,23,42,.8);
+    }
+    .btn-add:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .user-pill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: .85rem;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--dn-strong);
+      white-space: nowrap;
+    }
+
+    /* Acting dropdown */
+    .acting-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.30);
+      background: rgba(15,23,42,.55);
+      color: var(--dn-strong);
+      white-space: nowrap;
+    }
+    .acting-pill .label{
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(156,163,175,.92);
+    }
+    .acting-pill .value{
+      font-size: .86rem;
+      font-weight: 600;
+      color: rgba(229,231,235,.92);
+    }
+    .acting-menu{
+      background: #0B1220 !important;
+      border: 1px solid rgba(148,163,184,.24) !important;
+      box-shadow: 0 24px 70px rgba(0,0,0,.55) !important;
+    }
+    .acting-menu .dropdown-item{
+      color: rgba(229,231,235,.92) !important;
+    }
+    .acting-menu .dropdown-item:hover{
+      background: rgba(20,244,212,.10) !important;
+    }
+    .acting-menu .dropdown-header{
+      color: rgba(156,163,175,.92) !important;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .72rem;
+    }
+    .acting-menu .dropdown-divider{
+      border-top-color: rgba(148,163,184,.18) !important;
+    }
+
+    /* Content */
+    .content{
+      padding: 22px;
+      width: min(var(--dn-content-max), calc(100% - (var(--dn-content-gutter) * 2)));
+      margin: 0 auto;
+    }
+
+    .portal-card{
+      background: var(--dn-surface);
+      border: 1px solid rgba(31,41,55,.95);
+      border-radius: var(--dn-radius-md);
+      box-shadow: var(--dn-shadow);
+      padding: 18px 18px 16px;
+      color: var(--dn-text);
+    }
+    .portal-card-muted{
+      color: var(--dn-muted);
+      font-size:.9rem;
+    }
+
+    .section-eyebrow{
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:rgba(156,163,175,.9);
+    }
+    .section-title{
+      font-size:1.35rem;
+      font-weight:700;
+      color:var(--dn-strong);
+    }
+    .section-subtitle{
+      color:rgba(209,213,219,.95);
+      font-size:.92rem;
+    }
+
+    .portal-table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius: var(--dn-radius-md);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.35);
+    }
+    .portal-table thead th{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      padding:10px 12px;
+      background: rgba(2,6,23,.85);
+      color:rgba(156,163,175,.95);
+      border-bottom:1px solid rgba(148,163,184,.25);
+      white-space:nowrap;
+    }
+    .portal-table tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      font-size:.9rem;
+      color:rgba(229,231,235,.92);
+    }
+    .portal-table tbody tr:hover{
+      background:rgba(20,244,212,.06);
+    }
+
+    .cell-muted{ color: var(--dn-muted); }
+
+    .alert-stack{ margin-bottom: 14px; }
+    .alert-portal{
+      border-radius: 12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:
+        radial-gradient(220% 220% at 0% 0%, rgba(20,244,212,.18), rgba(15,23,42,.96));
+      color: var(--dn-strong);
+      font-size:.9rem;
+      padding:10px 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.4);
+    }
+
+    /* Full-width mode */
+    :root{
+      --dn-content-max: 100%;
+      --dn-content-max-xl: 100%;
+      --dn-content-gutter: 16px;
+    }
+    .content{
+      max-width: none !important;
+      width: calc(100% - (var(--dn-content-gutter) * 2)) !important;
+      margin: 0 !important;
+      padding-left: var(--dn-content-gutter) !important;
+      padding-right: var(--dn-content-gutter) !important;
+    }
+    .content .container,
+    .content .container-sm,
+    .content .container-md,
+    .content .container-lg,
+    .content .container-xl,
+    .content .container-xxl{
+      max-width: 100% !important;
+    }
+    @media (min-width: 1600px){
+      :root{ --dn-content-gutter: 24px; }
+    }
+
+    .portal-card,
+    .dn-card,
+    .dn-shell{ overflow: hidden; }
+    .portal-card canvas,
+    .dn-card canvas{ max-width: 100% !important; }
+    .chart-wrap{
+      position: relative;
+      width: 100%;
+      height: 320px;
+    }
+    .chart-wrap canvas{
+      width: 100% !important;
+      height: 100% !important;
+    }
+    @media (max-width: 991px){
+      .chart-wrap{ height: 260px; }
+      .sidebar{ display:none; }
+      .content{
+        padding: 16px;
+        width: min(var(--dn-content-max), calc(100% - 24px));
+      }
+      .topbar{
+        padding: 0 14px;
+        gap: 8px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 64px;
+        justify-content: flex-start;
+      }
+      .topbar-search{
+        max-width: 100%;
+        min-width: 0;
+        flex: 1 1 100%;
+        order: 3;
+      }
+    }
+    @media (min-width: 1600px){
+      .chart-wrap{ height: 360px; }
+      .topbar-search{ max-width: 520px; }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{% static 'landing/logo.png' %}" alt="DataNaut">
+      <div>
+        <div class="t1">DataNaut</div>
+        <div class="t2">Provisioning Hub</div>
+      </div>
+    </div>
+
+    {% with request.resolver_match.url_name as current_view %}
+      <div class="nav-section">Provisioning</div>
+      <nav class="side-nav">
+        <a class="side-link {% if current_view == 'provisioning_hub' %}active{% endif %}"
+           href="{% url 'portal:provisioning_hub' %}">
+          Overview
+        </a>
+
+        <a class="side-link {% if current_view == 'provisioning_my_requests' %}active{% endif %}"
+           href="{% url 'portal:provisioning_my_requests' %}">
+          Requests
+        </a>
+
+        <a class="side-link {% if current_view == 'provisioning_catalog' or current_view == 'provisioning_request_create' %}active{% endif %}"
+           href="{% url 'portal:provisioning_catalog' %}">
+          Catalog
+        </a>
+
+        <a class="side-link {% if current_view == 'provisioning_approvals' %}active{% endif %}"
+           href="{% url 'portal:provisioning_approvals' %}">
+          Approvals
+        </a>
+      </nav>
+    {% endwith %}
+
+    <div class="side-footer">
+  {% if request.user.is_staff or request.user.is_superuser %}
+    <div class="mb-2">
+      <a href="{% url 'portal:dashboard' %}">Back to main portal</a>
+    </div>
+  {% endif %}
+  <div class="small">Self-service · demo content</div>
+</div>
+</aside>
+
+  <div class="main">
+    <header class="topbar">
+      {% if request.user.is_authenticated %}
+
+        {# Manage / acting dropdown (както в base_portal) #}
+        {% if manageable_users %}
+          <div class="dropdown me-2">
+            <button class="btn btn-ghost btn-sm dropdown-toggle acting-pill"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+              <span class="label">Manage</span>
+              <span class="value">
+                {% if is_acting and acting_user %}
+                  {{ acting_user.username }}
+                {% else %}
+                  My access
+                {% endif %}
+              </span>
+            </button>
+
+            <ul class="dropdown-menu acting-menu">
+              <li class="dropdown-header">Manage access for</li>
+
+              {% if is_acting %}
+                <li>
+                  <form method="post" action="{% url 'portal:provisioning_acting_clear' %}" class="px-3 py-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-ghost btn-sm w-100">
+                      Back to my access
+                    </button>
+                  </form>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+              {% endif %}
+
+              {% for u in manageable_users %}
+                <li>
+                  <form method="post" action="{% url 'portal:provisioning_acting_set' %}" class="px-3 py-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <button type="submit"
+                            class="dropdown-item {% if acting_user and u.id == acting_user.id %}active{% endif %}">
+                      {{ u.username }}
+                    </button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        {# Search в рамките на портала #}
+        <form class="d-flex flex-grow-1 me-3 topbar-search" method="get" action="{% url 'portal:global_search' %}">
+          <div class="input-group input-group-sm w-100">
+            <span class="input-group-text text-uppercase fw-semibold">
+              Search
+            </span>
+            <input
+              type="search"
+              name="q"
+              class="form-control"
+              placeholder="Vendors, services, contracts, invoices, users..."
+              value="{{ request.GET.q|default_if_none:'' }}"
+            >
+            <button class="btn btn-ghost btn-sm" type="submit">
+              Go
+            </button>
+          </div>
+        </form>
+
+        <a href="{% url 'portal:dashboard' %}" class="btn btn-ghost btn-sm me-2">
+          Back to portal
+        </a>
+
+        <span class="user-pill ms-2 me-2">{{ request.user.username }}</span>
+        <form method="post" action="{% url 'portal_logout' %}" class="m-0 p-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
+        </form>
+
+      {% else %}
+        <a href="{% url 'portal_login' %}" class="btn btn-ghost btn-sm">Login</a>
+      {% endif %}
+    </header>
+
+    <main class="content">
+      {% if messages %}
+        <div class="alert-stack">
+          {% for message in messages %}
+            <div class="alert alert-portal {{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,5 +1,68 @@
-{% extends "portal/base_portal.html" %}
+{% extends "portal/base_provisioning.html" %}
 {% block content %}
+
+<div class="row g-3 mb-3">
+
+  <div class="col-12 col-md-4">
+    <div class="dn-card p-3 h-100">
+      <div class="metric-label mb-1">Active services</div>
+      <div class="metric-value">
+        {{ services_count|default:0 }}
+      </div>
+      <div class="metric-tagline">
+        Currently assigned to
+        {% if is_acting and acting_user %}
+          {{ acting_user.username }}
+        {% else %}
+          you
+        {% endif %}.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="dn-card p-3 h-100">
+      <div class="metric-label mb-1">Pending requests</div>
+      <div class="metric-value">
+        {{ pending_requests_count|default:0 }}
+      </div>
+      <div class="metric-tagline mb-2">
+        Track status in <a href="{% url 'portal:provisioning_my_requests' %}" class="link-inline">My requests</a>.
+      </div>
+      <a href="{% url 'portal:provisioning_catalog' %}" class="btn btn-ghost btn-sm">
+        Open catalog
+      </a>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="dn-card p-3 h-100">
+      <div class="metric-label mb-1">Indicative annual cost</div>
+      <div class="metric-value" style="font-size:1.25rem;">
+        {{ total_cost|floatformat:2 }}
+        {% if primary_currency %}
+          {{ primary_currency }}
+        {% endif %}
+      </div>
+      <div class="metric-tagline">
+        Based on service list prices.
+        {% if not primary_currency %}
+          Multi-currency.
+        {% endif %}
+      </div>
+      {% if is_prov_admin %}
+        <div class="mt-2 small">
+          Approvals queue:
+          <a href="{% url 'portal:provisioning_approvals' %}" class="link-inline">
+            {{ approvals_open|default:0 }} pending
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
 
 <div class="row g-3">
 
@@ -10,9 +73,11 @@
         <div>
           <div class="section-eyebrow">Provisioning Hub</div>
           <h1 class="section-title mb-1">Overview</h1>
-          <p class="section-subtitle mb-0">Your current access and requests.</p>
+          <p class="section-subtitle mb-0">
+            Your current access and requests.
+          </p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
           <a href="{% url 'portal:provisioning_my_requests' %}" class="btn btn-ghost btn-sm">Requests</a>
           <a href="{% url 'portal:provisioning_catalog' %}" class="btn btn-ghost btn-sm">Catalog</a>
           {% if is_prov_admin %}
@@ -46,7 +111,9 @@
                       <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
                     {% endif %}
                   </td>
-                  <td class="cell-muted">{% if r.is_active %}Active{% else %}Closed{% endif %}</td>
+                  <td class="cell-muted">
+                    {% if r.is_active %}Active{% else %}Closed{% endif %}
+                  </td>
                   <td class="text-end">
                     {% if r.list_price is not None %}
                       {{ r.list_price|floatformat:2 }}
@@ -74,8 +141,19 @@
             </tbody>
           </table>
         </div>
+
+        <div class="table-caption mt-2">
+          Use the <a href="{% url 'portal:provisioning_catalog' %}" class="link-inline">Catalog</a>
+          to request additional services.
+        </div>
       {% else %}
-        <div class="empty mt-3">No assigned services yet.</div>
+        <div class="empty mt-3">
+          No assigned services yet.
+          <div class="mt-2">
+            Go to the <a href="{% url 'portal:provisioning_catalog' %}" class="link-inline">Catalog</a>
+            to request your first access.
+          </div>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -117,18 +195,33 @@
           <div class="metric-label mb-1">Total cost (current access)</div>
           <div class="metric-value" style="font-size:1.2rem;">
             {{ total_cost|floatformat:2 }}
+            {% if primary_currency %}{{ primary_currency }}{% endif %}
           </div>
           <div class="portal-card-muted" style="font-size:.82rem;margin-top:.15rem;">
             Pricing is indicative (service list price). Split allocation will be added next.
           </div>
         </div>
+
+        {% if last_request %}
+          <div class="col-12">
+            <div class="metric-label mb-1">Last request</div>
+            <div class="small">
+              {% if last_request.service %}
+                {{ last_request.service.vendor.name }} – {{ last_request.service.name }}
+              {% endif %}
+            </div>
+            <div class="small text-muted">
+              {{ last_request.created_at|date:"Y-m-d H:i" }}
+              · Status: {{ last_request.status|title }}
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- REMOVE ACCESS MODAL (Styled like Delete service) -->
 <div class="modal fade" id="removeAccessModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
     <div class="modal-content portal-modal p-0" style="overflow:hidden;">
@@ -140,7 +233,7 @@
             <div class="section-eyebrow">Provisioning Hub</div>
             <div class="section-title" style="font-size:1.15rem; margin:0;">Remove access</div>
             <div class="portal-card-muted" style="margin-top:6px; font-size:.9rem;">
-              You are about to remove your access to:
+              You are about to remove access to:
             </div>
           </div>
 
@@ -162,7 +255,7 @@
             <span data-role="vendor">—</span> — <span data-role="svc">—</span>
           </div>
           <div class="portal-card-muted" style="margin-top:6px; font-size:.85rem;">
-            This will remove your current assignment. You can request access again from the catalog.
+            This will remove the current assignment. You can request access again from the catalog.
           </div>
         </div>
       </div>

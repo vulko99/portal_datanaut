@@ -47,7 +47,7 @@
     .reports-layout{
       min-height:100vh;
       padding: 20px 24px 32px;
-      max-width: 1440px;
+      max-width: 100% !important;
       margin: 0 auto;
     }
 
@@ -112,33 +112,6 @@
       font-size: .95rem;
       margin-bottom: 16px;
       max-width: 920px;
-    }
-
-    .reports-tabs{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:16px;
-    }
-    .reports-tab{
-      border-radius:999px;
-      padding:6px 14px;
-      font-size:.86rem;
-      border:1px solid rgba(148,163,184,.35);
-      background:rgba(15,23,42,.55);
-      color: rgba(229,231,235,.88);
-      text-decoration:none;
-      white-space:nowrap;
-    }
-    .reports-tab:hover{
-      border-color: rgba(96,165,250,.8);
-      color:var(--dn-strong);
-    }
-    .reports-tab.active{
-      border-color: rgba(20,244,212,.85);
-      background: rgba(20,244,212,.16);
-      color: var(--dn-strong);
-      box-shadow: 0 10px 26px rgba(0,0,0,.5);
     }
 
     .portal-card{
@@ -212,13 +185,11 @@
       background:rgba(20,244,212,.06);
     }
 
-    /* scrollable контейнер за големи таблици */
     .reports-table-shell{
-      max-height: 520px;      /* тук контролираш „видимите“ ~30 реда */
+      max-height: 520px;
       overflow-y: auto;
     }
 
-    /* toolbar над таблицата: rows-per-page */
     .reports-table-toolbar{
       display:flex;
       justify-content:flex-end;
@@ -267,7 +238,6 @@
       box-shadow: 0 12px 32px rgba(0,0,0,.4);
     }
 
-    /* Contracts renewals badges */
     .risk-badge{
       display:inline-flex;
       align-items:center;
@@ -279,8 +249,6 @@
     .risk-high{ background:rgba(220,38,38,.16); border-color:rgba(248,113,113,.9); }
     .risk-medium{ background:rgba(234,179,8,.14); border-color:rgba(250,204,21,.9); }
     .risk-low{ background:rgba(22,163,74,.14); border-color:rgba(34,197,94,.9); }
-
-    /* --- по-четими muted текстове и лейбъли вътре в репортите --- */
 
     .portal-card .small.text-muted,
     .portal-card .form-label,
@@ -306,8 +274,112 @@
       color: rgba(148,163,184,.88);
     }
 
+    /* ====== ЛЕЙАУТ: ляв сайдбар + основна част ====== */
+
+    .reports-main-layout{
+      display:flex;
+      gap:18px;
+      margin-top: 10px;
+      min-height: calc(100vh - 130px);
+    }
+
+    .reports-nav{
+      width: 250px;
+      padding: 10px 10px 14px;
+      border-radius: var(--dn-radius-md);
+      border: 1px solid rgba(148,163,184,.32);
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.22), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(20,244,212,.10), transparent 55%),
+        rgba(15,23,42,.96);
+      box-shadow: 0 18px 40px rgba(15,23,42,.9);
+      align-self:flex-start;
+    }
+
+    .reports-nav-title{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:rgba(156,163,175,.95);
+      margin-bottom:8px;
+    }
+
+    .reports-nav-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .reports-nav-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(15,23,42,.85);
+      color:rgba(229,231,235,.9);
+      font-size:.86rem;
+      text-decoration:none;
+      cursor:pointer;
+      transition: all .14s ease-out;
+    }
+    .reports-nav-link span.label{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .reports-nav-link span.tag{
+      font-size:.7rem;
+      opacity:.85;
+      color:rgba(148,163,184,.95);
+    }
+    .reports-nav-link:hover{
+      border-color: rgba(96,165,250,.85);
+      background: radial-gradient(circle at top left,
+        rgba(37,99,235,.5),
+        rgba(15,23,42,1));
+      color:var(--dn-strong);
+    }
+    .reports-nav-link.active{
+      border-color: rgba(20,244,212,.9);
+      background: radial-gradient(circle at top left,
+        rgba(20,244,212,.36),
+        rgba(15,23,42,1));
+      color:#0B1120;
+      box-shadow: 0 14px 40px rgba(15,23,42,1);
+    }
+    .reports-nav-link.active span.tag{
+      color:#0f172a;
+      opacity:.9;
+    }
+
+    .reports-main{
+      flex:1;
+      min-width:0;
+    }
+
     @media (max-width: 991px){
       .reports-shell{ padding:16px; }
+      .reports-main-layout{
+        flex-direction:column;
+      }
+      .reports-nav{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+      }
+      .reports-nav-list{
+        flex-direction:row;
+        flex-wrap:wrap;
+      }
+      .reports-nav-link{
+        flex:1 1 auto;
+      }
     }
   </style>
 
@@ -333,7 +405,66 @@
     </header>
 
     <main>
-      {% block content %}{% endblock %}
+      <div class="reports-main-layout">
+        <aside class="reports-nav">
+          <div class="reports-nav-title">Reports</div>
+          <ul class="reports-nav-list">
+            <li>
+              <a href="{% url 'portal:reports' %}"
+                 class="reports-nav-link {% if active_view == 'overview' %}active{% endif %}">
+                <span class="label">Overview</span>
+                <span class="tag">summary</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=users_cost"
+                 class="reports-nav-link {% if active_view == 'users_cost' %}active{% endif %}">
+                <span class="label">Users · access cost</span>
+                <span class="tag">inventory</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=services_catalog"
+                 class="reports-nav-link {% if active_view == 'services_catalog' %}active{% endif %}">
+                <span class="label">Services catalog (pricing)</span>
+                <span class="tag">services</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=contracts_renewals"
+                 class="reports-nav-link {% if active_view == 'contracts_renewals' %}active{% endif %}">
+                <span class="label">Contracts renewals schedule</span>
+                <span class="tag">renewals</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=vendor_spend_year"
+                 class="reports-nav-link {% if active_view == 'vendor_spend_year' %}active{% endif %}">
+                <span class="label">Vendor spend by year</span>
+                <span class="tag">spend</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=user_activity_timeline"
+                 class="reports-nav-link {% if active_view == 'user_activity_timeline' %}active{% endif %}">
+                <span class="label">User activity timeline</span>
+                <span class="tag">usage</span>
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'portal:reports' %}?view=builder"
+                 class="reports-nav-link {% if active_view == 'builder' %}active{% endif %}">
+                <span class="label">Report builder</span>
+                <span class="tag">self-service</span>
+              </a>
+            </li>
+          </ul>
+        </aside>
+
+        <section class="reports-main">
+          {% block content %}{% endblock %}
+        </section>
+      </div>
     </main>
 
   </div>

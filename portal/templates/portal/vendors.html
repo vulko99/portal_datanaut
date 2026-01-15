@@ -4,241 +4,497 @@
 
 {% block content %}
 <div class="row g-3">
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="section-header mb-2">
-                <div class="section-eyebrow">Inventory</div>
-                <h1 class="section-title mb-0">Vendors</h1>
-                <p class="section-subtitle mb-0">
-                    Your vendor catalogue with contact details, contracts and services.
-                </p>
-            </div>
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Inventory</div>
+        <h1 class="section-title mb-0">Vendors</h1>
+        <p class="section-subtitle mb-0">
+          Your vendor catalogue with contact details, contracts and services.
+        </p>
+      </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-2">
-                <div class="d-flex flex-wrap gap-3 align-items-end">
-                    <div>
-                        <div class="metric-label">Total vendors</div>
-                        <div class="metric-value">
-                            {{ total_vendors }}
-                        </div>
-                        <div class="small text-muted">
-                            Showing {{ showing_count }} of {{ total_vendors }} vendors
-                        </div>
-                    </div>
-
-                    {# Show Closed + Rows (GET: show_closed, rows) #}
-                    <form method="get"
-                          class="d-flex align-items-center gap-3 small"
-                          style="margin-bottom:.15rem;">
-                        <div class="form-check form-switch m-0">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="show-closed-toggle"
-                                   name="show_closed"
-                                   value="1"
-                                   {% if request.GET.show_closed %}checked{% endif %}
-                                   onchange="this.form.submit()">
-                            <label class="form-check-label" for="show-closed-toggle">
-                                Show Closed
-                            </label>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-1">
-                            <span class="text-muted">Rows:</span>
-                            <select name="rows"
-                                    class="form-select form-select-sm"
-                                    style="width:auto; min-width:80px;"
-                                    onchange="this.form.submit()">
-                                {% for opt in rows_options %}
-                                    <option value="{{ opt }}"
-                                            {% if opt == rows_limit %}selected{% endif %}>
-                                        {{ opt }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="text-end small portal-card-muted">
-                    Use the <strong>Add</strong> button in the top bar to register a new vendor.
-                </div>
-            </div>
-
-            {% if vendors %}
-                {# вътрешен скрол за големи списъци – като при Users #}
-                <div class="table-responsive">
-                    <div style="max-height: 520px; overflow-y: auto;">
-                        <table class="portal-table align-middle mb-0">
-                            <thead>
-                            <tr>
-                                <th style="width: 26%;">Vendor</th>
-                                <th style="width: 16%;">Type</th>
-                                <th style="width: 20%;">Tags</th>
-                                <th style="width: 10%;">Contracts</th>
-                                <th style="width: 10%;">Invoices</th>
-                                <th style="width: 18%;">Website</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for vendor in vendors %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'portal:vendor_detail' vendor.pk %}" class="link-inline">
-                                            {{ vendor.name }}
-                                        </a>
-
-                                        {% if vendor.is_active == False %}
-                                            <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
-                                        {% endif %}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {{ vendor.vendor_type|default:"—" }}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {{ vendor.tags|default:"—" }}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {{ vendor.contract_count|default:0 }}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {{ vendor.invoice_count|default:0 }}
-                                    </td>
-
-                                    <td class="cell-muted">
-                                        {% if vendor.website %}
-                                            <a href="{{ vendor.website }}"
-                                               target="_blank"
-                                               rel="noopener"
-                                               class="link-inline">
-                                                {{ vendor.website }}
-                                            </a>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% else %}
-                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
-                    <div>
-                        No vendors yet. Add vendors to start linking contracts, invoices and services.
-                    </div>
-                    <div class="mt-2 mt-sm-0">
-                        <button type="button"
-                                class="btn btn-add btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addVendorModal">
-                            + Add vendor
-                        </button>
-                    </div>
-                </div>
-            {% endif %}
+      {# COMPACT HEADER META (total + showing) #}
+      <div class="d-flex flex-wrap align-items-end justify-content-between mt-1 mb-2">
+        <div class="small text-muted">
+          <span class="me-3">
+            Total vendors: <strong>{{ total_vendors }}</strong>
+          </span>
+          <span>
+            Showing {{ vendors|length }} on this page
+          </span>
         </div>
+        <div class="text-end small text-muted">
+          Use the global <strong>Add</strong> button in the top bar to register a new vendor.
+        </div>
+      </div>
+
+      {# TOOLBAR: Show closed + Rows (Users-style) #}
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+
+          {# Show closed toggle (keep page + rows + selected) #}
+          <form method="get" class="small d-flex align-items-center gap-3">
+            <input type="hidden" name="show_closed" value="0">
+            <input type="hidden" name="page" value="{{ current_page }}">
+            <input type="hidden" name="rows" value="{{ rows_per_page }}">
+            {% if selected_vendor %}
+              <input type="hidden" name="selected" value="{{ selected_vendor.id }}">
+            {% endif %}
+
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input"
+                     type="checkbox"
+                     id="vendors-show-closed-toggle"
+                     name="show_closed"
+                     value="1"
+                     {% if show_closed %}checked{% endif %}
+                     onchange="this.form.submit()">
+              <label class="form-check-label" for="vendors-show-closed-toggle">
+                Show closed
+              </label>
+            </div>
+          </form>
+
+          {# Rows selector (separate GET form; keep show_closed + page + selected) #}
+          <form method="get" class="small d-flex align-items-center gap-2">
+            <input type="hidden" name="page" value="{{ current_page }}">
+            <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+            {% if selected_vendor %}
+              <input type="hidden" name="selected" value="{{ selected_vendor.id }}">
+            {% endif %}
+
+            <span class="text-muted">Rows:</span>
+            <select name="rows"
+                    class="form-select form-select-sm"
+                    style="width:auto; min-width: 90px;"
+                    onchange="this.form.submit()">
+              {% for opt in rows_options %}
+                <option value="{{ opt }}" {% if opt == rows_per_page %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </form>
+
+        </div>
+      </div>
+
+      {# VENDOR GRID #}
+      {% if vendors %}
+        {# Slightly smaller viewport for the list so details area has more space #}
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+          <table class="portal-table align-middle">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Vendor</th>
+                <th style="width: 14%;">Type</th>
+                <th style="width: 20%;">Tags</th>
+                <th style="width: 10%;">Contracts</th>
+                <th style="width: 10%;">Invoices</th>
+                <th style="width: 18%;">Website</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% with sc=show_closed|yesno:"1,0" %}
+                {% for v in vendors %}
+                  <tr {% if selected_vendor and v.id == selected_vendor.id %}style="background: rgba(20,244,212,.06);"{% endif %}>
+                    <td>
+                      <a
+                        href="?page={{ page_obj.number }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ v.id }}#vendor-details"
+                        class="link-table"
+                      >
+                        {{ v.name }}
+                        {% if v.is_active == False %}
+                          <span class="badge rounded-pill bg-secondary ms-2">Closed</span>
+                        {% endif %}
+                      </a>
+                    </td>
+                    <td class="cell-muted">{{ v.vendor_type|default:"—" }}</td>
+                    <td class="cell-muted">{{ v.tags|default:"—" }}</td>
+                    <td class="cell-muted">{{ v.contract_count|default:0 }}</td>
+                    <td class="cell-muted">{{ v.invoice_count|default:0 }}</td>
+                    <td class="cell-muted">
+                      {% if v.website %}
+                        <a href="{{ v.website }}" target="_blank" rel="noopener" class="link-inline">
+                          {{ v.website }}
+                        </a>
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% endwith %}
+            </tbody>
+          </table>
+        </div>
+
+        {# PAGINATION #}
+        {% if page_obj %}
+          {% with sc=show_closed|yesno:"1,0" %}
+            <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Vendors pagination">
+              <div class="small text-muted">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </div>
+
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                  {% if page_obj.has_previous %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_vendor %}&selected={{ selected_vendor.id }}{% endif %}">
+                      Prev
+                    </a>
+                  {% else %}
+                    <span class="page-link">Prev</span>
+                  {% endif %}
+                </li>
+
+                {% for p in page_obj.paginator.page_range %}
+                  {% if p == 1 or p == page_obj.paginator.num_pages or p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                    <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                      <a class="page-link"
+                         href="?page={{ p }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_vendor %}&selected={{ selected_vendor.id }}{% endif %}">
+                        {{ p }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                  {% if page_obj.has_next %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_vendor %}&selected={{ selected_vendor.id }}{% endif %}">
+                      Next
+                    </a>
+                  {% else %}
+                    <span class="page-link">Next</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </nav>
+          {% endwith %}
+        {% endif %}
+
+      {% else %}
+        <p class="portal-card-muted mb-0">
+          No vendors yet. Add vendors to start linking contracts, invoices and services.
+        </p>
+      {% endif %}
     </div>
+  </div>
+
+  {# INLINE VENDOR DETAILS #}
+  <div class="col-12" id="vendor-details">
+    {% if selected_vendor %}
+      <div class="portal-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="flex-grow-1">
+            {# Tabs: Vendor details + Audit in one design #}
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <button id="vendorDetailsTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Vendor details
+              </button>
+              <button id="vendorAuditTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Audit · Change log
+              </button>
+            </div>
+            <div class="section-title mb-0">{{ selected_vendor.name }}</div>
+            <div class="section-subtitle mb-0">
+              {{ selected_vendor.primary_contact_email|default:"—" }}
+            </div>
+          </div>
+
+          <div class="small text-muted text-end">
+            Make changes below and <strong>Save</strong>.
+          </div>
+        </div>
+
+        {# AUDIT PANEL (shown when Audit tab is active) #}
+        <div class="mb-3 d-none" id="vendorAuditPanel">
+          <div class="portal-card" style="padding: 14px;">
+            <div class="section-eyebrow mb-1">Audit</div>
+            <div class="section-title" style="font-size: 1.05rem;">Change log</div>
+            <div class="portal-card-muted mb-2">
+              Latest changes for this vendor.
+            </div>
+
+            {% if audit_events %}
+              <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                <table class="portal-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">When</th>
+                      <th style="width: 18%;">Actor</th>
+                      <th style="width: 60%;">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ev in audit_events %}
+                      <tr>
+                        <td class="cell-muted">
+                          {% if ev.occurred_at %}
+                            {{ ev.occurred_at|date:"Y-m-d H:i" }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+
+                        <td class="cell-muted">
+                          {% if ev.actor_display %}
+                            {{ ev.actor_display }}
+                          {% elif ev.actor %}
+                            {{ ev.actor }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+
+                        <td class="cell-muted">
+                          {{ ev.description|default:"—" }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="portal-card-muted">No audit events yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# VENDOR DETAILS PANEL (shown when Vendor details tab is active) #}
+        <div id="vendorDetailsPanel">
+          <div class="row g-3">
+            <div class="col-12">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="selected" value="{{ selected_vendor.id }}">
+                <input type="hidden" name="page" value="{{ current_page }}">
+                <input type="hidden" name="rows" value="{{ rows_per_page }}">
+                <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+                <div class="row g-3">
+                  <div class="col-md-6 col-xl-5">
+                    <label class="form-label small text-muted">Vendor name</label>
+                    <input class="form-control form-control-sm" name="name" value="{{ selected_vendor.name }}">
+                  </div>
+
+                  <div class="col-md-6 col-xl-3">
+                    <label class="form-label small text-muted">Type</label>
+                    <select class="form-select form-select-sm" name="vendor_type">
+                      <option value="">—</option>
+                      {% for val,label in vendor_type_choices %}
+                        <option value="{{ val }}" {% if selected_vendor.vendor_type == val %}selected{% endif %}>
+                          {{ label }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <div class="col-md-12 col-xl-4">
+                    <label class="form-label small text-muted">Tags</label>
+                    <input class="form-control form-control-sm" name="tags" value="{{ selected_vendor.tags|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Primary contact name</label>
+                    <input class="form-control form-control-sm" name="primary_contact_name" value="{{ selected_vendor.primary_contact_name|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted">Primary contact email</label>
+                    <input class="form-control form-control-sm" name="primary_contact_email" value="{{ selected_vendor.primary_contact_email|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-7">
+                    <label class="form-label small text-muted">Website</label>
+                    <input class="form-control form-control-sm" name="website" value="{{ selected_vendor.website|default_if_none:'' }}">
+                  </div>
+
+                  <div class="col-md-5">
+                    <label class="form-label small text-muted">Status</label>
+                    <select class="form-select form-select-sm" name="is_active">
+                      <option value="1" {% if selected_vendor.is_active %}selected{% endif %}>Active</option>
+                      <option value="0" {% if not selected_vendor.is_active %}selected{% endif %}>Closed</option>
+                    </select>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label small text-muted">Internal notes</label>
+                    <textarea class="form-control form-control-sm" name="notes" rows="4">{{ selected_vendor.notes|default_if_none:'' }}</textarea>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                  {% with sc=show_closed|yesno:"1,0" %}
+                    <a class="btn btn-sm btn-ghost"
+                       href="?page={{ current_page }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ selected_vendor.id }}#vendor-details">
+                      Discard
+                    </a>
+                  {% endwith %}
+                  <button type="submit" class="btn btn-sm dn-btn-primary">
+                    Save
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="portal-card">
+        <div class="portal-card-muted mb-0">
+          Select a vendor from the table above to view and edit details inline.
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
-{# --------- ADD VENDOR MODAL --------- #}
+{# ADD VENDOR MODAL (existing) #}
 <div class="modal fade" id="addVendorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content"
-             style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
-            <div class="modal-header border-0 pt-3 pb-1 px-4">
-                <div>
-                    <h5 class="modal-title">Add new vendor</h5>
-                    <div class="small text-muted">
-                        Create a new vendor in the inventory.
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body px-4 pb-4">
-                <form method="post">
-                    {% csrf_token %}
-
-                    {{ form.non_field_errors }}
-
-                    <div class="row g-3 mb-3 small">
-                        <div class="col-md-6 col-xl-4">
-                            <label class="form-label form-label-sm">Vendor name</label>
-                            {{ form.name }}
-                            {{ form.name.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            <label class="form-label form-label-sm">Type</label>
-                            {{ form.vendor_type }}
-                            {{ form.vendor_type.errors }}
-                        </div>
-                        <div class="col-md-12 col-xl-4">
-                            <label class="form-label form-label-sm">Tags</label>
-                            {{ form.tags }}
-                            {{ form.tags.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3 small">
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Primary contact name</label>
-                            {{ form.primary_contact_name }}
-                            {{ form.primary_contact_name.errors }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Primary contact email</label>
-                            {{ form.primary_contact_email }}
-                            {{ form.primary_contact_email.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-4 small">
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Website</label>
-                            {{ form.website }}
-                            {{ form.website.errors }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label form-label-sm">Internal notes</label>
-                            {{ form.notes }}
-                            {{ form.notes.errors }}
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-add btn-sm">
-                            Save and close
-                        </button>
-                    </div>
-                </form>
-            </div>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content"
+         style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+      <div class="modal-header border-0 pt-3 pb-1 px-4">
+        <div>
+          <h5 class="modal-title">Add new vendor</h5>
+          <div class="small text-muted">
+            Create a new vendor in the inventory.
+          </div>
         </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body px-4 pb-4">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="row g-3 mb-3 small">
+            <div class="col-md-6 col-xl-4">
+              <label class="form-label form-label-sm">Vendor name</label>
+              {{ form.name }}
+              {{ form.name.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              <label class="form-label form-label-sm">Type</label>
+              {{ form.vendor_type }}
+              {{ form.vendor_type.errors }}
+            </div>
+            <div class="col-md-12 col-xl-4">
+              <label class="form-label form-label-sm">Tags</label>
+              {{ form.tags }}
+              {{ form.tags.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3 small">
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">Primary contact name</label>
+              {{ form.primary_contact_name }}
+              {{ form.primary_contact_name.errors }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">Primary contact email</label>
+              {{ form.primary_contact_email }}
+              {{ form.primary_contact_email.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4 small">
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">Website</label>
+              {{ form.website }}
+              {{ form.website.errors }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">Internal notes</label>
+              {{ form.notes }}
+              {{ form.notes.errors }}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-add btn-sm">Save and close</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
+
 
 {% block extra_js %}
 {{ block.super }}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // If there are form errors after POST, auto-open the modal
-    const hasErrors = document.querySelector("#addVendorModal .errorlist") !== null;
-
-    if (hasErrors) {
-        const modalEl = document.getElementById("addVendorModal");
-        if (modalEl && window.bootstrap) {
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
-        }
+  // If there are form errors after POST, auto-open the modal
+  const hasErrors = JSON.parse('{{ add_form_has_errors|yesno:"true,false"|escapejs }}');
+  if (hasErrors) {
+    const modalEl = document.getElementById("addVendorModal");
+    if (modalEl && window.bootstrap) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
     }
+  }
+
+  // Global Add button opens Vendor modal
+  const globalAddBtn = document.getElementById('globalAddButton');
+  const addModalEl = document.getElementById('addVendorModal');
+  if (globalAddBtn && addModalEl && window.bootstrap) {
+    const modal = new bootstrap.Modal(addModalEl);
+    globalAddBtn.addEventListener('click', function () {
+      modal.show();
+    });
+  }
+
+  // Tabs inside Vendor details: Vendor details vs Audit
+  const detailsTab = document.getElementById('vendorDetailsTab');
+  const auditTab = document.getElementById('vendorAuditTab');
+  const detailsPanel = document.getElementById('vendorDetailsPanel');
+  const auditPanel = document.getElementById('vendorAuditPanel');
+
+  function activateVendorTab(tabName) {
+    if (!detailsPanel || !auditPanel || !detailsTab || !auditTab) return;
+
+    const showDetails = tabName === 'details';
+
+    // Toggle panels
+    detailsPanel.classList.toggle('d-none', !showDetails);
+    auditPanel.classList.toggle('d-none', showDetails);
+
+    // Visual state for tabs
+    if (showDetails) {
+      detailsTab.classList.add('active');
+      auditTab.classList.remove('active');
+    } else {
+      auditTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      // Scroll audit panel into view for better UX
+      auditPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  if (detailsTab && auditTab && detailsPanel && auditPanel) {
+    detailsTab.addEventListener('click', function () {
+      activateVendorTab('details');
+    });
+    auditTab.addEventListener('click', function () {
+      activateVendorTab('audit');
+    });
+
+    // Initial state – always land on Vendor details
+    activateVendorTab('details');
+  }
 });
 </script>
 {% endblock %}

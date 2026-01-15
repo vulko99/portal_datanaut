@@ -1,51 +1,107 @@
 {% extends "portal/base_reports.html" %}
 {% load portal_extras %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <style>
+    /* overview summary metrics */
+    .reports-metrics{
+      margin-bottom: 18px;
+    }
+    .reports-metric-card{
+      background: radial-gradient(circle at top left,
+                  rgba(15,23,42,.96),
+                  rgba(15,23,42,.92));
+      border-radius: var(--dn-radius-md);
+      border: 1px solid rgba(148,163,184,.45);
+      padding: 14px 16px 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.55);
+      height: 100%;
+    }
+    .reports-metric-label{
+      font-size:.72rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:rgba(156,163,175,.95);
+      margin-bottom:4px;
+    }
+    .reports-metric-value{
+      font-size:1.3rem;
+      font-weight:700;
+      color:var(--dn-strong);
+      margin-bottom:2px;
+    }
+    .reports-metric-sub{
+      font-size:.82rem;
+      color:var(--dn-muted);
+    }
+
+    @media (max-width: 991px){
+      .reports-metrics{ margin-bottom: 12px; }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
 <div class="page">
 
-  <div class="page-header mb-3">
-    <h1 class="page-title">Reports</h1>
-    <p class="page-subtitle">
-      Structured exports based on your contracts, invoices, vendors and user access.
-      Nothing here changes live data.
-    </p>
-  </div>
-
-  {# Tabs за навигация вътре в Reports #}
-  <div class="reports-tabs mb-3">
-    <a href="{% url 'portal:reports' %}?view=overview"
-       class="reports-tab {% if active_view == 'overview' %}active{% endif %}">
-      Overview
-    </a>
-    <a href="{% url 'portal:reports' %}?view=users_cost"
-       class="reports-tab {% if active_view == 'users_cost' %}active{% endif %}">
-      Users · access cost
-    </a>
-    <a href="{% url 'portal:reports' %}?view=services_catalog"
-       class="reports-tab {% if active_view == 'services_catalog' %}active{% endif %}">
-      Services catalog (pricing)
-    </a>
-    <a href="{% url 'portal:reports' %}?view=contracts_renewals"
-       class="reports-tab {% if active_view == 'contracts_renewals' %}active{% endif %}">
-      Contracts renewals schedule
-    </a>
-    <a href="{% url 'portal:reports' %}?view=vendor_spend_year"
-       class="reports-tab {% if active_view == 'vendor_spend_year' %}active{% endif %}">
-      Vendor spend by year
-    </a>
-    <a href="{% url 'portal:reports' %}?view=user_activity_timeline"
-       class="reports-tab {% if active_view == 'user_activity_timeline' %}active{% endif %}">
-      User activity timeline
-    </a>
-    <a href="{% url 'portal:reports' %}?view=builder"
-       class="reports-tab {% if active_view == 'builder' %}active{% endif %}">
-      Report builder
-    </a>
+  <div class="page-header mb-3 d-flex flex-wrap justify-content-between align-items-end">
+    <div class="mb-2">
+      <h1 class="page-title">Reports</h1>
+      <p class="page-subtitle mb-0">
+        Structured exports based on your contracts, invoices, vendors and user access.
+        Nothing here changes live data.
+      </p>
+    </div>
+    <div class="text-end small portal-card-muted mb-1">
+      <div><strong>{{ available_reports|length }}</strong> ready-made reports in this workspace.</div>
+      <div>All exports are CSV – safe to share with finance, procurement and IT stakeholders.</div>
+    </div>
   </div>
 
   {# ============================= OVERVIEW ============================= #}
   {% if active_view == "overview" %}
+
+    {# summary metric row #}
+    <div class="reports-metrics">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="reports-metric-card">
+            <div class="reports-metric-label">Catalog</div>
+            <div class="reports-metric-value">
+              {{ available_reports|length }} reports
+            </div>
+            <div class="reports-metric-sub">
+              Coverage across contracts, invoices, vendors, users and self-service access.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="reports-metric-card">
+            <div class="reports-metric-label">Data domains</div>
+            <div class="reports-metric-value">
+              Spend · Inventory · Usage
+            </div>
+            <div class="reports-metric-sub">
+              Use reports as a stable source of truth for management packs and audits.
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="reports-metric-card">
+            <div class="reports-metric-label">Exports &amp; sharing</div>
+            <div class="reports-metric-value">
+              CSV ready
+            </div>
+            <div class="reports-metric-sub">
+              Filters in the UI are fully reflected in the exported files, no hidden logic.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# catalog tiles #}
     <div class="page-section">
       <div class="row g-3">
         {% for report in available_reports %}
@@ -425,6 +481,7 @@
       {% endif %}
     </div>
 
+  {# ======================= USER ACTIVITY TIMELINE ====================== #}
   {% elif active_view == "user_activity_timeline" %}
     <div class="portal-card mb-3">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -496,6 +553,7 @@
       {% endif %}
     </div>
 
+  {# ============================== BUILDER ============================== #}
   {% elif active_view == "builder" %}
     <div class="portal-card mb-3">
       <div class="section-eyebrow mb-1">Builder</div>
@@ -647,7 +705,7 @@
       });
     }
 
-    // Auto-submit при чек/ънчек на колоните, без да затваря <details>
+    // Auto-submit при чек/ънчек на колоните
     const colCheckboxes = form.querySelectorAll(".builder-col-toggle");
     colCheckboxes.forEach(function(cb) {
       cb.addEventListener("change", function() {

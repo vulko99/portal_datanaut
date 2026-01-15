@@ -4,264 +4,544 @@
 
 {% block content %}
 <div class="row g-3">
-    <div class="col-12">
-        <div class="portal-card">
-            <div class="section-header mb-2">
-                <div class="section-eyebrow">Inventory</div>
-                <h1 class="section-title mb-0">Contracts</h1>
-                <p class="section-subtitle mb-0">
-                    Signed agreements with vendors. Use this view to upload new contracts and track renewal dates.
-                </p>
-            </div>
+  <div class="col-12">
+    <div class="portal-card">
+      <div class="section-header mb-2">
+        <div class="section-eyebrow">Inventory</div>
+        <h1 class="section-title mb-0">Contracts</h1>
+        <p class="section-subtitle mb-0">
+          Signed agreements with vendors. Use this view to upload new contracts and track renewal dates.
+        </p>
+      </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between mt-1 mb-3">
-                <div class="d-flex flex-wrap gap-3">
-                    <div>
-                        <div class="metric-label">Total contracts</div>
-                        <div class="metric-value">
-                            {{ contracts|length }}
-                        </div>
-                    </div>
-                </div>
-                <div class="text-end small portal-card-muted">
-                    Use the <strong>Add</strong> button in the top bar to upload a new contract.
-                </div>
-            </div>
-
-            {# TOOLBAR: search + filters + rows-per-page #}
-            {% if contracts %}
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                    <div class="d-flex flex-wrap gap-2">
-                        <div class="input-group input-group-sm" style="max-width: 320px;">
-                            <span class="input-group-text text-uppercase fw-semibold" style="font-size: 0.7rem;">
-                                Search
-                            </span>
-                            <input
-                                type="search"
-                                id="contractSearch"
-                                class="form-control"
-                                placeholder="Contract, vendor, ID…">
-                        </div>
-
-                        <select id="contractVendorFilter" class="form-select form-select-sm" style="min-width: 180px;">
-                            <option value="">All vendors</option>
-                        </select>
-
-                        <select id="contractStatusFilter" class="form-select form-select-sm" style="min-width: 160px;">
-                            <option value="">All statuses</option>
-                        </select>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
-                        <span id="contractsTableSummary" class="small portal-card-muted">
-                            Showing {{ contracts|length }} of {{ contracts|length }} contracts.
-                        </span>
-                        <div class="d-flex align-items-center">
-                            <span class="me-1 small portal-card-muted">Rows:</span>
-                            <select id="contractsPageSize" class="form-select form-select-sm" style="width:auto;">
-                                <option value="10">10</option>
-                                <option value="25" selected>25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="all">All</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if contracts %}
-                <div class="inventory-table-shell" style="max-height: 460px; overflow-y: auto;">
-                    <div class="table-responsive">
-                        <table class="portal-table align-middle">
-                            <thead>
-                            <tr>
-                                <th style="width: 20%;">Contract</th>
-                                <th style="width: 18%;">Vendor</th>
-                                <th style="width: 12%;">Type</th>
-                                <th style="width: 10%;">Currency</th>
-                                <th style="width: 12%; text-align:right;">Annual value</th>
-                                <th style="width: 12%;">Start</th>
-                                <th style="width: 12%;">End</th>
-                                <th style="width: 12%;">Renewal</th>
-                            </tr>
-                            </thead>
-                            <tbody id="contractsTableBody">
-                            {% for c in contracts %}
-                                <tr
-                                    data-contract-name="{{ c.contract_name|default_if_none:'' }}"
-                                    data-vendor="{{ c.vendor.name|default_if_none:'' }}"
-                                    data-status="{{ c.status|default_if_none:'' }}"
-                                >
-                                    <td>
-                                        <a href="{% url 'portal:contract_detail' c.pk %}" class="link-inline">
-                                            {{ c.contract_name }}
-                                        </a>
-                                        {% if c.contract_id %}
-                                            <div class="cell-muted small">Vendor ID: {{ c.contract_id }}</div>
-                                        {% endif %}
-                                    </td>
-                                    <td class="cell-muted">{{ c.vendor.name }}</td>
-                                    <td class="cell-muted">{{ c.get_contract_type_display|default:"—" }}</td>
-                                    <td class="cell-muted">{{ c.currency|default:"—" }}</td>
-                                    <td class="cell-muted" style="text-align:right;">
-                                        {% if c.annual_value %}{{ c.annual_value }}{% else %}—{% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if c.start_date %}{{ c.start_date }}{% else %}—{% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if c.end_date %}{{ c.end_date }}{% else %}—{% endif %}
-                                    </td>
-                                    <td class="cell-muted">
-                                        {% if c.renewal_date %}{{ c.renewal_date }}{% else %}—{% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <p class="portal-card-muted mt-2 mb-0">
-                    In a full deployment this grid can be extended with contract owners, renewal alerts, linked
-                    cost centres and workflow status.
-                </p>
-            {% else %}
-                <div class="empty d-flex flex-wrap align-items-center justify-content-between">
-                    <div>
-                        No contracts yet for this user. Use the
-                        <span class="fw-semibold">Add</span> button in the top bar to upload signed agreements.
-                    </div>
-                    <div class="mt-2 mt-sm-0">
-                        <button type="button"
-                                class="btn btn-add btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addContractModal">
-                            + Add contract
-                        </button>
-                    </div>
-                </div>
-            {% endif %}
+      {# HEADER – като Vendors/Services #}
+      <div class="d-flex flex-wrap align-items-end justify-content-between mt-1 mb-2">
+        <div class="small text-muted">
+          <span class="me-3">
+            Total contracts:
+            <strong>{{ total_contracts|default:contracts|length }}</strong>
+          </span>
+          <span>
+            Showing {{ contracts|length }} on this page
+          </span>
         </div>
+        <div class="text-end small text-muted">
+          Use the <strong>Add</strong> button in the top bar to upload a new contract.
+        </div>
+      </div>
+
+      {# TOOLBAR – Show closed + Rows #}
+      {% if contracts %}
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+          <div class="d-flex flex-wrap gap-3 align-items-center">
+
+            {# Show closed toggle #}
+            <form method="get" class="small d-flex align-items-center gap-3">
+              <input type="hidden" name="show_closed" value="0">
+              <input type="hidden" name="page" value="{{ current_page }}">
+              <input type="hidden" name="rows" value="{{ rows_per_page }}">
+              {% if selected_contract %}
+                <input type="hidden" name="selected" value="{{ selected_contract.id }}">
+              {% endif %}
+
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="contracts-show-closed-toggle"
+                       name="show_closed"
+                       value="1"
+                       {% if show_closed %}checked{% endif %}
+                       onchange="this.form.submit()">
+                <label class="form-check-label" for="contracts-show-closed-toggle">
+                  Show closed
+                </label>
+              </div>
+            </form>
+
+            {# Rows selector #}
+            <form method="get" class="small d-flex align-items-center gap-2">
+              <input type="hidden" name="page" value="{{ current_page }}">
+              <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+              {% if selected_contract %}
+                <input type="hidden" name="selected" value="{{ selected_contract.id }}">
+              {% endif %}
+
+              <span class="text-muted">Rows:</span>
+              <select name="rows"
+                      class="form-select form-select-sm"
+                      style="width:auto; min-width: 90px;"
+                      onchange="this.form.submit()">
+                <option value="10"  {% if rows_per_page == 10  %}selected{% endif %}>10</option>
+                <option value="20"  {% if rows_per_page == 20  %}selected{% endif %}>20</option>
+                <option value="30"  {% if rows_per_page == 30  %}selected{% endif %}>30</option>
+                <option value="50"  {% if rows_per_page == 50  %}selected{% endif %}>50</option>
+                <option value="100" {% if rows_per_page == 100 %}selected{% endif %}>100</option>
+                <option value="250" {% if rows_per_page == 250 %}selected{% endif %}>250</option>
+              </select>
+            </form>
+
+          </div>
+        </div>
+      {% endif %}
+
+      {% if contracts %}
+        {# LIST GRID #}
+        <div class="inventory-table-shell" style="max-height: 420px; overflow-y: auto;">
+          <div class="table-responsive">
+            <table class="portal-table align-middle">
+              <thead>
+                <tr>
+                  <th style="width: 20%;">Contract</th>
+                  <th style="width: 18%;">Vendor</th>
+                  <th style="width: 12%;">Type</th>
+                  <th style="width: 10%;">Currency</th>
+                  <th style="width: 12%; text-align:right;">Annual value</th>
+                  <th style="width: 12%;">Start</th>
+                  <th style="width: 12%;">End</th>
+                  <th style="width: 12%;">Renewal</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% with sc=show_closed|yesno:"1,0" %}
+                {% for c in contracts %}
+                  <tr {% if selected_contract and c.id == selected_contract.id %}style="background: rgba(20,244,212,.06);"{% endif %}>
+                    <td>
+                      <a href="?page={{ current_page }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ c.id }}#contract-details"
+                         class="link-table">
+                        {{ c.contract_name }}
+                      </a>
+                      {% if c.contract_id %}
+                        <div class="cell-muted small">Vendor ID: {{ c.contract_id }}</div>
+                      {% endif %}
+                    </td>
+                    <td class="cell-muted">{{ c.vendor.name }}</td>
+                    <td class="cell-muted">{{ c.get_contract_type_display|default:"—" }}</td>
+                    <td class="cell-muted">{{ c.currency|default:"—" }}</td>
+                    <td class="cell-muted" style="text-align:right;">
+                      {% if c.annual_value %}{{ c.annual_value }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">
+                      {% if c.start_date %}{{ c.start_date }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">
+                      {% if c.end_date %}{{ c.end_date }}{% else %}—{% endif %}
+                    </td>
+                    <td class="cell-muted">
+                      {% if c.renewal_date %}{{ c.renewal_date }}{% else %}—{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% endwith %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="portal-card-muted mt-2 mb-0">
+          In a full deployment this grid can be extended with contract owners, renewal alerts, linked
+          cost centres and workflow status.
+        </p>
+
+        {# PAGINATION #}
+        {% if page_obj %}
+          {% with sc=show_closed|yesno:"1,0" %}
+            <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Contracts pagination">
+              <div class="small text-muted">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </div>
+
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                  {% if page_obj.has_previous %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_contract %}&selected={{ selected_contract.id }}{% endif %}">
+                      Prev
+                    </a>
+                  {% else %}
+                    <span class="page-link">Prev</span>
+                  {% endif %}
+                </li>
+
+                {% for p in page_obj.paginator.page_range %}
+                  {% if p == 1 or p == page_obj.paginator.num_pages or p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                    <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                      <a class="page-link"
+                         href="?page={{ p }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_contract %}&selected={{ selected_contract.id }}{% endif %}">
+                        {{ p }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                  {% if page_obj.has_next %}
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&rows={{ rows_per_page }}&show_closed={{ sc }}{% if selected_contract %}&selected={{ selected_contract.id }}{% endif %}">
+                      Next
+                    </a>
+                  {% else %}
+                    <span class="page-link">Next</span>
+                  {% endif %}
+                </li>
+              </ul>
+            </nav>
+          {% endwith %}
+        {% endif %}
+
+      {% else %}
+        <div class="empty d-flex flex-wrap align-items-center justify-content-between">
+          <div>
+            No contracts yet for this user. Use the
+            <span class="fw-semibold">Add</span> button in the top bar to upload signed agreements.
+          </div>
+          <div class="mt-2 mt-sm-0">
+            <button type="button"
+                    class="btn btn-add btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addContractModal">
+              + Add contract
+            </button>
+          </div>
+        </div>
+      {% endif %}
     </div>
+  </div>
+
+  {# INLINE CONTRACT DETAILS – EDITABLE + Audit tabs #}
+  <div class="col-12" id="contract-details">
+    {% if selected_contract %}
+      <div class="portal-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <button id="contractDetailsTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Contract details
+              </button>
+              <button id="contractAuditTab"
+                      type="button"
+                      class="btn btn-sm btn-ghost">
+                Audit · Change log
+              </button>
+            </div>
+            <div class="section-title mb-0">
+              {{ selected_contract.contract_name }}
+            </div>
+            <div class="section-subtitle mb-0">
+              {{ selected_contract.vendor.name|default:"—" }}
+              {% if selected_contract.entity %} · {{ selected_contract.entity }}{% endif %}
+            </div>
+          </div>
+          <div class="small text-muted text-end">
+            Make changes below and <strong>Save</strong>.
+          </div>
+        </div>
+
+        {# AUDIT PANEL – ще вържем данни по-късно #}
+        <div class="mb-3 d-none" id="contractAuditPanel">
+          <div class="portal-card" style="padding: 14px;">
+            <div class="section-eyebrow mb-1">Audit</div>
+            <div class="section-title" style="font-size: 1.05rem;">Change log</div>
+            <div class="portal-card-muted mb-2">
+              Latest changes for this contract.
+            </div>
+
+            {% if audit_events %}
+              <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                <table class="portal-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">When</th>
+                      <th style="width: 18%;">Actor</th>
+                      <th style="width: 60%;">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ev in audit_events %}
+                      <tr>
+                        <td class="cell-muted">
+                          {% if ev.occurred_at %}
+                            {{ ev.occurred_at|date:"Y-m-d H:i" }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {% if ev.actor_display %}
+                            {{ ev.actor_display }}
+                          {% elif ev.actor %}
+                            {{ ev.actor }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                        <td class="cell-muted">
+                          {{ ev.description|default:"—" }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="portal-card-muted">No audit events yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# EDITABLE CONTRACT DETAILS PANEL #}
+        <div id="contractDetailsPanel">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_selected">
+            <input type="hidden" name="selected" value="{{ selected_contract.id }}">
+            <input type="hidden" name="page" value="{{ current_page }}">
+            <input type="hidden" name="rows" value="{{ rows_per_page }}">
+            <input type="hidden" name="show_closed" value="{% if show_closed %}1{% else %}0{% endif %}">
+
+            <div class="row g-3 small">
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Contract name</label>
+                <input type="text"
+                       name="contract_name"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.contract_name|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Vendor</label>
+                <select name="vendor_id" class="form-select form-select-sm">
+                  {% for v in vendors %}
+                    <option value="{{ v.id }}"
+                      {% if selected_contract.vendor_id == v.id %}selected{% endif %}>
+                      {{ v.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Vendor contract ID</label>
+                <input type="text"
+                       name="contract_id"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.contract_id|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Type</label>
+                <input type="text"
+                       name="contract_type"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.contract_type|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Entity</label>
+                <input type="text"
+                       name="entity"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.entity|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-2">
+                <label class="form-label form-label-sm">Annual value</label>
+                <input type="number" step="0.01"
+                       name="annual_value"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.annual_value|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-2">
+                <label class="form-label form-label-sm">Currency</label>
+                <input type="text"
+                       name="currency"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.currency|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Start date</label>
+                <input type="date"
+                       name="start_date"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.start_date|date:'Y-m-d' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">End date</label>
+                <input type="date"
+                       name="end_date"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.end_date|date:'Y-m-d' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Renewal date</label>
+                <input type="date"
+                       name="renewal_date"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.renewal_date|date:'Y-m-d' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Notice period (days)</label>
+                <input type="number"
+                       name="notice_period_days"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.notice_period_days|default_if_none:'' }}">
+              </div>
+
+              <div class="col-md-6 col-xl-4">
+                <label class="form-label form-label-sm">Notice date</label>
+                <input type="date"
+                       name="notice_date"
+                       class="form-control form-control-sm"
+                       value="{{ selected_contract.notice_date|date:'Y-m-d' }}">
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              {% with sc=show_closed|yesno:"1,0" %}
+                <a class="btn btn-sm btn-ghost"
+                   href="?page={{ current_page }}&rows={{ rows_per_page }}&show_closed={{ sc }}&selected={{ selected_contract.id }}#contract-details">
+                  Discard
+                </a>
+              {% endwith %}
+              <button type="submit" class="btn btn-sm dn-btn-primary">
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="portal-card">
+        <div class="portal-card-muted mb-0">
+          Select a contract from the table above to view and edit details inline.
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
 {# --------- ADD CONTRACT MODAL --------- #}
 <div class="modal fade" id="addContractModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
-            <div class="modal-header border-0 pt-3 pb-1 px-4">
-                <div>
-                    <h5 class="modal-title">Add contract</h5>
-                    <div class="small text-muted">
-                        Upload a signed contract and capture key metadata (term, value, renewal).
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body px-4 pb-4">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.vendor.label_tag }}
-                            {{ form.vendor }}
-                            {{ form.vendor.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.contract_name.label_tag }}
-                            {{ form.contract_name }}
-                            {{ form.contract_name.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.contract_id.label_tag }}
-                            {{ form.contract_id }}
-                            {{ form.contract_id.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.contract_type.label_tag }}
-                            {{ form.contract_type }}
-                            {{ form.contract_type.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.entity.label_tag }}
-                            {{ form.entity }}
-                            {{ form.entity.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-2">
-                            {{ form.annual_value.label_tag }}
-                            {{ form.annual_value }}
-                            {{ form.annual_value.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-2">
-                            {{ form.currency.label_tag }}
-                            {{ form.currency }}
-                            {{ form.currency.errors }}
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.start_date.label_tag }}
-                            {{ form.start_date }}
-                            {{ form.start_date.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.end_date.label_tag }}
-                            {{ form.end_date }}
-                            {{ form.end_date.errors }}
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.renewal_date.label_tag }}
-                            {{ form.renewal_date }}
-                            {{ form.renewal_date.errors }}
-                        </div>
-                    </div>
-
-                    {# Notice fields #}
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.notice_period_days.label_tag }}
-                            {{ form.notice_period_days }}
-                            {{ form.notice_period_days.errors }}
-                            <div class="form-text text-muted">
-                                Optional. If set and Notice date is empty, the system will derive it from End date.
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xl-4">
-                            {{ form.notice_date.label_tag }}
-                            {{ form.notice_date }}
-                            {{ form.notice_date.errors }}
-                            <div class="form-text text-muted">
-                                Optional manual override (must be on/before End date).
-                            </div>
-                        </div>
-                        <div class="col-xl-4 d-none d-xl-block"></div>
-                    </div>
-
-                    <div class="row g-3 mb-2">
-                        <div class="col-md-12 col-xl-6">
-                            {{ form.file.label_tag }}
-                            {{ form.file }}
-                            {{ form.file.errors }}
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-add btn-sm">Save and close</button>
-                    </div>
-                </form>
-            </div>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content" style="background: rgba(10,15,25,.96); color:#E5E7EB; border-radius:18px; border:1px solid rgba(148,163,184,.4);">
+      <div class="modal-header border-0 pt-3 pb-1 px-4">
+        <div>
+          <h5 class="modal-title">Add contract</h5>
+          <div class="small text-muted">
+            Upload a signed contract and capture key metadata (term, value, renewal).
+          </div>
         </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body px-4 pb-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create">
+          {{ form.non_field_errors }}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 col-xl-4">
+              {{ form.vendor.label_tag }}
+              {{ form.vendor }}
+              {{ form.vendor.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.contract_name.label_tag }}
+              {{ form.contract_name }}
+              {{ form.contract_name.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.contract_id.label_tag }}
+              {{ form.contract_id }}
+              {{ form.contract_id.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 col-xl-4">
+              {{ form.contract_type.label_tag }}
+              {{ form.contract_type }}
+              {{ form.contract_type.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.entity.label_tag }}
+              {{ form.entity }}
+              {{ form.entity.errors }}
+            </div>
+            <div class="col-md-6 col-xl-2">
+              {{ form.annual_value.label_tag }}
+              {{ form.annual_value }}
+              {{ form.annual_value.errors }}
+            </div>
+            <div class="col-md-6 col-xl-2">
+              {{ form.currency.label_tag }}
+              {{ form.currency }}
+              {{ form.currency.errors }}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 col-xl-4">
+              {{ form.start_date.label_tag }}
+              {{ form.start_date }}
+              {{ form.start_date.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.end_date.label_tag }}
+              {{ form.end_date }}
+              {{ form.end_date.errors }}
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.renewal_date.label_tag }}
+              {{ form.renewal_date }}
+              {{ form.renewal_date.errors }}
+            </div>
+          </div>
+
+          {# Notice fields #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 col-xl-4">
+              {{ form.notice_period_days.label_tag }}
+              {{ form.notice_period_days }}
+              {{ form.notice_period_days.errors }}
+              <div class="form-text text-muted">
+                Optional. If set and Notice date is empty, the system will derive it from End date.
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+              {{ form.notice_date.label_tag }}
+              {{ form.notice_date }}
+              {{ form.notice_date.errors }}
+              <div class="form-text text-muted">
+                Optional manual override (must be on/before End date).
+              </div>
+            </div>
+            <div class="col-xl-4 d-none d-xl-block"></div>
+          </div>
+
+          <div class="row g-3 mb-2">
+            <div class="col-md-12 col-xl-6">
+              {{ form.file.label_tag }}
+              {{ form.file }}
+              {{ form.file.errors }}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-add btn-sm">Save and close</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -269,170 +549,61 @@
 {{ block.super }}
 <script>
 (function () {
-    const tableBody = document.getElementById('contractsTableBody');
-    const searchInput = document.getElementById('contractSearch');
-    const vendorSelect = document.getElementById('contractVendorFilter');
-    const statusSelect = document.getElementById('contractStatusFilter');
-    const pageSizeSelect = document.getElementById('contractsPageSize');
-    const summaryEl = document.getElementById('contractsTableSummary');
+  // Global Add button -> open Add Contract modal
+  const globalAddBtn = document.getElementById('globalAddButton');
+  const modalEl = document.getElementById('addContractModal');
+  const modal =
+    modalEl && window.bootstrap
+      ? new bootstrap.Modal(modalEl)
+      : null;
 
-    const globalAddBtn = document.getElementById('globalAddButton');
-    const modalEl = document.getElementById('addContractModal');
-    const modal =
-        modalEl && window.bootstrap
-            ? new bootstrap.Modal(modalEl)
-            : null;
+  if (globalAddBtn && modal) {
+    globalAddBtn.addEventListener('click', function () {
+      modal.show();
+    });
+  }
 
-    let rows = [];
-    const vendors = new Set();
-    const statuses = new Set();
-    let totalCount = 0;
+  // Auto-open modal if form has errors
+  const hasErrors = document.querySelector('#addContractModal .errorlist') !== null;
+  if (hasErrors && modal) {
+    modal.show();
+  }
 
-    if (tableBody) {
-        rows = Array.from(tableBody.querySelectorAll('tr'));
-        totalCount = rows.length;
+  // Tabs вътре в Contract details: Details / Audit
+  const detailsTab = document.getElementById('contractDetailsTab');
+  const auditTab = document.getElementById('contractAuditTab');
+  const detailsPanel = document.getElementById('contractDetailsPanel');
+  const auditPanel = document.getElementById('contractAuditPanel');
 
-        // Populate filters from existing rows
-        rows.forEach(row => {
-            const v = (row.dataset.vendor || '').trim();
-            const s = (row.dataset.status || '').trim();
-            if (v) vendors.add(v);
-            if (s) statuses.add(s);
-        });
+  function activateContractTab(tabName) {
+    if (!detailsPanel || !auditPanel || !detailsTab || !auditTab) return;
 
-        if (vendorSelect) {
-            Array.from(vendors).sort().forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v;
-                opt.textContent = v;
-                vendorSelect.appendChild(opt);
-            });
-        }
+    const showDetails = tabName === 'details';
 
-        if (statusSelect) {
-            Array.from(statuses).sort().forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.textContent = s;
-                statusSelect.appendChild(opt);
-            });
-        }
+    detailsPanel.classList.toggle('d-none', !showDetails);
+    auditPanel.classList.toggle('d-none', showDetails);
 
-        // Restore saved rows-per-page preference
-        if (pageSizeSelect) {
-            try {
-                const saved = localStorage.getItem('contractsRowsPerPage');
-                if (saved) {
-                    const exists = Array.from(pageSizeSelect.options).some(o => o.value === saved);
-                    if (exists) {
-                        pageSizeSelect.value = saved;
-                    }
-                }
-            } catch (e) {
-                // ignore
-            }
-        }
-
-        function applyFiltersAndLimit() {
-            const query = (searchInput ? searchInput.value : '').toLowerCase();
-            const vendorFilter = vendorSelect ? vendorSelect.value.toLowerCase() : '';
-            const statusFilter = statusSelect ? statusSelect.value.toLowerCase() : '';
-
-            const matchedRows = [];
-
-            rows.forEach(row => {
-                const contractName = (row.dataset.contractName || '').toLowerCase();
-                const vendor = (row.dataset.vendor || '').toLowerCase();
-                const status = (row.dataset.status || '').toLowerCase();
-                const fullText = (row.textContent || '').toLowerCase();
-
-                const matchesText =
-                    !query ||
-                    contractName.includes(query) ||
-                    vendor.includes(query) ||
-                    fullText.includes(query);
-
-                const matchesVendor =
-                    !vendorFilter || vendor === vendorFilter;
-
-                const matchesStatus =
-                    !statusFilter || status === statusFilter;
-
-                if (matchesText && matchesVendor && matchesStatus) {
-                    matchedRows.push(row);
-                }
-            });
-
-            let limit = matchedRows.length;
-            if (pageSizeSelect) {
-                const val = pageSizeSelect.value;
-                if (val !== 'all') {
-                    const parsed = parseInt(val, 10);
-                    if (!isNaN(parsed) && parsed > 0) {
-                        limit = Math.min(parsed, matchedRows.length);
-                    }
-                }
-            }
-
-            // hide all, then show only limited subset of matched rows
-            rows.forEach(r => {
-                r.style.display = 'none';
-            });
-            matchedRows.slice(0, limit).forEach(r => {
-                r.style.display = '';
-            });
-
-            const filteredCount = matchedRows.length;
-            const shownCount = limit;
-
-            if (summaryEl) {
-                if (filteredCount === totalCount) {
-                    summaryEl.textContent =
-                        'Showing ' + shownCount + ' of ' + totalCount + ' contracts.';
-                } else {
-                    summaryEl.textContent =
-                        'Showing ' + shownCount + ' of ' + filteredCount +
-                        ' matching contracts (out of ' + totalCount + ' total).';
-                }
-            }
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', applyFiltersAndLimit);
-        }
-        if (vendorSelect) {
-            vendorSelect.addEventListener('change', applyFiltersAndLimit);
-        }
-        if (statusSelect) {
-            statusSelect.addEventListener('change', applyFiltersAndLimit);
-        }
-        if (pageSizeSelect) {
-            pageSizeSelect.addEventListener('change', function () {
-                try {
-                    localStorage.setItem('contractsRowsPerPage', pageSizeSelect.value);
-                } catch (e) {
-                    // ignore
-                }
-                applyFiltersAndLimit();
-            });
-        }
-
-        // Initial render
-        applyFiltersAndLimit();
+    if (showDetails) {
+      detailsTab.classList.add('active');
+      auditTab.classList.remove('active');
+    } else {
+      auditTab.classList.add('active');
+      detailsTab.classList.remove('active');
+      auditPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
 
-    // Global "Add" button in topbar -> open this page's contract modal
-    if (globalAddBtn && modal) {
-        globalAddBtn.addEventListener('click', function () {
-            modal.show();
-        });
-    }
+  if (detailsTab && auditTab && detailsPanel && auditPanel) {
+    detailsTab.addEventListener('click', function () {
+      activateContractTab('details');
+    });
+    auditTab.addEventListener('click', function () {
+      activateContractTab('audit');
+    });
 
-    // Auto-open modal if the POSTed form returned errors
-    const hasErrors = document.querySelector('#addContractModal .errorlist') !== null;
-    if (hasErrors && modal) {
-        modal.show();
-    }
+    // стартово – Contract details
+    activateContractTab('details');
+  }
 })();
 </script>
 {% endblock %}

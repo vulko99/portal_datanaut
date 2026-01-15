@@ -1,11 +1,11 @@
-# portal/models.py
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
-from django.db.models import Q  # <-- ADD
+from django.db.models import Q, Sum  # Q си го имаше, добавих Sum
 
 User = get_user_model()
 
@@ -351,6 +351,7 @@ class ProvisioningRequest(models.Model):
         svc = getattr(self.service, "name", "Service")
         return f"{self.requester} → {svc} ({self.status})"
 
+
 created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -359,6 +360,7 @@ created_by = models.ForeignKey(
         related_name="provisioning_requests_created",
         help_text="Who submitted the request (could be manager acting on behalf).",
     )
+
 
 # ---------- CONTRACT ----------
 
@@ -615,6 +617,116 @@ class Invoice(models.Model):
     @property
     def tax_label(self) -> str:
         return str(self.tax_amount) if self.tax_amount is not None else "—"
+
+    @property
+    def net_amount(self):
+        """
+        Net = total_amount - tax_amount (ако имаме и двете).
+        """
+        if self.total_amount is None:
+            return None
+        if self.tax_amount is None:
+            return self.total_amount
+        return self.total_amount - self.tax_amount
+
+    @property
+    def lines_total(self):
+        """
+        Sum of all InvoiceLine.line_amount values for this invoice.
+        Ползва се в UI за да сравниш header vs lines.
+        """
+        agg = self.lines.aggregate(total=Sum("line_amount"))
+        return agg["total"] or Decimal("0")
+
+    def auto_create_lines_from_assignments(
+        self,
+        service,
+        amount=None,
+        use_net=False,
+        clear_existing=False,
+        description_template=None,
+    ):
+        """
+        Create InvoiceLine rows for this invoice based on ServiceAssignment.
+
+        - service: Service instance, за която се отнася фактурата.
+        - amount: Decimal – ако None, взимаме total_amount (или net, ако use_net=True).
+        - use_net: ако True, ползваме total_amount - tax_amount.
+        - clear_existing: ако True, чистим self.lines преди да създадем новите.
+        - description_template: optional string шаблон, напр. "{service_name} – {username}".
+
+        Split-ът е равен по брой assigned users за този service.
+        cost_center идва от user.profile.cost_center.
+        Връщаме list от създадените InvoiceLine.
+        """
+        # assignments на този service
+        assignments = (
+            ServiceAssignment.objects
+            .filter(service=service)
+            .select_related("user__profile__cost_center")
+            .order_by("user__username", "id")
+        )
+
+        count = assignments.count()
+        if count == 0:
+            return []
+
+        # base amount за алокация
+        base_amount = amount
+        if base_amount is None:
+            base_amount = self.total_amount
+            if base_amount is None:
+                return []
+            if use_net and self.tax_amount is not None:
+                base_amount = base_amount - self.tax_amount
+
+        if base_amount is None or base_amount <= 0:
+            return []
+
+        # по желание чистим старите lines
+        if clear_existing:
+            self.lines.all().delete()
+
+        per_share = (base_amount / count).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        created_lines = []
+        allocated_so_far = Decimal("0.00")
+
+        for idx, assignment in enumerate(assignments, start=1):
+            # последният получава остатъка, за да няма rounding drift
+            if idx == count:
+                share = base_amount - allocated_so_far
+            else:
+                share = per_share
+                allocated_so_far += share
+
+            user = assignment.user
+            profile = getattr(user, "profile", None)
+            cost_center = getattr(profile, "cost_center", None) if profile else None
+
+            if description_template:
+                desc = description_template.format(
+                    service_name=getattr(service, "name", ""),
+                    vendor_name=getattr(service.vendor, "name", "") if getattr(service, "vendor", None) else "",
+                    username=user.get_username(),
+                    full_name=getattr(profile, "full_name", "") if profile else "",
+                )
+            else:
+                desc = f"{service.name} – {user.get_username()}"
+
+            line = InvoiceLine.objects.create(
+                invoice=self,
+                service=service,
+                description=desc,
+                quantity=Decimal("1.00"),
+                unit_price=share,
+                line_amount=share,
+                currency=self.currency or "",
+                cost_center=cost_center,
+                user=user,
+            )
+            created_lines.append(line)
+
+        return created_lines
 
 
 # ---------- INVOICE LINE ----------

@@ -7,6 +7,8 @@ from decimal import Decimal, InvalidOperation
 from datetime import datetime, date, timedelta
 from collections import defaultdict
 
+from django.contrib.auth.models import User
+from .models import Invoice, InvoiceLine, Service, Vendor, Contract, CostCenter
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -20,7 +22,9 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.urls import reverse
+from urllib.parse import urlencode
 from django.views.decorators.http import require_POST
+from django.core.exceptions import FieldDoesNotExist
 
 from .models import (
     Vendor,
@@ -30,7 +34,10 @@ from .models import (
     Contract,
     Invoice,
     ServiceAssignment,
-    ProvisioningRequest,   # добавено
+    ProvisioningRequest,
+    InvoiceLine,
+    UserProfile,
+
 )
 from .forms import ContractUploadForm, InvoiceUploadForm, VendorCreateForm
 
@@ -991,54 +998,503 @@ def _get_entity_or_404(entity: str) -> dict:
 
 
 
-# ----------
+# ---------- 
 # DASHBOARD
 # ----------
 
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from collections import defaultdict
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+import json
+
+from .models import Contract, Invoice, Vendor
+
+# ако helper-ът не е в този файл, импортни го от utils
+# from .utils import _first_existing_field
+
+
 @login_required
 def dashboard(request):
-    contracts = Contract.objects.filter(owner=request.user)
-    invoices = Invoice.objects.filter(owner=request.user)
+    user = request.user
+    today = date.today()
+    last_12m_start = today - timedelta(days=365)
+    prev_12m_start = last_12m_start - timedelta(days=365)
+    prev_12m_end = last_12m_start - timedelta(days=1)
+    renewals_window_end = today + timedelta(days=90)
 
-    total_spend = contracts.aggregate(total=Sum("annual_value"))["total"] or 0
-    active_contracts = contracts.count()
-    upcoming_renewals = contracts.filter(renewal_date__isnull=False).count()
+    # ==========================================================
+    # 1) ИНВОЙСИ – общ разход, quarterly chart, top vendors
+    # ==========================================================
+    amount_field = _first_existing_field(
+        Invoice,
+        ["total_amount", "amount", "net_amount", "gross_amount", "value"],
+    )
+    date_field = _first_existing_field(
+        Invoice,
+        ["invoice_date", "date", "issue_date", "period_start", "period_end"],
+    )
 
-    invoice_total = invoices.aggregate(total=Sum("total_amount"))["total"] or 0
-    vendors_count = Vendor.objects.filter(contracts__owner=request.user).distinct().count()
+    hero_total_spend = Decimal("0")
+    hero_spend_change_pct = None
+    chart_quarter_labels: list[str] = []
+    chart_quarter_actual: list[float] = []
+    chart_spend_vendor_labels: list[str] = []
+    chart_spend_vendor_values: list[float] = []
+    vendor_spend_rows: list[dict] = []
 
+    if amount_field and date_field:
+        base_qs = Invoice.objects.filter(owner=user)
+
+        # текущи 12 месеца
+        last12_filter = {
+            f"{date_field}__gte": last_12m_start,
+            f"{date_field}__lte": today,
+        }
+        last12_qs = base_qs.filter(**last12_filter)
+
+        # предишни 12 месеца (за % промяна)
+        prev12_filter = {
+            f"{date_field}__gte": prev_12m_start,
+            f"{date_field}__lte": prev_12m_end,
+        }
+        prev12_qs = base_qs.filter(**prev12_filter)
+
+        hero_total_spend = (
+            last12_qs.aggregate(total=Sum(amount_field))["total"]
+            or Decimal("0")
+        )
+        prev_total = prev12_qs.aggregate(total=Sum(amount_field))["total"]
+
+        if prev_total not in (None, 0, Decimal("0")):
+            hero_spend_change_pct = (
+                (hero_total_spend - prev_total) / prev_total * Decimal("100")
+            )
+
+        # агрегиране в Python
+        quarter_buckets: dict[str, Decimal] = defaultdict(Decimal)
+        vendor_buckets: dict[int, Decimal] = defaultdict(Decimal)
+        vendor_ids: set[int] = set()
+
+        for inv in last12_qs.select_related("vendor"):
+            dt = getattr(inv, date_field, None)
+            if isinstance(dt, datetime):
+                dt = dt.date()
+            if not isinstance(dt, date):
+                continue
+
+            # quarter label: 2025-Q1
+            q = ((dt.month - 1) // 3) + 1
+            q_label = f"{dt.year}-Q{q}"
+
+            amount = getattr(inv, amount_field, None) or Decimal("0")
+            if not isinstance(amount, Decimal):
+                amount = Decimal(str(amount))
+
+            quarter_buckets[q_label] += amount
+
+            v = getattr(inv, "vendor", None)
+            if v:
+                vendor_buckets[v.pk] += amount
+                vendor_ids.add(v.pk)
+
+        # сортиране на quarter-ите по време
+        chart_quarter_labels = sorted(quarter_buckets.keys())
+        chart_quarter_actual = [
+            float(quarter_buckets[label]) for label in chart_quarter_labels
+        ]
+
+        # Top 5 vendors по spend
+        top_vendor_pairs = sorted(
+            vendor_buckets.items(),
+            key=lambda kv: kv[1],
+            reverse=True,
+        )[:5]
+
+        vendors_by_id = {
+            v.pk: v for v in Vendor.objects.filter(id__in=vendor_ids)
+        }
+
+        for vid, total in top_vendor_pairs:
+            v = vendors_by_id.get(vid)
+            if not v:
+                continue
+
+            chart_spend_vendor_labels.append(v.name)
+            chart_spend_vendor_values.append(float(total))
+
+            vendor_spend_rows.append(
+                {
+                    "vendor_name": v.name,
+                    "category": getattr(v, "vendor_type", "") or "",
+                    "total_spend": total,
+                }
+            )
+
+    # ==========================================================
+    # 2) КОНТРАКТИ – hero KPIs, status pie, upcoming renewals
+    # ==========================================================
+    contracts_qs = (
+        Contract.objects.filter(owner=user)
+        .select_related("vendor")
+        .order_by("renewal_date", "end_date")
+    )
+
+    hero_contracts_total = contracts_qs.count()
+    hero_contracts_vendors = (
+        contracts_qs.values("vendor_id").distinct().count()
+    )
+    hero_contracts_entities = (
+        contracts_qs.values("entity").distinct().count()
+    )
+
+    # contracts by status
+    status_counts: dict[str, int] = {}
+    for c in contracts_qs:
+        status = getattr(c, "status", "") or "Unknown"
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    chart_status_labels = list(status_counts.keys())
+    chart_status_values = list(status_counts.values())
+
+    # upcoming renewals (90 дни)
+    upcoming_rows: list[dict] = []
+
+    for c in contracts_qs:
+        d = getattr(c, "renewal_date", None) or getattr(c, "end_date", None)
+        if isinstance(d, datetime):
+            d = d.date()
+        if not isinstance(d, date):
+            continue
+        if not (today <= d <= renewals_window_end):
+            continue
+
+        days_to = (d - today).days
+        if days_to <= 30:
+            risk = "High"
+        elif days_to <= 60:
+            risk = "Medium"
+        else:
+            risk = "Low"
+
+        upcoming_rows.append(
+            {
+                "vendor_name": c.vendor.name if c.vendor else "",
+                "contract_name": (
+                    getattr(c, "contract_name", "")
+                    or getattr(c, "contract_id", "")
+                    or ""
+                ),
+                "entity": getattr(c, "entity", "") or "",
+                "renewal_date": d,
+                "annual_value": getattr(c, "annual_value", None),
+                "currency": getattr(c, "currency", "") or "",
+                "risk": risk,
+            }
+        )
+
+    upcoming_rows.sort(key=lambda r: r["renewal_date"])
+    hero_renewals_90d = len(upcoming_rows)
+
+    # ==========================================================
+    # CONTEXT – списъците за charts вече са JSON string
+    # ==========================================================
     context = {
-        "total_spend": total_spend,
-        "active_contracts": active_contracts,
-        "upcoming_renewals": upcoming_renewals,
-        "invoice_total": invoice_total,
-        "vendors_count": vendors_count,
+        # hero
+        "hero_total_spend": hero_total_spend,
+        "hero_spend_change_pct": hero_spend_change_pct,
+        "hero_contracts_total": hero_contracts_total,
+        "hero_contracts_vendors": hero_contracts_vendors,
+        "hero_contracts_entities": hero_contracts_entities,
+        "hero_renewals_90d": hero_renewals_90d,
+        # charts (JSON strings за template-а)
+        "chart_quarter_labels": json.dumps(chart_quarter_labels),
+        "chart_quarter_actual": json.dumps(chart_quarter_actual),
+        "chart_spend_vendor_labels": json.dumps(chart_spend_vendor_labels),
+        "chart_spend_vendor_values": json.dumps(chart_spend_vendor_values),
+        "chart_status_labels": json.dumps(chart_status_labels),
+        "chart_status_values": json.dumps(chart_status_values),
+        # tables
+        "upcoming_rows": upcoming_rows,
+        "vendor_spend_rows": vendor_spend_rows,
+        # доп. инфо
+        "last_12m_start": last_12m_start,
+        "today": today,
     }
+
     return render(request, "portal/dashboard.html", context)
+
+
+
+
 
 
 # ----------
 # CONTRACTS
 # ----------
 
+def _contract_snapshot(contract: Contract) -> dict:
+    """
+    Snapshot на ключовите полета (за diff в audit лог-а).
+    """
+    return {
+        "vendor_id": contract.vendor_id,
+        "contract_name": contract.contract_name or "",
+        "contract_id": contract.contract_id or "",
+        "contract_type": contract.contract_type or "",
+        "entity": contract.entity or "",
+        "currency": contract.currency or "",
+        "annual_value": str(contract.annual_value) if contract.annual_value is not None else "",
+        "start_date": contract.start_date.isoformat() if contract.start_date else "",
+        "end_date": contract.end_date.isoformat() if contract.end_date else "",
+        "renewal_date": contract.renewal_date.isoformat() if contract.renewal_date else "",
+        "notice_period_days": contract.notice_period_days or "",
+        "notice_date": contract.notice_date.isoformat() if contract.notice_date else "",
+    }
+
+
 @login_required
 def contract_list(request):
-    contracts = (
+    """
+    Contract inventory list with:
+    - show_closed toggle
+    - rows-per-page
+    - pagination
+    - optional inline selected_contract + audit_events
+    - inline edit (Save/Discard) за избрания contract
+    """
+
+    # Базов queryset – всички контракти на този user
+    base_qs = (
         Contract.objects.filter(owner=request.user)
         .select_related("vendor", "owning_cost_center")
         .order_by("-start_date", "-created_at")
     )
 
+    # Общо контракти (за заглавието)
+    total_contracts = base_qs.count()
+
+    # --- Show closed ---
+    show_closed_param = request.GET.get("show_closed", "0")
+    show_closed = show_closed_param == "1"
+
+    filtered_qs = base_qs
+    if not show_closed:
+        # Ако имаш други статуси за "затворен", добави ги тук
+        closed_statuses = ["expired", "terminated", "cancelled", "closed"]
+        filtered_qs = filtered_qs.exclude(status__in=closed_statuses)
+
+    # --- Rows per page ---
+    rows_options = [10, 20, 30, 50, 100, 250]
+    try:
+        rows_per_page = int(request.GET.get("rows") or 50)
+    except (TypeError, ValueError):
+        rows_per_page = 50
+    if rows_per_page <= 0:
+        rows_per_page = 50
+
+    # --- Текуща страница ---
+    try:
+        current_page = int(request.GET.get("page") or 1)
+    except (TypeError, ValueError):
+        current_page = 1
+
+    paginator = Paginator(filtered_qs, rows_per_page)
+    page_obj = paginator.get_page(current_page)
+    contracts = list(page_obj.object_list)
+
+    # --- Кой contract е избран за долния панел ---
+    selected_contract = None
+    selected_id = request.GET.get("selected")
+    if selected_id:
+        try:
+            selected_contract = (
+                filtered_qs.select_related("vendor", "owning_cost_center")
+                .get(pk=selected_id)
+            )
+        except Contract.DoesNotExist:
+            selected_contract = None
+
+    # ---- POST ---- (add или inline update)
     if request.method == "POST":
-        form = ContractUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            contract = form.save(owner=request.user, uploaded_by=request.user)
-            messages.success(request, f"Contract '{contract.contract_name}' saved successfully.")
-            return redirect("portal:contracts")
+        action = _as_str(request.POST.get("action")) or "create"
+
+        # 1) Add contract (modal)
+        if action == "create":
+            form = ContractUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                contract = form.save(owner=request.user, uploaded_by=request.user)
+
+                # AUDIT: create
+                _audit_log_event(
+                    request=request,
+                    object_type="Contract",
+                    object_id=contract.pk,
+                    action="create",
+                    description=f"Created contract '{contract.contract_name}'.",
+                )
+
+                messages.success(
+                    request,
+                    f"Contract '{contract.contract_name}' saved successfully.",
+                )
+                return redirect("portal:contracts")
+
+        # 2) Inline update на избрания contract в долния панел
+        elif action == "update_selected":
+            errors: list[str] = []
+
+            selected_id = _as_str(request.POST.get("selected"))
+            contract = base_qs.filter(pk=selected_id).first()
+            if not contract:
+                messages.error(request, "Selected contract was not found.")
+                return redirect("portal:contracts")
+
+            before = _contract_snapshot(contract)
+
+            vendor_id = _as_str(request.POST.get("vendor_id"))
+            contract_name = _as_str(request.POST.get("contract_name"))
+            contract_id = _as_str(request.POST.get("contract_id"))
+            contract_type = _as_str(request.POST.get("contract_type"))
+            entity = _as_str(request.POST.get("entity"))
+            currency = _as_str(request.POST.get("currency"))
+            annual_value_raw = _as_str(request.POST.get("annual_value"))
+            start_date_raw = _as_str(request.POST.get("start_date"))
+            end_date_raw = _as_str(request.POST.get("end_date"))
+            renewal_date_raw = _as_str(request.POST.get("renewal_date"))
+            notice_period_raw = _as_str(request.POST.get("notice_period_days"))
+            notice_date_raw = _as_str(request.POST.get("notice_date"))
+
+            # Задължителни полета
+            if not contract_name:
+                errors.append("Contract name is required.")
+
+            vendor = None
+            if not vendor_id:
+                errors.append("Vendor is required.")
+            else:
+                vendor = Vendor.objects.filter(pk=vendor_id).first()
+                if not vendor:
+                    errors.append("Selected vendor does not exist.")
+
+            # Decimal
+            annual_value = None
+            if annual_value_raw:
+                try:
+                    annual_value = _parse_decimal(annual_value_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            # Дати
+            start_date = None
+            end_date = None
+            renewal_date = None
+            notice_date = None
+            try:
+                if start_date_raw:
+                    start_date = _parse_date(start_date_raw)
+                if end_date_raw:
+                    end_date = _parse_date(end_date_raw)
+                if renewal_date_raw:
+                    renewal_date = _parse_date(renewal_date_raw)
+                if notice_date_raw:
+                    notice_date = _parse_date(notice_date_raw)
+            except Exception as e:
+                errors.append(str(e))
+
+            # Notice period
+            notice_period_days = None
+            if notice_period_raw:
+                try:
+                    notice_period_days = _parse_int(notice_period_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            if notice_date and not end_date:
+                errors.append("If a notice date is set, end date is required.")
+            if notice_date and end_date and notice_date > end_date:
+                errors.append("Notice date must be on or before contract end date.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+            else:
+                contract.vendor = vendor
+                contract.contract_name = contract_name
+                contract.contract_id = contract_id
+                contract.contract_type = contract_type
+                contract.entity = entity
+                contract.currency = currency
+                contract.annual_value = annual_value
+                contract.start_date = start_date
+                contract.end_date = end_date
+                contract.renewal_date = renewal_date
+                contract.notice_period_days = notice_period_days
+                contract.notice_date = notice_date
+                contract.save()
+
+                # AUDIT: update (diff)
+                after = _contract_snapshot(contract)
+                changes = _diff_snapshots(before, after)
+                _audit_log_event(
+                    request=request,
+                    object_type="Contract",
+                    object_id=contract.pk,
+                    action="update",
+                    description="; ".join(changes) if changes else "Contract updated.",
+                )
+
+                messages.success(request, "Contract updated successfully.")
+
+                # >>> важно: запазваме избрания contract + page/rows/show_closed
+                page = _as_str(request.POST.get("page")) or "1"
+                rows = _as_str(request.POST.get("rows")) or str(rows_per_page)
+                show_closed_post = _as_str(request.POST.get("show_closed"))
+                if show_closed_post not in ("0", "1"):
+                    show_closed_post = "1" if show_closed else "0"
+
+                params = {
+                    "page": page,
+                    "rows": rows,
+                    "show_closed": show_closed_post,
+                    "selected": str(contract.pk),
+                }
+                url = reverse("portal:contracts") + "?" + urlencode(params) + "#contract-details"
+                return redirect(url)
+
+        # ако е друго action – просто падаме надолу и ще рендернем страницата
+        else:
+            form = ContractUploadForm(request.POST, request.FILES)
     else:
         form = ContractUploadForm()
 
-    context = {"contracts": contracts, "form": form}
+    # Audit events – вече реални, за избрания contract
+    audit_events: list = []
+    if selected_contract:
+        audit_events = _audit_fetch_events(
+            object_type="Contract",
+            object_id=selected_contract.pk,
+            limit=50,
+        )
+
+    # Vendors dropdown за inline формата
+    vendors = Vendor.objects.all().order_by("name")
+
+    context = {
+        "contracts": contracts,
+        "form": form,
+        "total_contracts": total_contracts,
+        "page_obj": page_obj,
+        "current_page": page_obj.number,
+        "rows_per_page": rows_per_page,
+        "rows_options": rows_options,
+        "show_closed": show_closed,
+        "selected_contract": selected_contract,
+        "audit_events": audit_events,
+        "vendors": vendors,
+    }
     return render(request, "portal/contracts.html", context)
 
 
@@ -1064,11 +1520,22 @@ def contract_detail(request, pk):
 
         if action == "delete":
             name = contract.contract_name
+
+            # AUDIT: delete
+            _audit_log_event(
+                request=request,
+                object_type="Contract",
+                object_id=contract.pk,
+                action="delete",
+                description=f"Deleted contract '{name}'.",
+            )
+
             contract.delete()
             messages.success(request, f"Contract '{name}' was deleted.")
             return redirect("portal:contracts")
 
         errors: list[str] = []
+        before = _contract_snapshot(contract)
 
         vendor_id = _as_str(request.POST.get("vendor_id"))
         contract_name = _as_str(request.POST.get("contract_name"))
@@ -1159,145 +1626,507 @@ def contract_detail(request, pk):
             contract.notes = notes
             contract.save()
 
+            after = _contract_snapshot(contract)
+            changes = _diff_snapshots(before, after)
+            _audit_log_event(
+                request=request,
+                object_type="Contract",
+                object_id=contract.pk,
+                action="update",
+                description="; ".join(changes) if changes else "Contract updated.",
+            )
+
             messages.success(request, "Contract updated successfully.")
             return redirect("portal:contract_detail", pk=contract.pk)
+
+    audit_events = _audit_fetch_events(
+        object_type="Contract",
+        object_id=contract.pk,
+        limit=50,
+    )
 
     context = {
         "contract": contract,
         "invoices": invoices,
         "vendors": vendors,
         "cost_centers": cost_centers,
+        "audit_events": audit_events,
     }
     return render(request, "portal/contract_detail.html", context)
+
+
+
+
 
 
 # ----------
 # INVOICING
 # ----------
 
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.core.paginator import Paginator
+from django.urls import reverse
+from django.db.models import Sum
+from urllib.parse import urlencode
+
+
+def _invoice_snapshot(inv):
+    """
+    Ползва се за audit diff – държим само 'човешките' полета.
+    """
+    return {
+        "vendor": getattr(inv.vendor, "name", None),
+        "contract": getattr(inv.contract, "contract_name", None),
+        "invoice_number": inv.invoice_number or "",
+        "invoice_date": inv.invoice_date.isoformat() if inv.invoice_date else None,
+        "currency": inv.currency or "",
+        "total_amount": str(inv.total_amount) if inv.total_amount is not None else None,
+        "tax_amount": str(inv.tax_amount) if inv.tax_amount is not None else None,
+        "period_start": inv.period_start.isoformat() if inv.period_start else None,
+        "period_end": inv.period_end.isoformat() if inv.period_end else None,
+        "notes": inv.notes or "",
+    }
+
+
+def _render_description(pattern: str, ctx: dict) -> str:
+    """
+    Проста замяна на плейсхолдъри:
+      {service_name}, {username}, {full_name}, {cost_center}
+    Оставя непознати плейсхолдъри, без да хвърля грешка.
+    """
+    if not pattern:
+        pattern = "{service_name} – {username}"
+    result = pattern
+    for key, value in ctx.items():
+        token = "{" + key + "}"
+        result = result.replace(token, str(value) if value is not None else "")
+    return result
+
+
 @login_required
 def invoice_list(request):
-    invoices = (
-        Invoice.objects.filter(owner=request.user)
-        .select_related("vendor", "contract")
-        .order_by("-invoice_date", "-id")
-    )
-    total_amount = invoices.aggregate(total=Sum("total_amount"))["total"] or 0
+    """
+    Invoice inventory screen:
+    - header stats
+    - show_closed toggle (зареждаме го, но засега не филтрираме – няма статус поле)
+    - rows-per-page
+    - pagination
+    - inline selected_invoice + breakdown (cost center / service) + audit
+    - Add invoice modal (InvoiceUploadForm)
+    - Lines & splits: добавяне / триене на InvoiceLine + generate_from_assignments
+    """
 
+    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
+
+    # --- rows per page ---
+    rows_options = [10, 20, 30, 50, 100, 250]
+    try:
+        rows_per_page = int(request.GET.get("rows") or 50)
+    except (TypeError, ValueError):
+        rows_per_page = 50
+    if rows_per_page not in rows_options:
+        rows_per_page = 50
+
+    # --- page ---
+    raw_page = (request.GET.get("page") or "").strip()
+    try:
+        page_number = int(raw_page) if raw_page else 1
+    except ValueError:
+        page_number = 1
+    if page_number < 1:
+        page_number = 1
+
+    # --- selected invoice id ---
+    selected_id = _as_str(request.GET.get("selected"))
+
+    add_form_has_errors = False
+
+    # -------------------------
+    # POST: Add (modal) или inline update/delete/add_line/delete_line/generate_from_assignments
+    # -------------------------
     if request.method == "POST":
-        form = InvoiceUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            invoice = form.save(owner=request.user)
-            messages.success(
-                request,
-                f"Invoice '{invoice.invoice_number}' saved for vendor {invoice.vendor.name}.",
+        inline_selected = _as_str(request.POST.get("selected"))
+
+        # 1) INLINE операции върху вече избран invoice
+        if inline_selected:
+            invoice = (
+                Invoice.objects.filter(owner=request.user)
+                .select_related("vendor", "contract")
+                .filter(pk=inline_selected)
+                .first()
             )
-            if invoice.contract is None:
-                messages.warning(request, "Invoice saved, but no matching contract was linked.")
-            return redirect("portal:invoices")
-    else:
-        form = InvoiceUploadForm()
+            if not invoice:
+                messages.error(request, "Selected invoice was not found.")
+                return redirect("portal:invoices")
 
-    context = {"invoices": invoices, "total_amount": total_amount, "form": form}
-    return render(request, "portal/invoices.html", context)
+            action = _as_str(request.POST.get("action")) or "update"
 
+            # redirect helper – пазим page/rows/show_closed и selected
+            def _redirect_back(include_selected: bool = True):
+                post_page = _as_str(request.POST.get("page")) or "1"
+                post_rows = _as_str(request.POST.get("rows")) or str(rows_per_page)
+                post_show_closed = _as_str(
+                    request.POST.get("show_closed") or ("1" if show_closed else "0")
+                )
+                params = {
+                    "page": post_page,
+                    "rows": post_rows,
+                    "show_closed": post_show_closed,
+                }
+                if include_selected:
+                    params["selected"] = str(invoice.pk)
+                url = (
+                    reverse("portal:invoices")
+                    + "?"
+                    + urlencode(params)
+                    + "#invoice-details"
+                )
+                return redirect(url)
 
-@login_required
-def invoice_detail(request, pk):
-    invoice = get_object_or_404(
-        Invoice.objects.select_related("vendor", "contract", "owner"),
-        pk=pk,
-        owner=request.user,
-    )
+            # 1a) DELETE invoice
+            if action == "delete":
+                number = invoice.invoice_number or f"Invoice {invoice.pk}"
 
-    lines = (
-        invoice.lines.select_related("service", "cost_center", "user", "service__vendor")
-        .order_by("id")
-    )
+                _audit_log_event(
+                    request=request,
+                    object_type="Invoice",
+                    object_id=invoice.pk,
+                    action="delete",
+                    description=f"Deleted invoice '{number}'.",
+                )
 
-    allocation_by_cost_center = (
-        lines.values("cost_center__code", "cost_center__name")
-        .annotate(total=Sum("line_amount"))
-        .order_by("cost_center__code")
-    )
+                invoice.delete()
+                messages.success(request, f"Invoice '{number}' was deleted.")
+                return _redirect_back(include_selected=False)
 
-    service_breakdown = (
-        lines.values("service__vendor__name", "service__name")
-        .annotate(total=Sum("line_amount"))
-        .order_by("service__vendor__name", "service__name")
-    )
+            # 1b) DELETE line
+            if action == "delete_line":
+                line_id = _as_str(request.POST.get("line_id"))
+                if not line_id:
+                    messages.error(request, "Line ID is required.")
+                    return _redirect_back(include_selected=True)
 
-    vendors = Vendor.objects.all().order_by("name")
-    contracts = Contract.objects.filter(owner=request.user).select_related("vendor").order_by("vendor__name", "contract_name")
+                line = InvoiceLine.objects.filter(
+                    pk=line_id,
+                    invoice=invoice,
+                ).first()
 
-    if request.method == "POST":
-        action = _as_str(request.POST.get("action")) or "update"
+                if not line:
+                    messages.error(request, "Invoice line was not found.")
+                    return _redirect_back(include_selected=True)
 
-        if action == "delete":
-            number = invoice.invoice_number
-            invoice.delete()
-            messages.success(request, f"Invoice '{number}' was deleted.")
-            return redirect("portal:invoices")
+                desc = (
+                    f"Deleted line #{line.pk}: '{line.description}' "
+                    f"amount {line.line_amount} {line.currency or invoice.currency}."
+                )
 
-        errors: list[str] = []
+                line.delete()
 
-        vendor_id = _as_str(request.POST.get("vendor_id"))
-        contract_id = _as_str(request.POST.get("contract_id"))
-        invoice_number = _as_str(request.POST.get("invoice_number"))
-        invoice_date_raw = _as_str(request.POST.get("invoice_date"))
-        currency = _as_str(request.POST.get("currency"))
-        total_amount_raw = _as_str(request.POST.get("total_amount"))
-        tax_amount_raw = _as_str(request.POST.get("tax_amount"))
-        period_start_raw = _as_str(request.POST.get("period_start"))
-        period_end_raw = _as_str(request.POST.get("period_end"))
-        notes = _as_str(request.POST.get("notes"))
+                _audit_log_event(
+                    request=request,
+                    object_type="Invoice",
+                    object_id=invoice.pk,
+                    action="update",  # invoice е променен
+                    description=desc,
+                )
 
-        if not invoice_number:
-            errors.append("Invoice number is required.")
+                messages.success(request, "Invoice line deleted.")
+                return _redirect_back(include_selected=True)
 
-        vendor = None
-        if not vendor_id:
-            errors.append("Vendor is required.")
-        else:
-            vendor = Vendor.objects.filter(pk=vendor_id).first()
-            if not vendor:
-                errors.append("Selected vendor does not exist.")
+            # 1c) GENERATE FROM ASSIGNMENTS
+            if action == "generate_from_assignments":
+                errors: list[str] = []
 
-        contract = None
-        if contract_id:
-            contract = Contract.objects.filter(owner=request.user, pk=contract_id).first()
-            if not contract:
-                errors.append("Selected contract does not exist.")
+                service_id = _as_str(request.POST.get("gen_service_id"))
+                description_pattern = _as_str(
+                    request.POST.get("gen_description_pattern")
+                ) or "{service_name} – {username}"
+                use_net = (
+                    _as_str(request.POST.get("gen_use_net"))
+                    in ("1", "true", "True", "on", "yes")
+                )
+                clear_existing = (
+                    _as_str(request.POST.get("gen_clear_existing"))
+                    in ("1", "true", "True", "on", "yes")
+                )
 
-        try:
-            invoice_date = _parse_date(invoice_date_raw) if invoice_date_raw else None
-        except Exception as e:
-            errors.append(str(e))
+                service = None
+                if not service_id:
+                    errors.append("Service is required to generate splits.")
+                else:
+                    service = (
+                        Service.objects.select_related("vendor")
+                        .filter(pk=service_id)
+                        .first()
+                    )
+                    if not service:
+                        errors.append("Selected service does not exist.")
 
-        total_amount = None
-        if total_amount_raw:
+                if errors:
+                    for e in errors:
+                        messages.error(request, e)
+                    return _redirect_back(include_selected=True)
+
+                # assignments за този service
+                assignments_qs = (
+                    ServiceAssignment.objects.filter(service=service)
+                    .select_related(
+                        "user",
+                        "user__profile",
+                        "user__profile__cost_center",
+                    )
+                    .order_by("user__username")
+                )
+                assignments = list(assignments_qs)
+
+                if not assignments:
+                    messages.error(
+                        request,
+                        "No service assignments found for this service.",
+                    )
+                    return _redirect_back(include_selected=True)
+
+                # Базова сума – total или net (total - tax)
+                total_amount = invoice.total_amount or Decimal("0")
+                if use_net and invoice.tax_amount is not None:
+                    base_amount = (invoice.total_amount or Decimal("0")) - (
+                        invoice.tax_amount or Decimal("0")
+                    )
+                else:
+                    base_amount = total_amount
+
+                if base_amount <= 0:
+                    messages.error(
+                        request,
+                        "Invoice total/net must be positive to generate splits.",
+                    )
+                    return _redirect_back(include_selected=True)
+
+                # Разпределяме базовата сума равномерно с 2 десетични
+                n = len(assignments)
+                per_raw = base_amount / Decimal(n)
+                per_rounded = per_raw.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+                amounts: list[Decimal] = []
+                remaining = base_amount
+                for idx in range(n):
+                    if idx == n - 1:
+                        amt = remaining
+                    else:
+                        amt = per_rounded
+                        remaining -= amt
+                    amounts.append(amt)
+
+                # По желание чистим старите линии
+                if clear_existing:
+                    invoice.lines.all().delete()
+
+                created_count = 0
+                for assignment, line_amount in zip(assignments, amounts):
+                    user = assignment.user
+                    profile = getattr(user, "profile", None)
+                    cost_center = getattr(profile, "cost_center", None)
+
+                    full_name = (
+                        getattr(profile, "full_name", "") or user.get_full_name() or user.username
+                    )
+                    cc_label = getattr(cost_center, "code", "")
+
+                    ctx = {
+                        "service_name": service.name,
+                        "username": user.username,
+                        "full_name": full_name,
+                        "cost_center": cc_label,
+                    }
+                    description = _render_description(description_pattern, ctx)
+
+                    InvoiceLine.objects.create(
+                        invoice=invoice,
+                        service=service,
+                        description=description,
+                        quantity=Decimal("1"),
+                        unit_price=None,
+                        line_amount=line_amount,
+                        currency=invoice.currency,
+                        cost_center=cost_center,
+                        user=user,
+                    )
+                    created_count += 1
+
+                _audit_log_event(
+                    request=request,
+                    object_type="Invoice",
+                    object_id=invoice.pk,
+                    action="update",
+                    description=(
+                        f"Generated {created_count} invoice lines from assignments "
+                        f"for service '{service.name}' "
+                        f"using {'net' if use_net else 'total'} amount {base_amount}."
+                    ),
+                )
+
+                messages.success(
+                    request,
+                    f"Generated {created_count} invoice lines from assignments.",
+                )
+                return _redirect_back(include_selected=True)
+
+            # 1d) ADD LINE (нов InvoiceLine)
+            if action == "add_line":
+                errors: list[str] = []
+
+                service_id = _as_str(request.POST.get("line_service_id"))
+                description = _as_str(request.POST.get("line_description"))
+                quantity_raw = _as_str(request.POST.get("line_quantity")) or "1"
+                amount_raw = _as_str(request.POST.get("line_amount"))
+                currency = (
+                    _as_str(request.POST.get("line_currency"))
+                    or invoice.currency
+                    or ""
+                )
+                cost_center_id = _as_str(request.POST.get("line_cost_center_id"))
+                user_id = _as_str(request.POST.get("line_user_id"))
+
+                service = None
+                if service_id:
+                    service = Service.objects.filter(pk=service_id).first()
+                    if not service:
+                        errors.append("Selected service does not exist.")
+
+                cost_center = None
+                if cost_center_id:
+                    cost_center = CostCenter.objects.filter(pk=cost_center_id).first()
+                    if not cost_center:
+                        errors.append("Selected cost centre does not exist.")
+
+                user = None
+                if user_id:
+                    user = User.objects.filter(pk=user_id).first()
+                    if not user:
+                        errors.append("Selected user does not exist.")
+
+                if not description:
+                    errors.append("Line description is required.")
+
+                quantity = None
+                try:
+                    quantity = _parse_decimal(quantity_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+                line_amount = None
+                if amount_raw:
+                    try:
+                        line_amount = _parse_decimal(amount_raw)
+                    except Exception as e:
+                        errors.append(str(e))
+                else:
+                    errors.append("Line amount is required.")
+
+                if errors:
+                    for e in errors:
+                        messages.error(request, e)
+                    return _redirect_back(include_selected=True)
+
+                line = InvoiceLine.objects.create(
+                    invoice=invoice,
+                    service=service,
+                    description=description,
+                    quantity=quantity or 1,
+                    unit_price=None,
+                    line_amount=line_amount,
+                    currency=currency,
+                    cost_center=cost_center,
+                    user=user,
+                )
+
+                _audit_log_event(
+                    request=request,
+                    object_type="Invoice",
+                    object_id=invoice.pk,
+                    action="update",  # invoice е променен
+                    description=(
+                        f"Added line #{line.pk}: '{description}', "
+                        f"amount {line_amount} {currency}."
+                    ),
+                )
+
+                messages.success(request, "Invoice line added.")
+                return _redirect_back(include_selected=True)
+
+            # 1e) UPDATE header полета (default)
+            errors: list[str] = []
+            before = _invoice_snapshot(invoice)
+
+            vendor_id = _as_str(request.POST.get("vendor_id"))
+            contract_id = _as_str(request.POST.get("contract_id"))
+            invoice_number = _as_str(request.POST.get("invoice_number"))
+            invoice_date_raw = _as_str(request.POST.get("invoice_date"))
+            currency = _as_str(request.POST.get("currency"))
+            total_amount_raw = _as_str(request.POST.get("total_amount"))
+            tax_amount_raw = _as_str(request.POST.get("tax_amount"))
+            period_start_raw = _as_str(request.POST.get("period_start"))
+            period_end_raw = _as_str(request.POST.get("period_end"))
+            notes = _as_str(request.POST.get("notes"))
+
+            if not invoice_number:
+                errors.append("Invoice number is required.")
+
+            vendor = None
+            if not vendor_id:
+                errors.append("Vendor is required.")
+            else:
+                vendor = Vendor.objects.filter(pk=vendor_id).first()
+                if not vendor:
+                    errors.append("Selected vendor does not exist.")
+
+            contract = None
+            if contract_id:
+                contract = (
+                    Contract.objects.filter(owner=request.user, pk=contract_id)
+                    .select_related("vendor")
+                    .first()
+                )
+                if not contract:
+                    errors.append("Selected contract does not exist.")
+
+            invoice_date = None
+            if invoice_date_raw:
+                try:
+                    invoice_date = _parse_date(invoice_date_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            total_amount = None
+            if total_amount_raw:
+                try:
+                    total_amount = _parse_decimal(total_amount_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            tax_amount = None
+            if tax_amount_raw:
+                try:
+                    tax_amount = _parse_decimal(tax_amount_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            period_start = None
+            period_end = None
             try:
-                total_amount = _parse_decimal(total_amount_raw)
+                if period_start_raw:
+                    period_start = _parse_date(period_start_raw)
+                if period_end_raw:
+                    period_end = _parse_date(period_end_raw)
             except Exception as e:
                 errors.append(str(e))
 
-        tax_amount = None
-        if tax_amount_raw:
-            try:
-                tax_amount = _parse_decimal(tax_amount_raw)
-            except Exception as e:
-                errors.append(str(e))
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+                return _redirect_back(include_selected=True)
 
-        try:
-            period_start = _parse_date(period_start_raw) if period_start_raw else None
-            period_end = _parse_date(period_end_raw) if period_end_raw else None
-        except Exception as e:
-            errors.append(str(e))
-
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-        else:
             invoice.vendor = vendor
             invoice.contract = contract
             invoice.invoice_number = invoice_number
@@ -1316,18 +2145,160 @@ def invoice_detail(request, pk):
                 invoice.file = upload_file
 
             invoice.save()
+
+            after = _invoice_snapshot(invoice)
+            changes = _diff_snapshots(before, after)
+
+            _audit_log_event(
+                request=request,
+                object_type="Invoice",
+                object_id=invoice.pk,
+                action="update",
+                description="; ".join(changes)
+                if changes
+                else "Invoice updated (inline).",
+            )
+
             messages.success(request, "Invoice updated successfully.")
-            return redirect("portal:invoice_detail", pk=invoice.pk)
+            return _redirect_back(include_selected=True)
+
+        # 2) ADD (modal) – няма selected
+        else:
+            form = InvoiceUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                invoice = form.save(owner=request.user)
+
+                _audit_log_event(
+                    request=request,
+                    object_type="Invoice",
+                    object_id=invoice.pk,
+                    action="create",
+                    description=(
+                        f"Created invoice '{invoice.invoice_number}' "
+                        f"for vendor '{invoice.vendor}'."
+                    ),
+                )
+
+                messages.success(
+                    request,
+                    f"Invoice '{invoice.invoice_number}' saved for vendor {invoice.vendor.name}.",
+                )
+                if invoice.contract is None:
+                    messages.warning(
+                        request,
+                        "Invoice saved, but no matching contract was linked.",
+                    )
+                return redirect("portal:invoices")
+            else:
+                add_form_has_errors = True
+    else:
+        form = InvoiceUploadForm()
+
+    # -------------------------
+    # GET (и POST с грешен Add form)
+    # -------------------------
+    base_qs = (
+        Invoice.objects.filter(owner=request.user)
+        .select_related("vendor", "contract")
+        .order_by("-invoice_date", "-id")
+    )
+
+    total_invoices = base_qs.count()
+    total_amount = base_qs.aggregate(total=Sum("total_amount"))["total"] or 0
+
+    paginator = Paginator(base_qs, rows_per_page)
+    page_obj = paginator.get_page(page_number)
+    invoices_page = list(page_obj.object_list)
+
+    # Selected invoice + breakdown + audit + lines
+    selected_invoice = None
+    allocation_by_cost_center = []
+    service_breakdown = []
+    audit_events = []
+    invoice_lines = []
+    lines_total = None
+
+    if selected_id:
+        try:
+            selected_invoice = (
+                Invoice.objects.filter(owner=request.user)
+                .select_related("vendor", "contract")
+                .get(pk=int(selected_id))
+            )
+        except (Invoice.DoesNotExist, ValueError):
+            selected_invoice = None
+
+    if selected_invoice:
+        lines_qs = selected_invoice.lines.select_related(
+            "service", "cost_center", "user", "service__vendor"
+        ).order_by("id")
+
+        invoice_lines = list(lines_qs)
+
+        lines_total = (
+            lines_qs.aggregate(total=Sum("line_amount"))["total"]
+            if lines_qs.exists()
+            else None
+        )
+
+        allocation_by_cost_center = (
+            lines_qs.values("cost_center__code", "cost_center__name")
+            .annotate(total=Sum("line_amount"))
+            .order_by("cost_center__code")
+        )
+
+        service_breakdown = (
+            lines_qs.values("service__vendor__name", "service__name")
+            .annotate(total=Sum("line_amount"))
+            .order_by("service__vendor__name", "service__name")
+        )
+
+        audit_events = _audit_fetch_events(
+            object_type="Invoice", object_id=selected_invoice.pk, limit=50
+        )
+
+    vendors = Vendor.objects.all().order_by("name")
+    contracts = (
+        Contract.objects.filter(owner=request.user)
+        .select_related("vendor")
+        .order_by("vendor__name", "contract_name")
+    )
+
+    # dropdown-и за Lines & splits
+    services = (
+        Service.objects.select_related("vendor")
+        .all()
+        .order_by("vendor__name", "name")
+    )
+    cost_centers = CostCenter.objects.all().order_by("code")
+    users = User.objects.all().order_by("username")
 
     context = {
-        "invoice": invoice,
-        "lines": lines,
+        "invoices": invoices_page,
+        "total_invoices": total_invoices,
+        "total_amount": total_amount,
+        "page_obj": page_obj,
+        "current_page": page_obj.number,
+        "rows_per_page": rows_per_page,
+        "rows_options": rows_options,
+        "show_closed": show_closed,
+        "selected_invoice": selected_invoice,
         "allocation_by_cost_center": allocation_by_cost_center,
         "service_breakdown": service_breakdown,
+        "audit_events": audit_events,
+        "invoice_lines": invoice_lines,
+        "lines_total": lines_total,
         "vendors": vendors,
         "contracts": contracts,
+        "services": services,
+        "cost_centers": cost_centers,
+        "users": users,
+        "form": form,
+        "add_form_has_errors": add_form_has_errors,
     }
-    return render(request, "portal/invoice_detail.html", context)
+    return render(request, "portal/invoices.html", context)
+
+
 
 
 # ----------
@@ -1336,8 +2307,120 @@ def invoice_detail(request, pk):
 
 @login_required
 def vendor_list(request):
-    # --- create vendor (както досега) ---
+    # -------------------------
+    # GET params (Users/Services style)
+    # -------------------------
+    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
+
+    rows_options = [10, 20, 30, 50, 100, 250]
+    try:
+        rows_per_page = int(request.GET.get("rows") or 50)
+    except (TypeError, ValueError):
+        rows_per_page = 50
+    if rows_per_page not in rows_options:
+        rows_per_page = 50
+
+    page_param = request.GET.get("page") or "1"
+    if page_param == "":
+        page_param = "1"
+
+    selected_id = _as_str(request.GET.get("selected"))
+
+    # -------------------------
+    # Base queryset + show_closed
+    # -------------------------
+    vendors_qs = (
+        Vendor.objects.all()
+        .annotate(contract_count=Count("contracts", distinct=True))
+        .annotate(invoice_count=Count("invoices", distinct=True))
+        .order_by("name")
+    )
+
+    if not show_closed and hasattr(Vendor, "is_active"):
+        vendors_qs = vendors_qs.filter(is_active=True)
+
+    total_vendors = vendors_qs.count()
+
+    # -------------------------
+    # POST:
+    #   1) inline update (when selected is present)
+    #   2) create vendor (existing form behaviour)
+    # -------------------------
+    form = VendorCreateForm()
+    add_form_has_errors = False
+
     if request.method == "POST":
+        inline_selected = _as_str(request.POST.get("selected"))
+
+        # ---------- INLINE UPDATE ----------
+        if inline_selected:
+            vendor = get_object_or_404(Vendor, pk=int(inline_selected))
+
+            errors: list[str] = []
+            before = _vendor_snapshot(vendor)
+
+            name = _as_str(request.POST.get("name"))
+            vendor_type = _as_str(request.POST.get("vendor_type"))
+            primary_contact_name = _as_str(request.POST.get("primary_contact_name"))
+            primary_contact_email = _as_str(request.POST.get("primary_contact_email"))
+            website = _as_str(request.POST.get("website"))
+            tags = _as_str(request.POST.get("tags"))
+            notes = _as_str(request.POST.get("notes"))
+
+            raw_is_active = _as_str(request.POST.get("is_active"))
+            is_active_new = None
+            if hasattr(vendor, "is_active"):
+                if raw_is_active in ("0", "false", "False", "off", "no"):
+                    is_active_new = False
+                else:
+                    is_active_new = True
+
+            if not name:
+                errors.append("Vendor name is required.")
+
+            valid_types = {choice[0] for choice in Vendor.VENDOR_TYPE_CHOICES}
+            if vendor_type and vendor_type not in valid_types:
+                errors.append("Invalid vendor type.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+            else:
+                vendor.name = name
+                vendor.vendor_type = vendor_type
+                vendor.primary_contact_name = primary_contact_name
+                vendor.primary_contact_email = primary_contact_email
+                vendor.website = website
+                vendor.tags = tags
+                vendor.notes = notes
+                if is_active_new is not None:
+                    vendor.is_active = is_active_new
+                vendor.save()
+
+                after = _vendor_snapshot(vendor)
+                changes = _diff_snapshots(before=before, after=after)
+                _audit_log_event(
+                    request=request,
+                    object_type="Vendor",
+                    object_id=vendor.pk,
+                    action="update",
+                    description="; ".join(changes) if changes else "Vendor updated.",
+                )
+
+                if hasattr(vendor, "is_active") and vendor.is_active is False:
+                    messages.success(request, "Vendor updated and marked as Closed.")
+                else:
+                    messages.success(request, "Vendor updated successfully.")
+
+            # back to same selection + keep paging params
+            return redirect(
+                f"{request.path}?page={_as_str(request.POST.get('page') or '1')}"
+                f"&rows={_as_str(request.POST.get('rows') or rows_per_page)}"
+                f"&show_closed={_as_str(request.POST.get('show_closed') or ('1' if show_closed else '0'))}"
+                f"&selected={vendor.pk}#vendor-details"
+            )
+
+        # ---------- CREATE VENDOR (existing behaviour) ----------
         form = VendorCreateForm(request.POST)
         if form.is_valid():
             vendor = form.save()
@@ -1352,52 +2435,66 @@ def vendor_list(request):
             )
 
             return redirect("portal:vendors")
-    else:
-        form = VendorCreateForm()
 
-    # --- базов queryset + show_closed ---
-    vendors = (
-        Vendor.objects.all()
-        .annotate(contract_count=Count("contracts", distinct=True))
-        .annotate(invoice_count=Count("invoices", distinct=True))
-        .order_by("name")
-    )
+        add_form_has_errors = True
+        # (form errors will render in template)
 
-    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
-    if not show_closed and hasattr(Vendor, "is_active"):
-        vendors = vendors.filter(is_active=True)
+    # -------------------------
+    # Pagination
+    # -------------------------
+    paginator = Paginator(vendors_qs, rows_per_page)
+    page_obj = paginator.get_page(page_param)
+    vendors = list(page_obj.object_list)
 
-    # --- pagination-подобна логика за rows ---
-    rows_param = request.GET.get("rows")
-    rows_options = [25, 50, 100, 250]
-    default_rows = 50
+    # -------------------------
+    # Selected vendor (for inline details) + AUDIT events
+    # -------------------------
+    selected_vendor = None
+    audit_events = []
 
-    try:
-        rows_limit = int(rows_param) if rows_param else default_rows
-    except (TypeError, ValueError):
-        rows_limit = default_rows
+    if selected_id:
+        try:
+            selected_vendor = (
+                Vendor.objects.annotate(contract_count=Count("contracts", distinct=True))
+                .annotate(invoice_count=Count("invoices", distinct=True))
+                .filter(pk=int(selected_id))
+                .first()
+            )
+        except (TypeError, ValueError):
+            selected_vendor = None
 
-    if rows_limit not in rows_options:
-        rows_limit = default_rows
-
-    total_vendors = vendors.count()
-    vendors_page = vendors[:rows_limit]
-    showing_count = vendors_page.count()  # evaluate queryset length
+    if selected_vendor:
+        audit_events = _audit_fetch_events(object_type="Vendor", object_id=selected_vendor.pk, limit=50)
 
     context = {
-        "vendors": vendors_page,
+        "vendors": vendors,
         "form": form,
+        "add_form_has_errors": add_form_has_errors,
+
         "show_closed": show_closed,
-        "total_vendors": total_vendors,
-        "rows_limit": rows_limit,
+        "rows_per_page": rows_per_page,
         "rows_options": rows_options,
-        "showing_count": showing_count,
+
+        "page_obj": page_obj,
+        "current_page": page_obj.number,
+        "total_vendors": total_vendors,
+
+        "selected_vendor": selected_vendor,
+        "vendor_type_choices": Vendor.VENDOR_TYPE_CHOICES,
+
+        # IMPORTANT: used by vendors.html collapse
+        "audit_events": audit_events,
     }
     return render(request, "portal/vendors.html", context)
 
 
 @login_required
 def vendor_detail(request, pk):
+    """
+    Keep this for backwards compatibility / direct links.
+    If you want everything ONLY in vendors.html, you can remove this
+    route from urls.py later, but leaving it does not hurt.
+    """
     vendor = get_object_or_404(Vendor, pk=pk)
 
     contracts = (
@@ -1560,10 +2657,199 @@ def vendor_detail(request, pk):
 @login_required
 def service_list(request):
     vendors = Vendor.objects.all().order_by("name")
+
+    # -------------------------
+    # GET params (Users-style)
+    # -------------------------
+    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
+
+    rows_options = [10, 20, 30, 50, 100, 250]
+    try:
+        rows_per_page = int(request.GET.get("rows") or 50)
+    except (TypeError, ValueError):
+        rows_per_page = 50
+    if rows_per_page not in rows_options:
+        rows_per_page = 50
+
+    page_param = request.GET.get("page") or "1"
+    if page_param == "":
+        page_param = "1"
+
+    selected_id = _as_str(request.GET.get("selected"))
+
+    # -------------------------
+    # Base queryset
+    # -------------------------
+    services_qs = (
+        Service.objects.select_related("vendor", "primary_contract")
+        .order_by("vendor__name", "name")
+    )
+    if not show_closed and hasattr(Service, "is_active"):
+        services_qs = services_qs.filter(is_active=True)
+
+    total_services = services_qs.count()
+
+    # -------------------------
+    # POST: inline update OR add modal create
+    # -------------------------
     add_form_data: dict = {}
     add_form_has_errors = False
 
     if request.method == "POST":
+        inline_selected = _as_str(request.POST.get("selected"))
+
+        # ---------- INLINE UPDATE (when selected is present) ----------
+        if inline_selected:
+            service = get_object_or_404(
+                Service.objects.select_related("vendor", "primary_contract"),
+                pk=int(inline_selected),
+            )
+
+            errors: list[str] = []
+            before = _service_snapshot(service)
+
+            vendor_id = _as_str(request.POST.get("vendor_id"))
+            name = _as_str(request.POST.get("name"))
+            category = _as_str(request.POST.get("category"))
+            billing_frequency = _as_str(request.POST.get("billing_frequency"))
+            default_currency = _as_str(request.POST.get("default_currency"))
+            service_code = _as_str(request.POST.get("service_code"))
+
+            # allow both names (old + new)
+            owner_display = _as_str(
+                request.POST.get("service_owner")
+                or request.POST.get("owner_display")
+            )
+
+            allocation_split = _as_str(request.POST.get("allocation_split"))
+            list_price_raw = _as_str(request.POST.get("list_price"))
+
+            # allow both: old contract_ref (text) and new primary_contract_id (id)
+            contract_ref = _as_str(request.POST.get("contract_ref"))
+            primary_contract_id = _as_str(request.POST.get("primary_contract_id"))
+
+            # status (optional field on model)
+            is_active_new = None
+            if hasattr(service, "is_active"):
+                raw_is_active = _as_str(request.POST.get("is_active"))
+                if raw_is_active in ("0", "false", "False", "off", "no"):
+                    is_active_new = False
+                else:
+                    is_active_new = True
+
+            # validate vendor/name
+            vendor = None
+            if not vendor_id:
+                errors.append("Vendor is required.")
+            else:
+                vendor = Vendor.objects.filter(pk=vendor_id).first()
+                if not vendor:
+                    errors.append("Selected vendor does not exist.")
+
+            if not name:
+                errors.append("Service name is required.")
+
+            # parse list_price
+            list_price = None
+            if list_price_raw:
+                try:
+                    list_price = _parse_decimal(list_price_raw)
+                except Exception as e:
+                    errors.append(str(e))
+
+            # primary contract resolve:
+            # 1) if primary_contract_id present -> exact id
+            # 2) else if contract_ref present -> match by name/id/pk (old logic)
+            primary_contract = None
+            contract_not_found = False
+
+            if primary_contract_id:
+                pc = Contract.objects.filter(owner=request.user, pk=primary_contract_id).first()
+                if pc:
+                    primary_contract = pc
+                else:
+                    contract_not_found = True
+            elif contract_ref and vendor:
+                contract_filters = Q(contract_name__iexact=contract_ref) | Q(contract_id__iexact=contract_ref)
+                try:
+                    ref_pk = int(contract_ref)
+                    contract_filters |= Q(pk=ref_pk)
+                except (TypeError, ValueError):
+                    pass
+
+                primary_contract = (
+                    Contract.objects.filter(owner=request.user, vendor=vendor)
+                    .filter(contract_filters)
+                    .first()
+                )
+                if primary_contract is None:
+                    contract_not_found = True
+
+            # uniqueness check
+            if vendor and name:
+                exists = (
+                    Service.objects.filter(vendor=vendor, name__iexact=name)
+                    .exclude(pk=service.pk)
+                    .exists()
+                )
+                if exists:
+                    errors.append("A service with this name already exists for the selected vendor.")
+
+            # redirect helper (keep state)
+            post_page = _as_str(request.POST.get("page") or "1") or "1"
+            post_rows = _as_str(request.POST.get("rows") or rows_per_page)
+            post_show_closed = _as_str(
+                request.POST.get("show_closed") or ("1" if show_closed else "0")
+            )
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+
+                return redirect(
+                    f"{request.path}?page={post_page}"
+                    f"&rows={post_rows}"
+                    f"&show_closed={post_show_closed}"
+                    f"&selected={service.pk}#service-details"
+                )
+
+            # save
+            service.vendor = vendor
+            service.name = name
+            service.category = category or ""
+            service.default_billing_frequency = billing_frequency or ""
+            service.default_currency = default_currency or ""
+            service.service_code = service_code or ""
+            service.owner_display = owner_display or ""
+            service.allocation_split = allocation_split or ""
+            service.list_price = list_price
+            service.primary_contract = primary_contract
+            if is_active_new is not None:
+                service.is_active = is_active_new
+            service.save()
+
+            after = _service_snapshot(service)
+            changes = _diff_snapshots(before, after)
+            _audit_log_event(
+                request=request,
+                object_type="Service",
+                object_id=service.pk,
+                action="update",
+                description="; ".join(changes) if changes else "Service updated.",
+            )
+
+            messages.success(request, "Service updated successfully.")
+            if contract_not_found and (contract_ref or primary_contract_id):
+                messages.warning(request, "Service saved, but no matching contract was linked.")
+
+            return redirect(
+                f"{request.path}?page={post_page}"
+                f"&rows={post_rows}"
+                f"&show_closed={post_show_closed}"
+                f"&selected={service.pk}#service-details"
+            )
+
+        # ---------- ADD MODAL CREATE (existing behavior) ----------
         vendor_id = _as_str(request.POST.get("vendor_id"))
         name = _as_str(request.POST.get("name") or request.POST.get("service_name"))
         category = _as_str(request.POST.get("category"))
@@ -1623,7 +2909,6 @@ def service_list(request):
                 .filter(contract_filters)
                 .first()
             )
-
             if primary_contract is None:
                 contract_not_found = True
 
@@ -1663,424 +2948,73 @@ def service_list(request):
                 messages.warning(request, "Service saved, but no matching contract was linked.")
             return redirect("portal:services")
 
-    # базов queryset за списъка
-    services_qs = (
-        Service.objects.select_related("vendor", "primary_contract")
-        .order_by("vendor__name", "name")
-    )
+    # -------------------------
+    # Pagination
+    # -------------------------
+    paginator = Paginator(services_qs, rows_per_page)
+    page_obj = paginator.get_page(page_param)
+    services = list(page_obj.object_list)
 
-    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
-    if not show_closed and hasattr(Service, "is_active"):
-        services_qs = services_qs.filter(is_active=True)
+    # Selected service (for inline details)
+    selected_service = None
+    if selected_id:
+        try:
+            selected_service = (
+                Service.objects.select_related("vendor", "primary_contract")
+                .filter(pk=int(selected_id))
+                .first()
+            )
+        except (TypeError, ValueError):
+            selected_service = None
 
-    # броячи + лимит на редове (като при Users/Vendors)
-    total_services = services_qs.count()
+    # ---------- Audit events for selected service (for inline Audit tab) ----------
+    audit_events = []
+    if selected_service:
+        audit_events = _audit_fetch_events(
+            object_type="Service",
+            object_id=selected_service.pk,
+            limit=50,
+        )
 
-    rows_options = [10, 25, 50, 100, 250]
-    rows_default = 25
-    rows_param = request.GET.get("rows")
-
+    # IMPORTANT: template uses current_page
     try:
-        rows_limit = int(rows_param) if rows_param else rows_default
-    except (TypeError, ValueError):
-        rows_limit = rows_default
-
-    if rows_limit not in rows_options:
-        rows_limit = rows_default
-
-    services = list(services_qs[:rows_limit])
-    showing_count = len(services)
+        current_page = int(page_obj.number)
+    except Exception:
+        current_page = 1
 
     context = {
         "services": services,
         "vendors": vendors,
+
+        "show_closed": show_closed,
+        "rows_per_page": rows_per_page,
+        "rows_options": rows_options,
+
+        "page_obj": page_obj,
+        "current_page": current_page,
+        "total_services": total_services,
+
+        "selected_service": selected_service,
+        "audit_events": audit_events,          # <--- новото
+
+        # add modal state
         "add_form_data": add_form_data,
         "add_form_has_errors": add_form_has_errors,
-        "show_closed": show_closed,
-        "total_services": total_services,
-        "showing_count": showing_count,
-        "rows_limit": rows_limit,
-        "rows_options": rows_options,
     }
     return render(request, "portal/services.html", context)
 
-
 @login_required
-def service_detail(request, pk: int):
-    service = get_object_or_404(Service.objects.select_related("vendor", "primary_contract"), pk=pk)
-
-    vendors = Vendor.objects.all().order_by("name")
-    contracts = Contract.objects.filter(owner=request.user, vendor=service.vendor).order_by("contract_name")
-
-    related_contracts = (
-        service.contracts.filter(owner=request.user)
-        .select_related("vendor")
-        .order_by("vendor__name", "contract_name")
-    )
-    invoice_lines = (
-        service.invoice_lines.select_related("invoice", "invoice__vendor")
-        .order_by("-invoice__invoice_date", "-invoice__id")[:10]
+def service_detail(request, pk):
+    service = get_object_or_404(
+        Service.objects.select_related("vendor", "primary_contract"),
+        pk=pk,
     )
 
-    if request.method == "POST":
-        action = _as_str(request.POST.get("action")) or "update"
-
-        if action == "delete":
-            name = str(service)
-
-            _audit_log_event(
-                request=request,
-                object_type="Service",
-                object_id=service.pk,
-                action="delete",
-                description=f"Deleted service '{name}'.",
-            )
-
-            service.delete()
-            messages.success(request, f"Service '{name}' was deleted.")
-            return redirect("portal:services")
-
-        if action == "update_status":
-            before = _service_snapshot(service)
-
-            raw = _as_str(request.POST.get("is_active"))
-            if raw == "":
-                is_active_new = True
-            elif raw in ("0", "false", "False", "off", "no"):
-                is_active_new = False
-            else:
-                is_active_new = True
-
-            if hasattr(service, "is_active"):
-                service.is_active = is_active_new
-                service.save(update_fields=["is_active"])
-
-                after = _service_snapshot(service)
-                changes = _diff_snapshots(before, after)
-                _audit_log_event(
-                    request=request,
-                    object_type="Service",
-                    object_id=service.pk,
-                    action="update",
-                    description="; ".join(changes) if changes else "Service status updated.",
-                )
-
-                if is_active_new:
-                    messages.success(request, "Service marked as Active.")
-                    return redirect("portal:service_detail", pk=service.pk)
-
-                messages.success(request, "Service marked as Closed.")
-                return redirect("portal:service_detail", pk=service.pk)
-
-            messages.error(request, "Service status field is not available yet (missing is_active).")
-            return redirect("portal:service_detail", pk=service.pk)
-
-        errors: list[str] = []
-        before = _service_snapshot(service)
-
-        vendor_id = _as_str(request.POST.get("vendor_id"))
-        name = _as_str(request.POST.get("name"))
-        category = _as_str(request.POST.get("category"))
-        billing_frequency = _as_str(request.POST.get("billing_frequency"))
-        default_currency = _as_str(request.POST.get("default_currency"))
-        service_code = _as_str(request.POST.get("service_code"))
-        owner_display = _as_str(request.POST.get("owner_display"))
-        allocation_split = _as_str(request.POST.get("allocation_split"))
-        list_price_raw = _as_str(request.POST.get("list_price"))
-        primary_contract_id = _as_str(request.POST.get("primary_contract_id"))
-
-        raw_is_active = _as_str(request.POST.get("is_active"))
-        is_active_new = None
-        if hasattr(service, "is_active"):
-            if raw_is_active == "":
-                is_active_new = True
-            elif raw_is_active in ("0", "false", "False", "off", "no"):
-                is_active_new = False
-            else:
-                is_active_new = True
-
-        if not name:
-            errors.append("Service name is required.")
-
-        vendor = None
-        if not vendor_id:
-            errors.append("Vendor is required.")
-        else:
-            vendor = Vendor.objects.filter(pk=vendor_id).first()
-            if not vendor:
-                errors.append("Selected vendor does not exist.")
-
-        list_price = None
-        if list_price_raw:
-            try:
-                list_price = _parse_decimal(list_price_raw)
-            except Exception as e:
-                errors.append(str(e))
-
-        primary_contract = None
-        if primary_contract_id:
-            primary_contract = Contract.objects.filter(owner=request.user, pk=primary_contract_id).first()
-            if not primary_contract:
-                errors.append("Selected primary contract does not exist.")
-
-        if vendor and name:
-            exists = (
-                Service.objects.filter(vendor=vendor, name__iexact=name)
-                .exclude(pk=service.pk)
-                .exists()
-            )
-            if exists:
-                errors.append("A service with this name already exists for the selected vendor.")
-
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-        else:
-            service.vendor = vendor
-            service.name = name
-            service.category = category or ""
-            service.default_billing_frequency = billing_frequency or ""
-            service.default_currency = default_currency or ""
-            service.service_code = service_code or ""
-            service.owner_display = owner_display or ""
-            service.allocation_split = allocation_split or ""
-            service.list_price = list_price
-            service.primary_contract = primary_contract
-            if is_active_new is not None:
-                service.is_active = is_active_new
-            service.save()
-
-            after = _service_snapshot(service)
-            changes = _diff_snapshots(before, after)
-            _audit_log_event(
-                request=request,
-                object_type="Service",
-                object_id=service.pk,
-                action="update",
-                description="; ".join(changes) if changes else "Service updated.",
-            )
-
-            if hasattr(service, "is_active") and service.is_active is False:
-                messages.success(request, "Service updated and marked as Closed.")
-                return redirect("portal:services")
-
-            messages.success(request, "Service updated successfully.")
-            return redirect("portal:service_detail", pk=service.pk)
-
-    audit_events = _audit_fetch_events(object_type="Service", object_id=service.pk, limit=50)
-
+    # Ако имаш нещо по-специално за service detail, може да го допълним после
     context = {
         "service": service,
-        "vendors": vendors,
-        "contracts": contracts,
-        "related_contracts": related_contracts,
-        "invoice_lines": invoice_lines,
-        "audit_events": audit_events,
     }
     return render(request, "portal/service_detail.html", context)
-
-
-@login_required
-def service_create(request):
-    vendors = Vendor.objects.all().order_by("name")
-
-    if request.method == "POST":
-        vendor_id = _as_str(request.POST.get("vendor_id"))
-        name = _as_str(request.POST.get("name"))
-        category = _as_str(request.POST.get("category"))
-        service_code = _as_str(request.POST.get("service_code"))
-        default_currency = _as_str(request.POST.get("default_currency"))
-        default_billing_frequency = _as_str(request.POST.get("default_billing_frequency"))
-        owner_display = _as_str(request.POST.get("owner_display"))
-        allocation_split = _as_str(request.POST.get("allocation_split"))
-        list_price_raw = _as_str(request.POST.get("list_price"))
-
-        errors: list[str] = []
-
-        vendor = None
-        if not vendor_id:
-            errors.append("Vendor is required.")
-        else:
-            vendor = Vendor.objects.filter(pk=vendor_id).first()
-            if not vendor:
-                errors.append("Selected vendor does not exist.")
-
-        if not name:
-            errors.append("Service name is required.")
-
-        list_price = None
-        if list_price_raw:
-            try:
-                list_price = _parse_decimal(list_price_raw)
-            except Exception as e:
-                errors.append(str(e))
-
-        if vendor and name:
-            exists = Service.objects.filter(vendor=vendor, name__iexact=name).exists()
-            if exists:
-                errors.append("A service with this name already exists for the selected vendor.")
-
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-
-            return render(
-                request,
-                "portal/service_form.html",
-                {
-                    "mode": "create",
-                    "vendors": vendors,
-                    "form_data": {
-                        "vendor_id": vendor_id,
-                        "name": name,
-                        "category": category,
-                        "service_code": service_code,
-                        "default_currency": default_currency,
-                        "default_billing_frequency": default_billing_frequency,
-                        "owner_display": owner_display,
-                        "allocation_split": allocation_split,
-                        "list_price": list_price_raw,
-                    },
-                },
-            )
-
-        service = Service.objects.create(
-            vendor=vendor,
-            name=name,
-            category=category or "",
-            service_code=service_code or "",
-            default_currency=default_currency or "",
-            default_billing_frequency=default_billing_frequency or "",
-            owner_display=owner_display or "",
-            allocation_split=allocation_split or "",
-            list_price=list_price,
-        )
-
-        _audit_log_event(
-            request=request,
-            object_type="Service",
-            object_id=service.pk,
-            action="create",
-            description=f"Created service '{service}'.",
-        )
-
-        messages.success(request, "Service created successfully.")
-        return redirect("portal:service_detail", pk=service.pk)
-
-    return render(
-        request,
-        "portal/service_form.html",
-        {
-            "mode": "create",
-            "vendors": vendors,
-            "form_data": {},
-        },
-    )
-
-
-@login_required
-def service_edit(request, pk: int):
-    service = get_object_or_404(Service.objects.select_related("vendor"), pk=pk)
-    vendors = Vendor.objects.all().order_by("name")
-
-    if request.method == "POST":
-        vendor_id = _as_str(request.POST.get("vendor_id"))
-        name = _as_str(request.POST.get("name"))
-        category = _as_str(request.POST.get("category"))
-        service_code = _as_str(request.POST.get("service_code"))
-        default_currency = _as_str(request.POST.get("default_currency"))
-        default_billing_frequency = _as_str(request.POST.get("default_billing_frequency"))
-        owner_display = _as_str(request.POST.get("owner_display"))
-        allocation_split = _as_str(request.POST.get("allocation_split"))
-        list_price_raw = _as_str(request.POST.get("list_price"))
-
-        errors: list[str] = []
-
-        vendor = None
-        if not vendor_id:
-            errors.append("Vendor is required.")
-        else:
-            vendor = Vendor.objects.filter(pk=vendor_id).first()
-            if not vendor:
-                errors.append("Selected vendor does not exist.")
-
-        if not name:
-            errors.append("Service name is required.")
-
-        list_price = None
-        if list_price_raw:
-            try:
-                list_price = _parse_decimal(list_price_raw)
-            except Exception as e:
-                errors.append(str(e))
-
-        if vendor and name:
-            exists = Service.objects.filter(vendor=vendor, name__iexact=name).exclude(pk=service.pk).exists()
-            if exists:
-                errors.append("A service with this name already exists for the selected vendor.")
-
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-
-            return render(
-                request,
-                "portal/service_form.html",
-                {
-                    "mode": "edit",
-                    "service": service,
-                    "vendors": vendors,
-                    "form_data": {
-                        "vendor_id": vendor_id,
-                        "name": name,
-                        "category": category,
-                        "service_code": service_code,
-                        "default_currency": default_currency,
-                        "default_billing_frequency": default_billing_frequency,
-                        "owner_display": owner_display,
-                        "allocation_split": allocation_split,
-                        "list_price": list_price_raw,
-                    },
-                },
-            )
-
-        service.vendor = vendor
-        service.name = name
-        service.category = category or ""
-        service.service_code = service_code or ""
-        service.default_currency = default_currency or ""
-        service.default_billing_frequency = default_billing_frequency or ""
-        service.owner_display = owner_display or ""
-        service.allocation_split = allocation_split or ""
-        service.list_price = list_price
-        service.save()
-
-        messages.success(request, "Service updated successfully.")
-        return redirect("portal:service_detail", pk=service.pk)
-
-    form_data = {
-        "vendor_id": str(service.vendor_id) if service.vendor_id else "",
-        "name": service.name or "",
-        "category": service.category or "",
-        "service_code": getattr(service, "service_code", "") or "",
-        "default_currency": getattr(service, "default_currency", "") or "",
-        "default_billing_frequency": getattr(service, "default_billing_frequency", "") or "",
-        "owner_display": getattr(service, "owner_display", "") or "",
-        "allocation_split": getattr(service, "allocation_split", "") or "",
-        "list_price": _as_str(service.list_price) if service.list_price is not None else "",
-    }
-
-    return render(
-        request,
-        "portal/service_form.html",
-        {
-            "mode": "edit",
-            "service": service,
-            "vendors": vendors,
-            "form_data": form_data,
-        },
-    )
-
 
 
 # ----------
@@ -2098,36 +3032,54 @@ def cost_centers_list(request):
     return render(request, "portal/cost_centers.html", {"cost_centers": cost_centers})
 
 
+
 # ----------
 # USERS
 # ----------
+
+from django.core.paginator import Paginator
+
 
 @login_required
 def users_list(request):
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
 
-    # колко реда да показваме
+    # rows per page (allowlist)
     try:
         rows_per_page = int(request.GET.get("rows") or 50)
-    except ValueError:
+    except (TypeError, ValueError):
         rows_per_page = 50
 
-    # малко guard rails
-    if rows_per_page < 10:
-        rows_per_page = 10
-    if rows_per_page > 250:
-        rows_per_page = 250
+    allowed_rows = [10, 20, 30, 50]
+    if rows_per_page not in allowed_rows:
+        rows_per_page = 50
 
-    # базов queryset (ползваме го, за да се уверим, че профилите съществуват)
+    # page (robust: page="" -> 1)
+    raw_page = (request.GET.get("page") or "").strip()
+    try:
+        page_number = int(raw_page) if raw_page else 1
+    except ValueError:
+        page_number = 1
+    if page_number < 1:
+        page_number = 1
+
+    # selected user id (optional)
+    raw_selected = (request.GET.get("selected") or "").strip()
+    try:
+        selected_id = int(raw_selected) if raw_selected else None
+    except ValueError:
+        selected_id = None
+
+    # base queryset (ensure profiles exist)
     base_qs = User.objects.all().order_by("username")
     if not show_closed:
         base_qs = base_qs.filter(is_active=True)
 
-    # ensure UserProfile съществува за всеки
+    # ensure UserProfile exists for each user (keep your behaviour, but safer)
     for u in base_qs:
         UserProfile.objects.get_or_create(user=u)
 
-    # реалният queryset за екрана – със select_related
+    # real queryset for screen
     users_qs = (
         User.objects.select_related("profile", "profile__cost_center", "profile__manager")
         .order_by("username")
@@ -2135,257 +3087,202 @@ def users_list(request):
     if not show_closed:
         users_qs = users_qs.filter(is_active=True)
 
-    total_users = users_qs.count()        # общо (след филтъра Show closed)
-    users_qs = users_qs[:rows_per_page]   # само първите N реда за екрана
+    total_users = users_qs.count()
 
-    rows_options = [10, 25, 50, 100, 250]
+    # -------------------------
+    # Inline SAVE (POST)
+    # -------------------------
+    if request.method == "POST":
+        # we expect selected user id in POST
+        raw_post_selected = (request.POST.get("selected") or "").strip()
+        try:
+            post_selected_id = int(raw_post_selected)
+        except (TypeError, ValueError):
+            post_selected_id = None
+
+        if not post_selected_id:
+            messages.error(request, "No user selected.")
+            return redirect("portal:users")
+
+        user_obj = get_object_or_404(
+            User.objects.select_related("profile", "profile__cost_center", "profile__manager"),
+            pk=post_selected_id,
+        )
+        profile, _ = UserProfile.objects.get_or_create(user=user_obj)
+
+        before = _user_snapshot(user_obj, profile)
+
+        # ---- account fields ----
+        username = _as_str(request.POST.get("username"))
+        email = _as_str(request.POST.get("email"))
+
+        raw_is_active = _as_str(request.POST.get("is_active"))
+        is_active_flag = False if raw_is_active in ("0", "false", "False", "off", "no") else True
+
+        # ---- profile fields (safe) ----
+        full_name = _as_str(request.POST.get("full_name"))
+        location = _as_str(request.POST.get("location"))
+        legal_entity = _as_str(request.POST.get("legal_entity"))
+
+        # support both "phone" and "phone_number"
+        phone_number = _as_str(request.POST.get("phone_number")) or _as_str(request.POST.get("phone"))
+
+        # cost center: accept either id or code
+        cost_center = None
+        cost_center_id = _as_str(request.POST.get("cost_center_id"))
+        cost_center_code = _as_str(request.POST.get("cost_center"))
+        if cost_center_id:
+            cost_center = CostCenter.objects.filter(pk=cost_center_id).first()
+        elif cost_center_code:
+            cost_center = CostCenter.objects.filter(code__iexact=cost_center_code).first()
+
+        # manager: accept either id or username
+        manager = None
+        manager_id = _as_str(request.POST.get("manager_id"))
+        manager_username = _as_str(request.POST.get("manager"))
+        if manager_id:
+            manager = User.objects.filter(pk=manager_id).first()
+        elif manager_username:
+            manager = User.objects.filter(username__iexact=manager_username).first()
+
+        errors: list[str] = []
+
+        # validations (mirror your user_detail style)
+        if not username:
+            errors.append("Username is required.")
+        else:
+            if User.objects.exclude(pk=user_obj.pk).filter(username__iexact=username).exists():
+                errors.append("Another user with this username already exists.")
+
+        if email:
+            if User.objects.exclude(pk=user_obj.pk).filter(email__iexact=email).exists():
+                errors.append("Another user with this email already exists.")
+
+        if (cost_center_id or cost_center_code) and not cost_center:
+            errors.append("Selected cost centre does not exist.")
+
+        if (manager_id or manager_username) and manager_id and not manager:
+            errors.append("Selected manager does not exist.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            # keep same paging state after error
+            return redirect(
+                f"{request.path}?page={page_number}&rows={rows_per_page}"
+                f"&show_closed={'1' if show_closed else '0'}&selected={user_obj.pk}#user-details"
+            )
+
+        # persist
+        user_obj.username = username
+        user_obj.email = email
+        user_obj.is_active = is_active_flag
+        user_obj.save()
+
+        profile.full_name = full_name
+        profile.cost_center = cost_center
+        profile.manager = manager
+        profile.location = location
+        profile.legal_entity = legal_entity
+        # keep compatibility with your model field name
+        if hasattr(profile, "phone_number"):
+            profile.phone_number = phone_number
+        elif hasattr(profile, "phone"):
+            profile.phone = phone_number
+        profile.save()
+
+        after = _user_snapshot(user_obj, profile)
+        changes = _diff_snapshots(before, after)
+        _audit_log_event(
+            request=request,
+            object_type="User",
+            object_id=user_obj.pk,
+            action="update",
+            description="; ".join(changes) if changes else "User updated (inline).",
+        )
+
+        messages.success(request, "User updated successfully.")
+
+        # redirect back, keep same page/rows/show_closed/selected
+        return redirect(
+            f"{request.path}?page={page_number}&rows={rows_per_page}"
+            f"&show_closed={'1' if show_closed else '0'}&selected={user_obj.pk}#user-details"
+        )
+
+    # -------------------------
+    # Pagination
+    # -------------------------
+    paginator = Paginator(users_qs, rows_per_page)
+    page_obj = paginator.get_page(page_number)
+    users_page = page_obj.object_list
+
+    # -------------------------
+    # Selected user + services (for inline details)
+    # -------------------------
+    selected_user = None
+    selected_services = []
+    audit_events = []  # NEW: audit лог за избрания user
+
+    if selected_id:
+        selected_user = User.objects.select_related(
+            "profile", "profile__cost_center", "profile__manager"
+        ).filter(pk=selected_id).first()
+
+        if selected_user:
+            UserProfile.objects.get_or_create(user=selected_user)
+
+            assignments = (
+                ServiceAssignment.objects
+                .filter(user=selected_user)
+                .select_related("service", "service__vendor")
+                .order_by("service__vendor__name", "service__name")
+            )
+
+            for a in assignments:
+                svc = a.service
+                if not svc:
+                    continue
+
+                vendor_name = svc.vendor.name if getattr(svc, "vendor", None) else "—"
+                price = getattr(svc, "list_price", None)
+                ccy = getattr(svc, "default_currency", "") or "—"
+                is_active = getattr(svc, "is_active", True)
+
+                selected_services.append({
+                    "service_name": getattr(svc, "name", "—"),
+                    "vendor_name": vendor_name,
+                    "price": price if price is not None else "—",
+                    "ccy": ccy,
+                    "status": "Active" if is_active else "Closed",
+                })
+
+            # >>> ТУК: взимаме audit log за User, както при Services/Contracts
+            audit_events = _audit_fetch_events(
+                object_type="User",
+                object_id=selected_user.pk,
+                limit=50,
+            )
+
+    rows_options = [10, 20, 30, 50]
 
     return render(
         request,
         "portal/users.html",
         {
-            "users": users_qs,
+            "users": users_page,
+            "page_obj": page_obj,
+            "current_page": page_obj.number,
             "show_closed": show_closed,
             "rows_per_page": rows_per_page,
             "rows_options": rows_options,
             "total_users": total_users,
+            "selected_user": selected_user,
+            "selected_services": selected_services,
+            "audit_events": audit_events,  # NEW: подаваме към шаблона
         },
     )
 
 
-@login_required
-def user_detail(request, pk: int):
-    user_obj = get_object_or_404(
-        User.objects.select_related("profile", "profile__cost_center", "profile__manager"),
-        pk=pk,
-    )
-    profile, _ = UserProfile.objects.get_or_create(user=user_obj)
-
-    cost_centers = CostCenter.objects.all().order_by("code")
-    managers = User.objects.exclude(pk=user_obj.pk).order_by("username")
-
-    if request.method == "POST":
-        action = _as_str(request.POST.get("action"))
-
-        # --------------------
-        # DELETE
-        # --------------------
-        if action == "delete":
-            if user_obj == request.user:
-                messages.error(request, "You cannot delete the currently logged-in user.")
-                return redirect("portal:user_detail", pk=user_obj.pk)
-
-            username = user_obj.username
-            _audit_log_event(
-                request=request,
-                object_type="User",
-                object_id=user_obj.pk,
-                action="delete",
-                description=f"Deleted user '{username}'.",
-            )
-            user_obj.delete()
-            messages.success(request, f"User '{username}' was deleted.")
-            return redirect("portal:users")
-
-        # --------------------
-        # STATUS ONLY (quick toggle)
-        # --------------------
-        if action == "update_status":
-            before = _user_snapshot(user_obj, profile)
-
-            raw = _as_str(request.POST.get("is_active"))
-            # templates send hidden is_active=1 + checkbox value=0 (Closed)
-            if raw in ("0", "false", "False", "off", "no"):
-                is_active_new = False
-            else:
-                is_active_new = True
-
-            user_obj.is_active = is_active_new
-            user_obj.save(update_fields=["is_active"])
-
-            after = _user_snapshot(user_obj, profile)
-            changes = _diff_snapshots(before, after)
-            _audit_log_event(
-                request=request,
-                object_type="User",
-                object_id=user_obj.pk,
-                action="update",
-                description="; ".join(changes) if changes else "User status updated.",
-            )
-
-            if is_active_new:
-                messages.success(request, "User marked as Active.")
-                return redirect("portal:user_detail", pk=user_obj.pk)
-
-            messages.success(request, "User marked as Closed.")
-            return redirect("portal:users")
-
-        # --------------------
-        # ACCOUNT UPDATE (username/email/first/last + is_active)
-        # --------------------
-        if action == "update_account":
-            errors: list[str] = []
-            before = _user_snapshot(user_obj, profile)
-
-            username = _as_str(request.POST.get("username"))
-            email = _as_str(request.POST.get("email"))
-            first_name = _as_str(request.POST.get("first_name"))
-            last_name = _as_str(request.POST.get("last_name"))
-
-            raw_is_active = _as_str(request.POST.get("is_active"))
-            if raw_is_active in ("0", "false", "False", "off", "no"):
-                is_active_flag = False
-            else:
-                is_active_flag = True
-
-            if not username:
-                errors.append("Username is required.")
-            else:
-                if (
-                    User.objects.exclude(pk=user_obj.pk)
-                    .filter(username__iexact=username)
-                    .exists()
-                ):
-                    errors.append("Another user with this username already exists.")
-
-            if email:
-                if (
-                    User.objects.exclude(pk=user_obj.pk)
-                    .filter(email__iexact=email)
-                    .exists()
-                ):
-                    errors.append("Another user with this email already exists.")
-
-            if errors:
-                for e in errors:
-                    messages.error(request, e)
-                return redirect("portal:user_detail", pk=user_obj.pk)
-
-            user_obj.username = username
-            user_obj.email = email
-            user_obj.first_name = first_name
-            user_obj.last_name = last_name
-            user_obj.is_active = is_active_flag
-            user_obj.save()
-
-            after = _user_snapshot(user_obj, profile)
-            changes = _diff_snapshots(before, after)
-            _audit_log_event(
-                request=request,
-                object_type="User",
-                object_id=user_obj.pk,
-                action="update",
-                description="; ".join(changes) if changes else "User updated (account).",
-            )
-
-            if user_obj.is_active is False:
-                messages.success(request, "Account updated and marked as Closed.")
-                return redirect("portal:users")
-
-            messages.success(request, "Account updated successfully.")
-            return redirect("portal:user_detail", pk=user_obj.pk)
-
-        # --------------------
-        # PROFILE UPDATE (extended fields only)
-        # --------------------
-        if action == "update_profile":
-            errors: list[str] = []
-            before = _user_snapshot(user_obj, profile)
-
-            full_name = _as_str(request.POST.get("full_name"))
-            cost_center_id = _as_str(request.POST.get("cost_center_id"))
-            manager_id = _as_str(request.POST.get("manager_id"))
-            location = _as_str(request.POST.get("location"))
-            legal_entity = _as_str(request.POST.get("legal_entity"))
-            phone_number = _as_str(request.POST.get("phone_number"))
-
-            cost_center = None
-            if cost_center_id:
-                cost_center = CostCenter.objects.filter(pk=cost_center_id).first()
-                if not cost_center:
-                    errors.append("Selected cost centre does not exist.")
-
-            manager = None
-            if manager_id:
-                manager = User.objects.filter(pk=manager_id).first()
-                if not manager:
-                    errors.append("Selected manager does not exist.")
-
-            if errors:
-                for e in errors:
-                    messages.error(request, e)
-                return redirect("portal:user_detail", pk=user_obj.pk)
-
-            profile.full_name = full_name
-            profile.cost_center = cost_center
-            profile.manager = manager
-            profile.location = location
-            profile.legal_entity = legal_entity
-            profile.phone_number = phone_number
-            profile.save()
-
-            after = _user_snapshot(user_obj, profile)
-            changes = _diff_snapshots(before, after)
-            _audit_log_event(
-                request=request,
-                object_type="User",
-                object_id=user_obj.pk,
-                action="update",
-                description="; ".join(changes) if changes else "User updated (profile).",
-            )
-
-            messages.success(request, "Profile updated successfully.")
-            return redirect("portal:user_detail", pk=user_obj.pk)
-
-        # --------------------
-        # FALLBACK
-        # --------------------
-        messages.error(request, "Unknown action.")
-        return redirect("portal:user_detail", pk=user_obj.pk)
-
-    audit_events = _audit_fetch_events(object_type="User", object_id=user_obj.pk, limit=50)
-
-    # assigned services for this user (grouped by vendor) + price/currency/status
-    assignments = (
-        ServiceAssignment.objects
-        .filter(user=user_obj)
-        .select_related("service", "service__vendor")
-        .order_by("service__vendor__name", "service__name")
-    )
-
-    assigned_services_by_vendor: dict[str, list] = {}
-    assigned_services_rows_by_vendor: dict[str, list] = {}
-
-    for a in assignments:
-        svc = a.service
-        if not svc:
-            continue
-        vname = svc.vendor.name if svc.vendor else "—"
-
-        # old/simple structure
-        assigned_services_by_vendor.setdefault(vname, []).append(svc)
-
-        # rich rows for your new table
-        assigned_services_rows_by_vendor.setdefault(vname, []).append({
-            "service": svc,
-            "is_active": getattr(svc, "is_active", True),
-            "list_price": getattr(svc, "list_price", None),
-            "currency": getattr(svc, "default_currency", "") or "—",
-        })
-
-    return render(
-        request,
-        "portal/user_detail.html",
-        {
-            "user_obj": user_obj,
-            "cost_centers": cost_centers,
-            "managers": managers,
-            "audit_events": audit_events,
-            "audit_has_more": False,
-            "assigned_services_by_vendor": assigned_services_by_vendor,
-            "assigned_services_rows_by_vendor": assigned_services_rows_by_vendor,
-        },
-    )
 
 
 
@@ -2764,6 +3661,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.contrib.auth.models import Group
 from django.views.decorators.http import require_POST
 
 from .models import (
@@ -2813,6 +3711,18 @@ def _can_act_for(manager_user, target_user) -> bool:
 
     return False
 
+def is_portal_admin(user) -> bool:
+    """
+    Кой вижда целия „админ“ портал:
+      - superuser
+      - staff
+      - член на група PortalAdmins
+    """
+    if not user.is_authenticated:
+        return False
+    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
+        return True
+    return user.groups.filter(name="PortalAdmins").exists()
 
 def _get_acting_user(request):
     """
@@ -2890,9 +3800,11 @@ def provisioning_acting_clear(request):
 
 
 @login_required
+@login_required
 def provisioning_hub(request):
     """
     Provisioning Hub landing page:
+      - summary tiles (counts + last request)
       - left: current assigned services (from ServiceAssignment)
       - right: user card (profile + total cost)
     IMPORTANT: uses acting user if set.
@@ -2911,6 +3823,7 @@ def provisioning_hub(request):
 
     assigned_rows = []
     total_cost = Decimal("0")
+    currencies = set()
 
     for a in assignments:
         s = a.service
@@ -2936,6 +3849,34 @@ def provisioning_hub(request):
             except Exception:
                 pass
 
+        if currency and currency != "—":
+            currencies.add(currency)
+
+    services_count = len(assigned_rows)
+
+    pending_requests_count = (
+        ProvisioningRequest.objects.filter(
+            requester=acting_user,
+            status=ProvisioningRequest.STATUS_PENDING,
+        ).count()
+    )
+
+    last_request = (
+        ProvisioningRequest.objects
+        .select_related("service", "service__vendor")
+        .filter(requester=acting_user)
+        .order_by("-created_at")
+        .first()
+    )
+
+    approvals_open = 0
+    if is_prov_admin:
+        approvals_open = ProvisioningRequest.objects.filter(
+            status=ProvisioningRequest.STATUS_PENDING
+        ).count()
+
+    primary_currency = list(currencies)[0] if len(currencies) == 1 else None
+
     return render(
         request,
         "portal/provisioning_hub.html",
@@ -2947,8 +3888,14 @@ def provisioning_hub(request):
             "profile": profile,
             "assigned_rows": assigned_rows,
             "total_cost": total_cost,
+            "services_count": services_count,
+            "pending_requests_count": pending_requests_count,
+            "last_request": last_request,
+            "approvals_open": approvals_open,
+            "primary_currency": primary_currency,
         },
     )
+
 
 
 @login_required
@@ -3007,6 +3954,9 @@ def provisioning_catalog_request_bulk(request):
     """
     acting_user = _get_acting_user(request)
 
+    # NEW: reason от модала
+    reason = (request.POST.get("reason") or "").strip()
+
     service_ids = request.POST.getlist("service_ids")
     if not service_ids:
         messages.error(request, "No services selected.")
@@ -3056,7 +4006,7 @@ def provisioning_catalog_request_bulk(request):
                     requester=acting_user,
                     service=svc,
                     status=ProvisioningRequest.STATUS_PENDING,
-                    reason="",
+                    reason=reason,
                 )
                 created += 1
             except IntegrityError:
@@ -3079,8 +4029,21 @@ def provisioning_my_requests(request):
     """
     My Requests page (real data).
     Uses acting user.
+    Supports status filter via ?status=pending|approved|rejected|cancelled
     """
     acting_user = _get_acting_user(request)
+
+    # какво е избрано от табчетата горе
+    status_key = (request.GET.get("status") or "").strip().lower()
+
+    # map от ключ за URL към реалните стойности в модела
+    status_filters = {
+        "pending":   ProvisioningRequest.STATUS_PENDING,
+        "approved":  ProvisioningRequest.STATUS_APPROVED,
+        "rejected":  ProvisioningRequest.STATUS_REJECTED,
+    }
+    if hasattr(ProvisioningRequest, "STATUS_CANCELLED"):
+        status_filters["cancelled"] = ProvisioningRequest.STATUS_CANCELLED
 
     reqs = (
         ProvisioningRequest.objects
@@ -3089,6 +4052,11 @@ def provisioning_my_requests(request):
         .order_by("-created_at", "-id")
     )
 
+    # ако има валиден филтър – прилагаме го
+    db_status = status_filters.get(status_key)
+    if db_status:
+        reqs = reqs.filter(status=db_status)
+
     return render(
         request,
         "portal/provisioning_my_requests.html",
@@ -3096,6 +4064,14 @@ def provisioning_my_requests(request):
             "acting_user": acting_user,
             "is_acting": (acting_user.pk != request.user.pk),
             "requests": reqs,
+            "current_status": status_key,
+            # за шаблона – да не пишем 'approved' на ръка
+            "status_pending": ProvisioningRequest.STATUS_PENDING,
+            "status_approved": ProvisioningRequest.STATUS_APPROVED,
+            "status_rejected": ProvisioningRequest.STATUS_REJECTED,
+            "status_cancelled": getattr(
+                ProvisioningRequest, "STATUS_CANCELLED", None
+            ),
         },
     )
 
@@ -3136,8 +4112,12 @@ def provisioning_request_create(request, service_pk: int):
     """
     acting_user = _get_acting_user(request)
 
-    service = get_object_or_404(Service.objects.select_related("vendor"), pk=service_pk)
+    service = get_object_or_404(
+        Service.objects.select_related("vendor"),
+        pk=service_pk,
+    )
 
+    # Guardrails: service / vendor must be active
     if hasattr(Service, "is_active") and not getattr(service, "is_active", True):
         messages.error(request, "This service is closed and cannot be requested.")
         return redirect("portal:provisioning_catalog")
@@ -3146,12 +4126,13 @@ def provisioning_request_create(request, service_pk: int):
         messages.error(request, "This vendor is closed and cannot be requested.")
         return redirect("portal:provisioning_catalog")
 
-    already_assigned = ServiceAssignment.objects.filter(user=acting_user, service=service).exists()
-    if already_assigned:
+    # Already has access?
+    if ServiceAssignment.objects.filter(user=acting_user, service=service).exists():
         messages.info(request, "Access already exists for this service.")
         return redirect("portal:provisioning_hub")
 
     if request.method == "POST":
+        # 1) вече има pending?
         existing_pending = ProvisioningRequest.objects.filter(
             requester=acting_user,
             service=service,
@@ -3161,21 +4142,46 @@ def provisioning_request_create(request, service_pk: int):
             messages.info(request, "A pending request already exists for this service.")
             return redirect("portal:provisioning_my_requests")
 
+        # 2) reason – задължително
+        reason = (request.POST.get("reason") or "").strip()
+        if not reason:
+            messages.error(request, "Please provide a short business reason for this request.")
+            return render(
+        request,
+        "portal/provisioning_request_create.html",
+        {
+            "acting_user": acting_user,
+            "is_acting": (acting_user.pk != request.user.pk),
+            "service": service,
+            "reason": reason,
+        },
+    )
+
+        # 3) създаваме request с reason
         try:
             ProvisioningRequest.objects.create(
                 requester=acting_user,
                 service=service,
                 status=ProvisioningRequest.STATUS_PENDING,
+                reason=reason,
             )
             if acting_user.pk != request.user.pk:
-                messages.success(request, f"Request submitted for {acting_user.username}: {service.vendor.name} – {service.name}.")
+                messages.success(
+                    request,
+                    f"Request submitted for {acting_user.username}: "
+                    f"{service.vendor.name} – {service.name}.",
+                )
             else:
-                messages.success(request, f"Request submitted: {service.vendor.name} – {service.name}.")
+                messages.success(
+                    request,
+                    f"Request submitted: {service.vendor.name} – {service.name}.",
+                )
         except IntegrityError:
             messages.info(request, "A pending request already exists for this service.")
 
         return redirect("portal:provisioning_my_requests")
 
+    # GET – първоначално зареждане
     return render(
         request,
         "portal/provisioning_request_create.html",
@@ -3183,6 +4189,7 @@ def provisioning_request_create(request, service_pk: int):
             "acting_user": acting_user,
             "is_acting": (acting_user.pk != request.user.pk),
             "service": service,
+            "reason": "",
         },
     )
 
@@ -3244,6 +4251,7 @@ def provisioning_approvals_decide_bulk(request):
     POST:
       - ids: list of ProvisioningRequest ids
       - decision: approve|reject
+      - decision_note: optional text, записва се върху всички
     """
     if request.method != "POST":
         messages.error(request, "POST required.")
@@ -3258,11 +4266,16 @@ def provisioning_approvals_decide_bulk(request):
         messages.error(request, "Invalid decision.")
         return redirect("portal:provisioning_approvals")
 
-    ids = request.POST.getlist("ids")
-    ids = [i for i in ids if str(i).isdigit()]
+    # избрани заявки
+    raw_ids = request.POST.getlist("ids")
+    ids = [int(i) for i in raw_ids if str(i).isdigit()]
     if not ids:
         messages.warning(request, "No requests selected.")
         return redirect("portal:provisioning_approvals")
+
+    decision_note = (request.POST.get("decision_note") or "").strip()
+
+    processed = 0
 
     with transaction.atomic():
         qs = (
@@ -3272,15 +4285,26 @@ def provisioning_approvals_decide_bulk(request):
             .filter(id__in=ids, status=ProvisioningRequest.STATUS_PENDING)
         )
 
-        processed = 0
         for pr in qs:
             pr.decided_at = timezone.now()
             pr.decided_by = request.user
 
+            # ако имаме decision_note – запиши го
+            if decision_note and hasattr(pr, "decision_note"):
+                pr.decision_note = decision_note
+
             if decision == "approve":
                 pr.status = ProvisioningRequest.STATUS_APPROVED
-                pr.save(update_fields=["status", "decided_at", "decided_by"])
+                pr.save(
+                    update_fields=[
+                        "status",
+                        "decided_at",
+                        "decided_by",
+                        *(["decision_note"] if decision_note and hasattr(pr, "decision_note") else []),
+                    ]
+                )
 
+                # създай assignment, ако още го няма
                 ServiceAssignment.objects.get_or_create(
                     user=pr.requester,
                     service=pr.service,
@@ -3288,14 +4312,25 @@ def provisioning_approvals_decide_bulk(request):
                 )
             else:
                 pr.status = ProvisioningRequest.STATUS_REJECTED
-                pr.save(update_fields=["status", "decided_at", "decided_by"])
+                pr.save(
+                    update_fields=[
+                        "status",
+                        "decided_at",
+                        "decided_by",
+                        *(["decision_note"] if decision_note and hasattr(pr, "decision_note") else []),
+                    ]
+                )
 
             processed += 1
 
-    # (ако искаш да оправим текста "rejectd" → "rejected", ще го направим след това в 1 ред)
-    messages.success(request, f"{processed} request(s) {decision}d.")
+    if processed:
+        messages.success(request, f"{processed} request(s) {decision}d.")
+    else:
+        messages.warning(request, "No pending requests matched your selection.")
+
     return redirect("portal:provisioning_approvals")
 
+    
 @login_required
 @require_POST
 def provisioning_access_remove(request, service_pk: int):
@@ -3322,6 +4357,7 @@ def provisioning_access_remove(request, service_pk: int):
         messages.success(request, "Access removed.")
 
     return redirect("portal:provisioning_hub")
+
 
 @login_required
 def report_center(request):
@@ -4635,3 +5671,11 @@ def usage_users(request):
 def portal_logout(request):
     logout(request)
     return redirect("login")
+
+@login_required
+def user_detail(request, pk: int):
+    # Keep backwards compatibility: redirect to inline details in users list
+    show_closed = request.GET.get("show_closed", "0")
+    rows = request.GET.get("rows", "50")
+    page = request.GET.get("page", "1")
+    return redirect(f"/en/portal/users/?page={page}&rows={rows}&show_closed={show_closed}&selected={pk}#user-details")
