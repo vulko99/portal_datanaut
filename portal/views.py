@@ -5454,6 +5454,7 @@ def usage_overview(request):
     }
     return render(request, "portal/usage.html", context)
 
+
 @login_required
 def usage_contract(request):
     contracts = (
@@ -5468,6 +5469,39 @@ def usage_contract(request):
 
     contract_count = contracts.count()
 
+    # --- CSV export ---
+    export = (request.GET.get("export") or "").lower()
+    if export == "csv":
+        headers = [
+            "Contract",
+            "Vendor",
+            "Currency",
+            "Annual value",
+            "Entity",
+            "Status",
+            "Start date",
+            "End date",
+        ]
+        rows = []
+        for c in contracts:
+            rows.append([
+                c.contract_name or "",
+                c.vendor.name if c.vendor else "",
+                c.currency or "",
+                "" if c.annual_value is None else str(c.annual_value),
+                c.entity or "",
+                c.status or "",
+                c.start_date.isoformat() if c.start_date else "",
+                c.end_date.isoformat() if c.end_date else "",
+            ])
+
+        filename = (
+            f"datanaut_usage_contracts_"
+            f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        return _csv_response(filename, headers, rows)
+    # -------------------
+
     context = {
         "contracts": contracts,
         "contract_count": contract_count,
@@ -5481,6 +5515,9 @@ def usage_contract(request):
 def usage_vendors(request):
     """
     Vendor inventory, базирано на общия usage snapshot.
+    Комбинира функционалността и на двете стари версии:
+      - kpis от snapshot-а
+      - show_closed флаг за скриване на неактивни vendors
     """
     snapshot = _build_usage_snapshot()
     vendor_rows = snapshot["vendor_rows"]
@@ -5488,16 +5525,49 @@ def usage_vendors(request):
 
     show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
 
+    # ако не искаме "затворени" доставчици, филтрираме по vendor.is_active
     if not show_closed:
         filtered = []
         for row in vendor_rows:
             vendor = row.get("vendor")
+            # ако моделът няма is_active, приемаме че е активен
             if hasattr(vendor, "is_active"):
                 if vendor.is_active:
                     filtered.append(row)
             else:
                 filtered.append(row)
         vendor_rows = filtered
+
+    # --- CSV export ---
+    export = (request.GET.get("export") or "").lower()
+    if export == "csv":
+        headers = [
+            "Vendor",
+            "Desks",
+            "Total licences",
+            "Active licences",
+            "Dormant licences",
+            "Annual value",
+            "Value at risk",
+        ]
+        rows = []
+        for r in vendor_rows:
+            rows.append([
+                r.get("vendor_name") or "",
+                str(r.get("desks_count") or 0),
+                str(r.get("licences") or 0),
+                str(r.get("active_licences") or 0),
+                str(r.get("dormant_licences") or 0),
+                "" if r.get("total_price") is None else str(r.get("total_price")),
+                "" if r.get("dormant_price") is None else str(r.get("dormant_price")),
+            ])
+
+        filename = (
+            f"datanaut_usage_vendors_"
+            f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        return _csv_response(filename, headers, rows)
+    # -------------------
 
     context = {
         "vendor_rows": vendor_rows,
@@ -5509,13 +5579,91 @@ def usage_vendors(request):
 
 
 @login_required
+def usage_invoices(request):
+    invoices = (
+        Invoice.objects.filter(owner=request.user)
+        .select_related("vendor", "contract")
+        .order_by("-invoice_date", "-id")
+    )
+
+    # агрегации по реалните полета total_amount и tax_amount
+    agg = invoices.aggregate(
+        total_amount_sum=Sum("total_amount"),
+        tax_amount_sum=Sum("tax_amount"),
+    )
+
+    total_amount = agg["total_amount_sum"] or Decimal("0")
+    tax_amount = agg["tax_amount_sum"] or Decimal("0")
+    invoice_count = invoices.count()
+
+    # --- CSV export ---
+    export = (request.GET.get("export") or "").lower()
+    if export == "csv":
+        headers = [
+            "Invoice number",
+            "Invoice date",
+            "Total amount",
+            "Tax amount",
+            "Currency",
+            "Vendor",
+            "Contract",
+            "Period start",
+            "Period end",
+        ]
+        rows = []
+        for inv in invoices:
+            rows.append([
+                inv.invoice_number or "",
+                inv.invoice_date.isoformat() if inv.invoice_date else "",
+                "" if inv.total_amount is None else str(inv.total_amount),
+                "" if inv.tax_amount is None else str(inv.tax_amount),
+                inv.currency or "",
+                inv.vendor.name if inv.vendor else "",
+                inv.contract.contract_name if inv.contract else "",
+                inv.period_start.isoformat() if inv.period_start else "",
+                inv.period_end.isoformat() if inv.period_end else "",
+            ])
+
+        filename = (
+            f"datanaut_usage_invoices_"
+            f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        return _csv_response(filename, headers, rows)
+    # -------------------
+
+    context = {
+        "invoices": invoices,
+        "invoice_count": invoice_count,
+        "total_amount": total_amount,
+        "tax_amount": tax_amount,
+        "active_tab": "invoices",  # за да светне правилния таб
+    }
+    return render(request, "portal/usage_invoices.html", context)
+
+
+@login_required
 def usage_users(request):
     """
     User inventory – списък с потребители от общия usage snapshot,
-    със сървърни филтри и контрол върху броя редове.
+    със сървърни филтри, контрол върху броя редове и show_closed флаг.
+    Обединява логиката и на двете стари версии.
     """
     snapshot = _build_usage_snapshot()
     user_rows = snapshot["user_rows"]
+
+    # --- филтър за active / closed потребители ---
+    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
+    if not show_closed:
+        # пазим само активните (ако моделът въобще има is_active)
+        filtered_by_active = []
+        for row in user_rows:
+            user = row.get("user")
+            if hasattr(user, "is_active"):
+                if user.is_active:
+                    filtered_by_active.append(row)
+            else:
+                filtered_by_active.append(row)
+        user_rows = filtered_by_active
 
     total_users = len(user_rows)
 
@@ -5543,7 +5691,46 @@ def usage_users(request):
 
     filtered_count = len(filtered)
 
-    # --- колко реда да показваме ---
+    # --- CSV export (експортираме всички филтрирани, без paging) ---
+    export = (request.GET.get("export") or "").lower()
+    if export == "csv":
+        headers = [
+            "Username",
+            "Desk",
+            "Services",
+            "Dormant services",
+            "Total price",
+            "Last login",
+            "Days since login",
+            "Status",
+        ]
+        rows = []
+        for u in filtered:
+            last_login = u.get("last_login")
+            if last_login:
+                last_login_str = last_login.strftime("%Y-%m-%d")
+            else:
+                last_login_str = ""
+
+            rows.append([
+                u.get("username") or "",
+                u.get("desk_label") or "",
+                str(u.get("services") or 0),
+                str(u.get("dormant_services") or 0),
+                "" if u.get("total_price") is None else str(u.get("total_price")),
+                last_login_str,
+                "" if u.get("days_since_login") is None else str(u.get("days_since_login")),
+                u.get("status") or "",
+            ])
+
+        filename = (
+            f"datanaut_usage_users_"
+            f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        return _csv_response(filename, headers, rows)
+    # ---------------------------------------------------------------
+
+    # --- paging ---
     page_sizes = [10, 20, 30, 40, 50, 100]
     page_size_param = request.GET.get("limit") or request.GET.get("page_size") or "20"
     try:
@@ -5571,96 +5758,10 @@ def usage_users(request):
         "page_sizes": page_sizes,
         "q": q,
         "status": status,
-    }
-    return render(request, "portal/usage_users.html", context)
-
-@login_required
-def usage_invoices(request):
-    invoices = (
-        Invoice.objects.filter(owner=request.user)
-        .select_related("vendor", "contract")
-        .order_by("-invoice_date", "-id")
-    )
-
-    # агрегации по реалните полета total_amount и tax_amount
-    agg = invoices.aggregate(
-        total_amount_sum=Sum("total_amount"),
-        tax_amount_sum=Sum("tax_amount"),
-    )
-
-    total_amount = agg["total_amount_sum"] or Decimal("0")
-    tax_amount = agg["tax_amount_sum"] or Decimal("0")
-    invoice_count = invoices.count()
-
-    context = {
-        "invoices": invoices,
-        "invoice_count": invoice_count,
-        "total_amount": total_amount,
-        "tax_amount": tax_amount,
-        "active_tab": "invoices",  # за да светне правилния таб
-    }
-    return render(request, "portal/usage_invoices.html", context)
-
-
-@login_required
-def usage_vendors(request):
-    """
-    Vendor inventory, базирано на общия usage snapshot.
-    """
-    snapshot = _build_usage_snapshot()
-    vendor_rows = snapshot["vendor_rows"]
-    kpis = snapshot["kpis"]
-
-    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
-
-    # ако не искаме "затворени" доставчици, филтрираме по vendor.is_active
-    if not show_closed:
-        filtered = []
-        for row in vendor_rows:
-            vendor = row.get("vendor")
-            # ако моделът няма is_active, приемаме че е активен
-            if hasattr(vendor, "is_active"):
-                if vendor.is_active:
-                    filtered.append(row)
-            else:
-                filtered.append(row)
-        vendor_rows = filtered
-
-    context = {
-        "vendor_rows": vendor_rows,
-        "kpis": kpis,
-        "show_closed": show_closed,
-    }
-    return render(request, "portal/usage_vendors.html", context)
-
-
-@login_required
-def usage_users(request):
-    """
-    User inventory, базирано на usage snapshot-а.
-    """
-    snapshot = _build_usage_snapshot()
-    user_rows = snapshot["user_rows"]
-
-    show_closed = (request.GET.get("show_closed") in ("1", "true", "True", "on", "yes"))
-
-    # ако show_closed е False – можеш да филтрираш по user.is_active, ако има такъв флаг
-    if not show_closed:
-        filtered = []
-        for row in user_rows:
-            user = row.get("user")
-            if hasattr(user, "is_active"):
-                if user.is_active:
-                    filtered.append(row)
-            else:
-                filtered.append(row)
-        user_rows = filtered
-
-    context = {
-        "user_rows": user_rows,
         "show_closed": show_closed,
     }
     return render(request, "portal/usage_users.html", context)
+
 
 
 

@@ -2,19 +2,27 @@
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
 
 # Virtualenv
 venv/
-.env/
-*.venv/
+.env
+*.env
 
-# Django
-db.sqlite3
-/media/
-staticfiles/
+# Django / DB
+*.sqlite3
+*.db
+*.log
 
-# VS Code
+# IDE
 .vscode/
+.idea/
 
-# Backups
-datanaut_portal.zip
+# Archives
+*.zip
+*.tar
+*.gz
+
+# Static/media if генерирани
+staticfiles/
+media/

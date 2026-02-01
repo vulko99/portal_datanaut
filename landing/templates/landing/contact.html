@@ -8,12 +8,12 @@
 <!-- Hero -->
 <section class="dn-hero">
     <div class="container-lg">
-        <h1 class="dn-hero-title mb-3">
+        <h1 class="dn-hero-title mb-3" style="animation: fadeInUp 0.8s ease-out;">
             {% trans "Talk to us about DataNaut" %}
         </h1>
-        <p class="dn-hero-lead mb-0">
+        <p class="dn-hero-lead mb-0" style="animation: fadeInUp 0.8s ease-out 0.2s backwards;">
             {% blocktrans trimmed %}
-            Share a bit about your current market data setup, vendors and pain points and we’ll follow up
+            Share a bit about your current market data setup, vendors and pain points and we'll follow up
             with a tailored Data Cost Assessment and live demo.
             {% endblocktrans %}
         </p>
@@ -27,12 +27,12 @@
 
             <!-- LEFT: form -->
             <div class="col-lg-7">
-                <div class="dn-card-light p-4 h-100">
-                    <h2 class="h6 text-uppercase text-light mb-2">
+                <div class="dn-card-light p-4 h-100" style="animation: fadeInUp 0.8s ease-out 0.4s backwards;">
+                    <h2 class="h6 text-uppercase mb-2" style="color: #00e0d6; letter-spacing: 0.1em; font-weight: 700;">
                         {% trans "Request a demo / assessment" %}
                     </h2>
                     <p class="small text-white-50 mb-4">
-                        {% trans "Fill in the form below and we’ll get back to you within one business day." %}
+                        {% trans "Fill in the form below and we'll get back to you within one business day." %}
                     </p>
 
                     <form method="post" novalidate>
@@ -40,52 +40,57 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label small mb-1">
+                                <label class="form-label small mb-1 fw-semibold" style="color: #e5e7eb;">
                                     {% trans "Name" %}
                                 </label>
                                 <input type="text"
-                                       class="form-control form-control-sm"
+                                       name="name"
+                                       class="form-control contact-input"
                                        placeholder="{% trans 'Your name' %}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small mb-1">
+                                <label class="form-label small mb-1 fw-semibold" style="color: #e5e7eb;">
                                     {% trans "Company" %}
                                 </label>
                                 <input type="text"
-                                       class="form-control form-control-sm"
+                                       name="company"
+                                       class="form-control contact-input"
                                        placeholder="{% trans 'Your company' %}">
                             </div>
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label small mb-1">
+                                <label class="form-label small mb-1 fw-semibold" style="color: #e5e7eb;">
                                     {% trans "Role" %}
                                 </label>
                                 <input type="text"
-                                       class="form-control form-control-sm"
+                                       name="role"
+                                       class="form-control contact-input"
                                        placeholder="{% trans 'e.g. Head of Trading, CFO' %}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small mb-1">
+                                <label class="form-label small mb-1 fw-semibold" style="color: #e5e7eb;">
                                     {% trans "Work email" %}
                                 </label>
                                 <input type="email"
-                                       class="form-control form-control-sm"
+                                       name="email"
+                                       class="form-control contact-input"
                                        placeholder="{% trans 'you@firm.com' %}">
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label small mb-1">
+                            <label class="form-label small mb-1 fw-semibold" style="color: #e5e7eb;">
                                 {% trans "Message / Notes" %}
                             </label>
                             <textarea rows="4"
-                                      class="form-control form-control-sm"
+                                      name="message"
+                                      class="form-control contact-input"
                                       placeholder="{% trans 'Vendors you use today, approximate spend, main challenges…' %}"></textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary px-4">
+                        <button type="submit" class="btn btn-primary contact-submit px-5 py-2">
                             {% trans "Send request" %}
                         </button>
                     </form>
@@ -94,8 +99,8 @@
 
             <!-- RIGHT: contact details -->
             <div class="col-lg-5">
-                <div class="dn-card-light p-4 h-100">
-                    <h2 class="h6 text-uppercase text-light mb-2">
+                <div class="dn-card-light p-4 h-100" style="animation: fadeInUp 0.8s ease-out 0.6s backwards;">
+                    <h2 class="h6 text-uppercase mb-2" style="color: #00e0d6; letter-spacing: 0.1em; font-weight: 700;">
                         {% trans "Contact details" %}
                     </h2>
                     <p class="small text-white-50 mb-3">
@@ -103,32 +108,165 @@
                     </p>
 
                     <dl class="small mb-0">
-                        <dt class="text-white-50">
+                        <dt class="text-white-50 mb-1">
                             {% trans "Email" %}
                         </dt>
                         <dd class="mb-3">
-                            <a href="mailto:clients.datanaut@outlook.com">clients.datanaut@outlook.com</a>
+                            <a href="mailto:clients.datanaut@outlook.com" class="contact-link">clients.datanaut@outlook.com</a>
                         </dd>
 
-                        <dt class="text-white-50">
+                        <dt class="text-white-50 mb-1">
                             {% trans "LinkedIn" %}
                         </dt>
-                        <dd>
-                            <a href="https://www.linkedin.com/company/datanaut-ltd" target="_blank" rel="noopener">DataNaut</a>
+                        <dd class="mb-3">
+                            <a href="https://www.linkedin.com/company/datanaut-ltd" target="_blank" rel="noopener" class="contact-link">DataNaut</a>
                         </dd>
                     </dl>
 
-                    <p class="small text-white-50 mt-3 mb-0">
-                        {% blocktrans trimmed %}
-                        We typically start with a focused assessment on a subset of contracts and invoices
-                        to estimate savings, then move to a broader rollout if the fit is right.
-                        {% endblocktrans %}
-                    </p>
+                    <div class="contact-info-box mt-4 p-3">
+                        <p class="small mb-0" style="color: #d1d5db; line-height: 1.6;">
+                            {% blocktrans trimmed %}
+                            We typically start with a focused assessment on a subset of contracts and invoices
+                            to estimate savings, then move to a broader rollout if the fit is right.
+                            {% endblocktrans %}
+                        </p>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 </section>
+
+<style>
+    /* Hero */
+    .dn-hero {
+        padding: 120px 0 64px;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(0, 224, 214, 0.15), transparent 60%),
+            radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.12), transparent 58%),
+            #020617;
+        color: #f9fafb;
+    }
+
+    .dn-hero-title {
+        font-weight: 800;
+        font-size: clamp(2.2rem, 4vw, 3rem);
+        letter-spacing: -0.03em;
+        color: #f9fafb;
+    }
+
+    .dn-hero-lead {
+        font-size: 1.1rem;
+        color: #d1d5db;
+        max-width: 700px;
+        line-height: 1.7;
+    }
+
+    /* Section */
+    .dn-section-light {
+        background: var(--dn-bg-page);
+    }
+
+    /* Cards */
+    .dn-card-light {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s ease;
+    }
+
+    .dn-card-light:hover {
+        border-color: rgba(0, 224, 214, 0.4);
+        box-shadow: 0 25px 60px rgba(0, 224, 214, 0.15);
+    }
+
+    /* Form inputs */
+    .contact-input {
+        background: rgba(2, 6, 23, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-input:focus {
+        background: rgba(2, 6, 23, 0.8);
+        border-color: #00e0d6;
+        color: #f9fafb;
+        box-shadow: 0 0 0 3px rgba(0, 224, 214, 0.15);
+        outline: none;
+    }
+
+    .contact-input::placeholder {
+        color: #6b7280;
+    }
+
+    /* Submit button */
+    .contact-submit {
+        background: linear-gradient(90deg, #22c55e, #06b6d4);
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 999px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+        filter: brightness(1.1);
+    }
+
+    /* Links */
+    .contact-link {
+        color: #00e0d6;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .contact-link:hover {
+        color: #22c55e;
+        transform: translateX(3px);
+    }
+
+    /* Info box */
+    .contact-info-box {
+        background: rgba(0, 224, 214, 0.05);
+        border: 1px solid rgba(0, 224, 214, 0.2);
+        border-radius: 8px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 991.98px) {
+        .dn-hero {
+            padding: 96px 0 48px;
+        }
+
+        .dn-hero-title {
+            font-size: 2rem;
+        }
+
+        .dn-hero-lead {
+            font-size: 1rem;
+        }
+    }
+</style>
 
 {% endblock %}

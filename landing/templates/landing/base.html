@@ -33,6 +33,12 @@
         }
 
         /* ---------- GLOBAL ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         html,
         body {
             height: 100%;
@@ -41,29 +47,61 @@
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background-color: var(--dn-bg-page);
+            background:
+                radial-gradient(900px 550px at 8% 0%, rgba(34, 197, 94, 0.16), transparent 60%),
+                radial-gradient(900px 550px at 92% 0%, rgba(56, 189, 248, 0.14), transparent 55%),
+                linear-gradient(180deg, #020617, #020712);
             color: var(--dn-text-main);
-
-            /* запазваме място за фиксирания футър */
             padding-bottom: 80px;
+            overflow-x: hidden;
         }
 
         .page-offset {
-            padding-top: 72px; /* за fixed navbar */
+            padding-top: 72px;
         }
 
         a {
             text-decoration: none;
         }
 
+        .dn-shell {
+            max-width: 100%;
+            width: 100%;
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .dn-shell {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+        }
+
         /* ---------- NAVBAR ---------- */
         .dn-navbar {
             background: var(--dn-bg-nav);
+            backdrop-filter: blur(10px);
             border-bottom: none;
             min-height: 72px;
+            transition: all 0.3s ease;
         }
 
-        /* Логото да е по-голямо от текста */
+        .dn-navbar.scrolled {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+
         .navbar-brand .dn-logo-mark {
             height: 57px;
             width: auto;
@@ -78,6 +116,7 @@
         .nav-link {
             font-size: 0.9rem;
             color: var(--dn-text-muted);
+            transition: color 0.3s ease;
         }
 
         .nav-link.active,
@@ -86,7 +125,6 @@
             color: #ffffff;
         }
 
-        /* зелено Request demo в нав бара */
         .btn-request-demo {
             background-color: var(--dn-accent-green);
             border: none;
@@ -94,27 +132,32 @@
             font-weight: 600;
             font-size: 0.86rem;
             border-radius: 999px;
+            transition: all 0.3s ease;
         }
 
         .btn-request-demo:hover {
             filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
         .dropdown-menu {
             background-color: #050816;
             border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .dropdown-item {
             color: var(--dn-text-main);
             font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
         .dropdown-item:hover {
             background-color: rgba(37, 99, 235, 0.12);
         }
 
-        /* Language selector */
         .lang-selector .dropdown-toggle {
             font-size: 0.8rem;
             text-transform: uppercase;
@@ -140,11 +183,33 @@
 
         /* ---------- HERO ---------- */
         .hero-section {
-            background: radial-gradient(circle at 0% 0%, #0f766e 0, #020617 30%),
-                        radial-gradient(circle at 100% 0%, #4c1d95 0, #020617 40%),
-                        radial-gradient(circle at 50% 100%, #1d4ed8 0, #020617 40%);
-            color: var(--dn-text-main);
-            padding: 80px 0 96px;
+            position: relative;
+            padding: 88px 0 72px;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: -18%;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(1300px 900px at 0% 0%,
+                                rgba(0, 224, 214, 0.78),
+                                rgba(0, 224, 214, 0.45),
+                                transparent 60%),
+                radial-gradient(1100px 700px at 100% 0%,
+                                rgba(76, 132, 255, 0.55),
+                                transparent 58%),
+                radial-gradient(1200px 700px at 50% 110%,
+                                rgba(37, 99, 235, 0.55),
+                                transparent 60%),
+                linear-gradient(180deg,
+                                rgba(5, 8, 20, 0.10),
+                                rgba(5, 8, 20, 0.85) 60%,
+                                rgba(5, 8, 20, 1) 100%);
+            opacity: 0.98;
         }
 
         .hero-title {
@@ -152,12 +217,14 @@
             font-size: clamp(2.4rem, 3vw, 2.9rem);
             letter-spacing: -0.03em;
             margin-bottom: 0.75rem;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .hero-lead {
             font-size: 0.98rem;
             color: var(--dn-text-muted);
             max-width: 480px;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
         .hero-value-list {
@@ -166,6 +233,7 @@
             font-size: 0.9rem;
             list-style: none;
             padding-left: 0;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
         }
 
         .hero-value-list li::before {
@@ -178,9 +246,9 @@
             font-size: 0.75rem;
             color: var(--dn-text-muted);
             margin-top: 0.75rem;
+            animation: fadeInUp 0.8s ease-out 0.6s backwards;
         }
 
-        /* зелено Request a demo в hero */
         .btn-cta-primary {
             background-color: var(--dn-accent-green);
             border: none;
@@ -188,10 +256,13 @@
             font-size: 0.9rem;
             color: #022c22;
             border-radius: 999px;
+            transition: all 0.3s ease;
         }
 
         .btn-cta-primary:hover {
             filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
         }
 
         .btn-cta-secondary {
@@ -199,21 +270,32 @@
             color: #e5e7eb;
             font-size: 0.9rem;
             border-radius: 999px;
+            transition: all 0.3s ease;
         }
 
         .btn-cta-secondary:hover {
             background-color: rgba(15, 23, 42, 0.9);
+            transform: translateY(-2px);
         }
 
         /* ---------- METRICS CARD ---------- */
         .metrics-card {
-            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.15), transparent 55%),
-                        radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.18), transparent 60%),
-                        #020617;
+            background:
+                radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.28), transparent 55%),
+                radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.24), transparent 60%),
+                #020617;
             border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.5);
             padding: 18px 20px 16px;
             color: var(--dn-text-main);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+            animation: fadeInUp 0.8s ease-out 0.8s backwards;
+            transition: all 0.3s ease;
+        }
+
+        .metrics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 28px 70px rgba(15, 23, 42, 0.98);
         }
 
         .metrics-label {
@@ -253,6 +335,7 @@
             height: 100%;
             border-radius: inherit;
             background: linear-gradient(90deg, var(--dn-accent-teal), var(--dn-accent-purple));
+            transition: width 1s ease-out;
         }
 
         /* ---------- GENERIC SECTIONS ---------- */
@@ -294,6 +377,12 @@
             color: #4b5563;
             font-weight: 500;
             box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .trusted-logo-pill:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(15, 23, 42, 0.12);
         }
 
         /* ---------- PERSONA CARDS ---------- */
@@ -304,6 +393,12 @@
             padding: 18px 18px 14px;
             height: 100%;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            transition: all 0.4s ease;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
         }
 
         .persona-card h5 {
@@ -323,15 +418,111 @@
             color: #4b5563;
         }
 
+        /* ---------- ENTERPRISE SURFACES ---------- */
+        .landing-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .landing-section {
+            padding: 72px 0;
+        }
+
+        .landing-grid-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .landing-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .landing-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dn-surface {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
+            border-radius: 1.1rem;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        .dn-surface:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 28px 70px rgba(15, 23, 42, 0.98);
+        }
+
+        .dn-surface-inner {
+            padding: 1.5rem 1.6rem;
+        }
+
+        .dn-chip {
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            background: rgba(15, 23, 42, 0.9);
+            font-size: 0.7rem;
+            padding: 0.25rem 0.7rem;
+            color: #e5e7eb;
+        }
+
+        .dn-gradient {
+            background: linear-gradient(90deg, #22c55e, #06b6d4);
+        }
+
+        .dn-cta-btn {
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.75rem 1.7rem;
+            transition: all 0.3s ease;
+        }
+
+        .dn-cta-btn-primary {
+            background: linear-gradient(90deg, #22c55e, #06b6d4);
+            border: none;
+            color: #022c22;
+        }
+
+        .dn-cta-btn-primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+        }
+
+        .dn-cta-btn-secondary {
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            color: #e5e7eb;
+            background: transparent;
+        }
+
+        .dn-cta-btn-secondary:hover {
+            background-color: rgba(15, 23, 42, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .dn-ring:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.55);
+        }
+
         /* ---------- FOOTER ---------- */
         .site-footer {
             border-top: 1px solid rgba(148, 163, 184, 0.25);
-            background: radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.12), transparent 55%),
-                        radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.12), transparent 50%),
-                        #020617;
+            background:
+                radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.12), transparent 55%),
+                radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.12), transparent 50%),
+                #020617;
             color: var(--dn-text-muted);
             font-size: 0.8rem;
-
             position: fixed;
             left: 0;
             bottom: 0;
@@ -341,20 +532,44 @@
 
         .footer-link {
             color: var(--dn-text-muted);
+            transition: color 0.3s ease;
         }
 
         .footer-link:hover {
             color: #e5e7eb;
         }
 
+        /* ---------- ANIMATIONS ---------- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ---------- RESPONSIVE ---------- */
         @media (max-width: 991.98px) {
             .hero-section {
-                padding-top: 64px;
-                padding-bottom: 72px;
+                padding-top: 72px;
+                padding-bottom: 56px;
             }
 
             .metrics-card {
                 margin-top: 1.5rem;
+            }
+
+            .landing-section {
+                padding: 56px 0;
+            }
+
+            .landing-grid-hero,
+            .landing-grid-2,
+            .landing-grid-3 {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -362,14 +577,14 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-<header class="dn-navbar navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
+<header class="dn-navbar navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+    <div class="container dn-shell d-flex align-items-center">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
             <img src="{% static 'landing/logo.png' %}" alt="{% trans 'DataNaut logo' %}" class="dn-logo-mark">
             <span class="dn-logo-text ms-2">DataNaut</span>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
                 data-bs-target="#mainNavbar" aria-controls="mainNavbar"
                 aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -384,7 +599,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="whoDropdown"
                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {% trans "Who it’s for" %}
+                        {% trans "Who it's for" %}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="whoDropdown">
                         <li>
@@ -473,7 +688,7 @@
 </main>
 
 <footer class="site-footer">
-    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 py-3">
+    <div class="container dn-shell d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 py-3">
         <div>
             <div class="d-flex align-items-center mb-1">
                 <img src="{% static 'landing/logo.png' %}" alt="{% trans 'DataNaut logo' %}" style="height:22px;">
@@ -504,7 +719,17 @@
         crossorigin="anonymous"></script>
 
 <script>
-    // плавно скролване за anchor линковете
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const nav = document.getElementById('mainNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(function (link) {
         link.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href').slice(1);
@@ -519,6 +744,30 @@
                 });
             }
         });
+    });
+
+    // Progress bar animation
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const progressBars = entry.target.querySelectorAll('.metrics-progress-bar');
+                progressBars.forEach(bar => {
+                    const width = bar.style.width || bar.getAttribute('data-width');
+                    if (width) {
+                        bar.style.width = width;
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.metrics-card').forEach(card => {
+        observer.observe(card);
     });
 </script>
 

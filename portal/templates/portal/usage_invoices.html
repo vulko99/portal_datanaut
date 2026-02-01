@@ -3,6 +3,35 @@
 {% block title_suffix %} · Usage – Invoice inventory{% endblock %}
 
 {% block content %}
+<div class="mb-3">
+  <ul class="nav nav-pills nav-sm bg-dark rounded-pill px-1 py-1 d-inline-flex shadow-sm">
+    <li class="nav-item">
+      <a class="nav-link active px-3" aria-current="page"
+         href="{% url 'portal:usage_invoices' %}">
+        Invoice inventory
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white-50 px-3"
+         href="{% url 'portal:usage_contract' %}">
+        Contract inventory
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white-50 px-3"
+         href="{% url 'portal:usage_vendors' %}">
+        Vendor inventory
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white-50 px-3"
+         href="{% url 'portal:usage_users' %}">
+        User inventory
+      </a>
+    </li>
+  </ul>
+</div>
+
 <div class="portal-card">
   <div class="section-eyebrow mb-1">Dashboards · Invoices</div>
   <h1 class="section-title mb-1">Invoice inventory</h1>
@@ -10,7 +39,43 @@
     All invoices in scope, with invoice number, total, currency and vendor.
   </p>
 
-  <div class="table-responsive">
+  {# KPIs + Export #}
+  <div class="d-flex flex-wrap gap-3 mb-3 justify-content-between align-items-center">
+    <div class="d-flex flex-wrap gap-3">
+      <div class="portal-kpi">
+        <div class="kpi-label text-muted small">Invoices in scope</div>
+        <div class="kpi-value h4 mb-0">{{ invoice_count }}</div>
+      </div>
+      <div class="portal-kpi">
+        <div class="kpi-label text-muted small">Total invoiced amount</div>
+        <div class="kpi-value h4 mb-0">
+          {% if total_amount %}
+            {{ total_amount|floatformat:2 }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+      <div class="portal-kpi">
+        <div class="kpi-label text-muted small">Total tax amount</div>
+        <div class="kpi-value h4 mb-0">
+          {% if tax_amount %}
+            {{ tax_amount|floatformat:2 }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <a href="?export=csv"
+       class="btn btn-sm btn-outline-light">
+      Export CSV
+    </a>
+  </div>
+
+  {# вътрешен скрол само за таблицата #}
+  <div class="table-responsive" style="max-height: 540px; overflow-y: auto;">
     <table class="portal-table align-middle">
       <thead>
         <tr>
@@ -22,11 +87,73 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="cell-muted" colspan="5">No invoices in scope yet.</td>
-        </tr>
+        {% if invoice_count %}
+          {% for invoice in invoices %}
+            <tr>
+              <td>
+                {{ invoice.invoice_number }}
+                {% if invoice.contract %}
+                  <div class="cell-muted small">
+                    {{ invoice.contract.contract_name }}
+                  </div>
+                {% endif %}
+              </td>
+              <td>
+                {% if invoice.invoice_date %}
+                  {{ invoice.invoice_date|date:"Y-m-d" }}
+                {% else %}
+                  <span class="cell-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if invoice.total_amount %}
+                  {{ invoice.total_amount|floatformat:2 }}
+                {% else %}
+                  <span class="cell-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if invoice.currency %}
+                  {{ invoice.currency }}
+                {% else %}
+                  <span class="cell-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if invoice.vendor %}
+                  {{ invoice.vendor.name }}
+                {% else %}
+                  <span class="cell-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td class="cell-muted" colspan="5">No invoices in scope yet.</td>
+          </tr>
+        {% endif %}
       </tbody>
     </table>
+  </div>
+
+  <div class="row mt-4 g-3">
+    <div class="col-lg-6">
+      <h2 class="h6 text-white mb-2">What this view is for</h2>
+      <ul class="section-subtitle mb-0">
+        <li>Single source of truth for all market data invoices across vendors and desks.</li>
+        <li>Quickly reconcile invoice totals against contracts and internal budgets.</li>
+        <li>Support monthly close and accruals with exportable, structured data.</li>
+      </ul>
+    </div>
+    <div class="col-lg-6">
+      <h2 class="h6 text-white mb-2">How clients typically use this</h2>
+      <ul class="section-subtitle mb-0">
+        <li>Review new invoices as they land and spot outliers by value or vendor.</li>
+        <li>Export a slice of the data to share with Finance or local cost centre owners.</li>
+        <li>Connect invoice history back to usage and contracts in optimisation reviews.</li>
+      </ul>
+    </div>
   </div>
 </div>
 {% endblock %}
