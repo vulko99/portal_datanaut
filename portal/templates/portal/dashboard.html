@@ -23,6 +23,13 @@
       margin-top: 8px;
     }
   }
+
+  /* --- KPI add-on: keep hero row readable with 6 metrics --- */
+  @media (min-width: 1200px){
+    .dash-metric{
+      max-width: 230px;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -92,6 +99,62 @@
               impact and options.
             </div>
           </div>
+
+          <div class="dash-metric">
+            <div class="metric-label">Dormant licence exposure</div>
+            <div class="metric-value">
+              {% if kpi_dormant_exposure %}
+                {{ kpi_dormant_exposure|floatformat:0 }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+            <div class="metric-sub">
+              Estimated exposure from dormant / underused access in scope.
+            </div>
+            <div class="metric-tagline">
+              Derived from usage signals (last 60–90 days).
+            </div>
+          </div>
+
+          <div class="dash-metric">
+            <div class="metric-label">Duplicate coverage exposure</div>
+            <div class="metric-value">
+              {% if kpi_duplicate_exposure %}
+                {{ kpi_duplicate_exposure|floatformat:0 }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+            <div class="metric-sub">
+              Estimated redundancy from overlapping vendor coverage.
+            </div>
+            <div class="metric-tagline">
+              Derived from desk-level overlap signals.
+            </div>
+          </div>
+
+          <div class="dash-metric">
+            <div class="metric-label">Estimated optimisation potential</div>
+            <div class="metric-value">
+              {% if kpi_est_optimisation_pct %}
+                {{ kpi_est_optimisation_pct|floatformat:1 }}%
+              {% else %}
+                —
+              {% endif %}
+            </div>
+            <div class="metric-sub">
+              {% if kpi_est_optimisation_amount %}
+                Indicative saving: {{ kpi_est_optimisation_amount|floatformat:0 }}
+              {% else %}
+                Indicative saving: —
+              {% endif %}
+            </div>
+            <div class="metric-tagline">
+              (Dormant + duplicate exposure) ÷ total spend.
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

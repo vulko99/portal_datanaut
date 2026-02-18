@@ -1,0 +1,114 @@
+{% extends "portal/base_provisioning.html" %}
+{% block content %}
+
+<div class="portal-card">
+  <div class="d-flex align-items-start justify-content-between gap-3">
+    <div>
+      <div class="section-eyebrow">Provisioning Hub</div>
+      <div class="section-title">Request access</div>
+      <div class="section-subtitle">
+        {{ service.vendor.name }} · {{ service.name }}
+      </div>
+    </div>
+    <a href="{% url 'portal:provisioning_catalog' %}" class="btn btn-ghost btn-sm">Back to catalog</a>
+  </div>
+
+  <div class="mt-3 row g-3">
+    {# Лява колона – информация за услугата #}
+    <div class="col-12 col-lg-7">
+      <div class="dn-card p-3 mb-3">
+        <div class="mb-1">
+          <span class="metric-label">Service</span>
+        </div>
+        <div class="metric-value mb-1">
+          {{ service.name }}
+        </div>
+        <div class="metric-tagline mb-1">
+          Vendor: {{ service.vendor.name }}
+          {% if service.category %}
+            · Category: {{ service.category }}
+          {% endif %}
+        </div>
+
+        <div class="mt-2 small text-muted">
+          {% if service.list_price %}
+            List price:
+            <strong>
+              {{ service.list_price|floatformat:2 }}
+              {{ service.default_currency|default:"" }}
+            </strong>
+            per year (indicative).
+          {% else %}
+            No list price captured yet.
+          {% endif %}
+        </div>
+      </div>
+
+      <form method="post" class="dn-card p-3">
+        {% csrf_token %}
+
+        <div class="mb-2">
+          <label class="form-label small text-muted mb-1" for="id_reason">
+            Reason / business justification
+          </label>
+          <textarea
+            id="id_reason"
+            name="reason"
+            rows="3"
+            class="form-control form-control-sm bg-white text-dark"
+            placeholder="Why do you need this access? Trading desk, research project, new hire, replacement, etc.">{{ reason|default_if_none:"" }}</textarea>
+          <div class="form-text text-muted small">
+            This helps approvers understand the context and speed up the decision.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <a href="{% url 'portal:provisioning_catalog' %}" class="btn btn-ghost btn-sm">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-add btn-sm">
+            Submit request
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {# Дясна колона – за кого и какво ще се случи #}
+    <div class="col-12 col-lg-5">
+      <div class="dn-card p-3 mb-3">
+        <div class="section-eyebrow mb-1">Requester</div>
+        <div class="section-title" style="font-size:1.05rem;">
+          {% if acting_user %}
+            {{ acting_user.profile.full_name|default:acting_user.username }}
+          {% else %}
+            {{ request.user.profile.full_name|default:request.user.username }}
+          {% endif %}
+        </div>
+        <div class="portal-card-muted mt-1 small">
+          {% if acting_user %}
+            You are acting on behalf of this user. The access will be provisioned to them.
+          {% else %}
+            The access will be provisioned to your account.
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="dn-card p-3">
+        <div class="section-eyebrow mb-1">What happens next</div>
+        <ul class="small mb-0 portal-card-muted">
+          <li>Your request will appear in <strong>My requests</strong>.</li>
+          <li>Approvers will see it in the <strong>Approvals</strong> queue.</li>
+          <li>Once approved, your access inventory will be updated.</li>
+        </ul>
+
+        <div class="mt-3 d-flex flex-wrap gap-2">
+          <a href="{% url 'portal:provisioning_my_requests' %}" class="btn btn-ghost btn-sm">
+            View my requests
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

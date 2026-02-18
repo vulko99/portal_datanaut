@@ -998,18 +998,20 @@ def _get_entity_or_404(entity: str) -> dict:
 
 
 
-# ---------- 
+# ----------
 # DASHBOARD
 # ----------
 
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from collections import defaultdict
+import json
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-import json
+from django.shortcuts import render
 
+from .kpi import compute_dashboard_kpis
 from .models import Contract, Invoice, Vendor
 
 # ако helper-ът не е в този файл, импортни го от utils
@@ -1113,9 +1115,7 @@ def dashboard(request):
             reverse=True,
         )[:5]
 
-        vendors_by_id = {
-            v.pk: v for v in Vendor.objects.filter(id__in=vendor_ids)
-        }
+        vendors_by_id = {v.pk: v for v in Vendor.objects.filter(id__in=vendor_ids)}
 
         for vid, total in top_vendor_pairs:
             v = vendors_by_id.get(vid)
@@ -1143,12 +1143,8 @@ def dashboard(request):
     )
 
     hero_contracts_total = contracts_qs.count()
-    hero_contracts_vendors = (
-        contracts_qs.values("vendor_id").distinct().count()
-    )
-    hero_contracts_entities = (
-        contracts_qs.values("entity").distinct().count()
-    )
+    hero_contracts_vendors = contracts_qs.values("vendor_id").distinct().count()
+    hero_contracts_entities = contracts_qs.values("entity").distinct().count()
 
     # contracts by status
     status_counts: dict[str, int] = {}
@@ -1224,11 +1220,17 @@ def dashboard(request):
         "today": today,
     }
 
+    # ==========================================================
+    # 3) KPI add-on (enterprise-safe) — adds only new keys
+    # ==========================================================
+    context.update(
+    compute_dashboard_kpis(
+        owner=user,
+        total_spend_12m=hero_total_spend,
+    )
+)
+
     return render(request, "portal/dashboard.html", context)
-
-
-
-
 
 
 # ----------
