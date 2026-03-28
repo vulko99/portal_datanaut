@@ -1,9 +1,9 @@
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, include
-from django.conf.urls.i18n import i18n_patterns
+from django.urls import include, path
 
 from landing import views as landing_views
 
@@ -29,7 +29,7 @@ urlpatterns += i18n_patterns(
     # ----- Portal app -----
     path("portal/", include(("portal.urls", "portal"), namespace="portal")),
 
-    # ----- Allauth (ако ти трябва) -----
+    # ----- Allauth -----
     path("accounts/", include("allauth.urls")),
 
     # ----- Marketing site -----
@@ -38,10 +38,13 @@ urlpatterns += i18n_patterns(
     path("pricing/", landing_views.pricing, name="pricing"),
     path("contact/", landing_views.contact, name="contact"),
     path("about/", landing_views.about, name="about"),
+    path("how-it-works/", landing_views.how_it_works, name="how_it_works"),
     path("who/trading-desks/", landing_views.for_trading_desks, name="for_trading_desks"),
     path("who/cfo-finance/", landing_views.for_cfo, name="for_cfo"),
     path("who/investors-board/", landing_views.for_investors, name="for_investors"),
-    path("how-it-works/", landing_views.how_it_works, name="how_it_works"),
+    path("roi-calculator/", landing_views.roi_calculator, name="roi_calculator"),
+    path("roi-calculator/export-pdf/", landing_views.export_report_pdf, name="export_report_pdf"),
+    path("roi-calculator/export-xlsx/", landing_views.export_report_xlsx, name="export_report_xlsx"),
 )
 
 if settings.DEBUG:

@@ -1,0 +1,1311 @@
+{% extends "landing/base.html" %}
+{% load i18n %}
+
+{% block title %}ROI Calculator · DataNaut{% endblock %}
+
+{% block content %}
+
+<section class="calculator-hero">
+    <div class="container-lg">
+        <div class="text-center mb-4" style="animation: fadeInUp 0.8s ease-out;">
+            <span class="calculator-badge">AI-POWERED BENCHMARKING · 2026</span>
+            <h1 class="calculator-title mt-3 mb-3">
+                Calculate Your Market Data Savings
+            </h1>
+            <p class="calculator-subtitle mb-0">
+                See how much you're losing to ghost licenses, overlapping feeds, and manual audits.<br>
+                Build a CFO-ready savings case in under a minute.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="calculator-section">
+    <div class="container-lg">
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+                <div class="calculator-card" style="animation: fadeInUp 0.8s ease-out 0.2s backwards;">
+                    <h2 class="calculator-card-title">Your Current Setup</h2>
+                    <p class="calculator-card-subtitle">Move the sliders or type values directly</p>
+
+                    <form id="roiForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="calc-input-group">
+                            <label class="calc-label">
+                                <span class="calc-label-text">Company Name</span>
+                            </label>
+                            <input
+                                type="text"
+                                class="calc-text-input"
+                                id="companyInput"
+                                placeholder="Your Company"
+                                value="Your Company"
+                            >
+                        </div>
+
+                        <div class="calc-input-group">
+                            <label class="calc-label">
+                                <span class="calc-label-text">Annual Market Data Spend</span>
+                                <span class="calc-label-value" id="spendValue">$0</span>
+                            </label>
+
+                            <div class="calc-input-inline">
+                                <input
+                                    type="range"
+                                    class="calc-slider"
+                                    id="spendSlider"
+                                    min="0"
+                                    max="50000000"
+                                    step="10000"
+                                    value="0"
+                                >
+                                <div class="calc-number-wrap calc-number-wrap-wide">
+                                    <span class="calc-prefix">$</span>
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        class="calc-number-input"
+                                        id="spendInput"
+                                        value="0"
+                                        autocomplete="off"
+                                    >
+                                    <span class="calc-suffix">USD</span>
+                                </div>
+                            </div>
+
+                            <div class="calc-range-labels">
+                                <span>$0</span>
+                                <span>$50,000,000</span>
+                            </div>
+                        </div>
+
+                        <div class="calc-input-group">
+                            <label class="calc-label">
+                                <span class="calc-label-text">Number of Terminals / Users</span>
+                                <span class="calc-label-value" id="terminalsValue">0</span>
+                            </label>
+
+                            <div class="calc-input-inline">
+                                <input
+                                    type="range"
+                                    class="calc-slider"
+                                    id="terminalsSlider"
+                                    min="0"
+                                    max="5000"
+                                    step="1"
+                                    value="0"
+                                >
+                                <div class="calc-number-wrap">
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        class="calc-number-input"
+                                        id="terminalsInput"
+                                        value="0"
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="calc-range-labels">
+                                <span>0</span>
+                                <span>5,000</span>
+                            </div>
+                        </div>
+
+                        <div class="calc-input-group">
+                            <label class="calc-label">
+                                <span class="calc-label-text">Estimated "Zombie" License Rate</span>
+                                <span class="calc-label-value" id="zombieValue">0%</span>
+                            </label>
+
+                            <div class="calc-input-inline">
+                                <input
+                                    type="range"
+                                    class="calc-slider"
+                                    id="zombieSlider"
+                                    min="0"
+                                    max="40"
+                                    step="1"
+                                    value="0"
+                                >
+                                <div class="calc-number-wrap">
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        class="calc-number-input"
+                                        id="zombieInput"
+                                        value="0"
+                                        autocomplete="off"
+                                    >
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="calc-range-labels">
+                                <span>0%</span>
+                                <span>40%</span>
+                            </div>
+                            <p class="calc-help-text">Industry average: 10–20% of licenses are unused or redundant</p>
+                        </div>
+
+                        <div class="calc-input-group">
+                            <label class="calc-label">
+                                <span class="calc-label-text">Current Management Method</span>
+                            </label>
+                            <select class="calc-select" id="managementMethod">
+                                <option value="excel">Excel Spreadsheets</option>
+                                <option value="manual">Manual Tracking</option>
+                                <option value="none">No Formal Process</option>
+                                <option value="basic">Basic Software</option>
+                            </select>
+                        </div>
+
+                        <div class="calc-note-box">
+                            <h3 class="calc-note-title">How the estimate works</h3>
+                            <ul class="calc-note-list">
+                                <li>Zombie license cost is based on your input waste rate.</li>
+                                <li>Overlapping feed cost assumes 8% average redundancy.</li>
+                                <li>Manual audit cost reflects process overhead from non-automated governance.</li>
+                                <li>Target savings assumes 70% recoverability with continuous optimization.</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="results-card sticky-results" style="animation: fadeInUp 0.8s ease-out 0.4s backwards;">
+                    <div class="results-alert">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">
+                            <h3 class="alert-title">Estimated Annual Leakage</h3>
+                            <div class="alert-amount" id="leakageAmount">$0</div>
+                            <p class="alert-text">Based on ghost licenses, overlapping feeds, and manual audit inefficiency</p>
+                        </div>
+                    </div>
+
+                    <div class="results-breakdown">
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Projected 12-Month Savings</div>
+                            <div class="breakdown-value" id="savingsAmount">$0</div>
+                            <div class="breakdown-subtext">Target scenario using 70% recovery rate</div>
+                        </div>
+
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Payback Period</div>
+                            <div class="breakdown-value" id="paybackPeriod">0.0 months</div>
+                            <div class="breakdown-subtext">Time to ROI breakeven</div>
+                        </div>
+
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Labor Hours Recovered</div>
+                            <div class="breakdown-value" id="laborHours">0 hours/year</div>
+                            <div class="breakdown-subtext">Eliminated manual audits</div>
+                        </div>
+                    </div>
+
+                    <div class="scenario-box">
+                        <h4 class="scenario-title">Scenario Analysis</h4>
+                        <div class="scenario-grid">
+                            <div class="scenario-card">
+                                <div class="scenario-label">Conservative</div>
+                                <div class="scenario-rate">50%</div>
+                                <div class="scenario-value" id="conservativeSavings">$0</div>
+                            </div>
+                            <div class="scenario-card scenario-card-featured">
+                                <div class="scenario-label">Target</div>
+                                <div class="scenario-rate">70%</div>
+                                <div class="scenario-value" id="targetSavings">$0</div>
+                            </div>
+                            <div class="scenario-card">
+                                <div class="scenario-label">Optimistic</div>
+                                <div class="scenario-rate">90%</div>
+                                <div class="scenario-value" id="optimisticSavings">$0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-cta">
+                        <h4 class="cta-title">Get Your Detailed Report</h4>
+                        <p class="cta-text">Export the current estimate for internal review and business case validation.</p>
+
+                        <form id="leadForm" class="lead-form">
+                            <input
+                                type="email"
+                                class="lead-input"
+                                id="emailInput"
+                                placeholder="your.email@company.com"
+                                required
+                            >
+                            <button type="submit" class="lead-button">
+                                Request Full Report
+                            </button>
+                        </form>
+
+                        <div class="export-actions">
+                            <button type="button" class="lead-button export-button" id="exportExcelBtn">
+                                Export to Excel
+                            </button>
+                            <button type="button" class="lead-button pdf-button" id="exportPdfBtn">
+                                Download PDF
+                            </button>
+                        </div>
+
+                        <p class="share-help-text">
+                            Best used for validation, budgeting, and internal deck preparation.
+                        </p>
+                    </div>
+
+                    <div class="disclaimer-box">
+                        <strong>Directional estimate:</strong> Results are based on benchmark assumptions for market data governance, license utilization, overlapping entitlements, and manual control overhead. Final savings depend on vendor mix, usage patterns, and remediation scope.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="roadmap-section mt-5" style="animation: fadeInUp 0.8s ease-out 0.55s backwards;">
+            <div class="roadmap-card">
+                <h3 class="roadmap-title">Step-by-Step Recovery Roadmap</h3>
+                <div class="roadmap-grid">
+                    <div class="roadmap-item">
+                        <div class="roadmap-phase">Phase 1</div>
+                        <div class="roadmap-heading">Inventory Discovery</div>
+                        <div class="roadmap-text">Auto-sync HR records and terminal inventories to identify inactive users and stale entitlements.</div>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-phase">Phase 2</div>
+                        <div class="roadmap-heading">Duplicate Analysis</div>
+                        <div class="roadmap-text">Flag users and desks with overlapping feed coverage across multiple vendors.</div>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-phase">Phase 3</div>
+                        <div class="roadmap-heading">Governance Automation</div>
+                        <div class="roadmap-text">Move from spreadsheet-led review to continuous monitoring and approval workflow.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="benchmark-section mt-5" style="animation: fadeInUp 0.8s ease-out 0.6s backwards;">
+            <div class="benchmark-card">
+                <h3 class="benchmark-title">
+                    <span class="benchmark-icon">📊</span>
+                    AI-Powered Industry Benchmark
+                </h3>
+                <p class="benchmark-text">
+                    Based on anonymized data from 120+ financial institutions, organizations of your size
+                    typically spend <strong id="benchmarkSpend">$0 - $0</strong> annually on market data.
+                    Your inputs suggest you're <strong id="benchmarkPosition">set your inputs to compare against the benchmark</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="comparison-section mt-5" style="animation: fadeInUp 0.8s ease-out 0.7s backwards;">
+            <div class="comparison-card">
+                <h3 class="comparison-title">Current State vs DataNaut Automation</h3>
+                <div class="table-responsive">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Your Current</th>
+                                <th>DataNaut SaaS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Audit Frequency</td>
+                                <td id="currentAuditFrequency">Annual / Quarterly</td>
+                                <td>Real-time / 24x7</td>
+                            </tr>
+                            <tr>
+                                <td>Accuracy</td>
+                                <td>60–70% (Manual Error Risk)</td>
+                                <td>99.9% (API-Driven)</td>
+                            </tr>
+                            <tr>
+                                <td>Cost to Manage</td>
+                                <td id="currentManageCost">$0</td>
+                                <td>$50,000 baseline subscription</td>
+                            </tr>
+                            <tr>
+                                <td>Redundancy Detection</td>
+                                <td>Ad hoc / spreadsheet-led</td>
+                                <td>Continuous duplicate feed detection</td>
+                            </tr>
+                            <tr>
+                                <td>Control Trail</td>
+                                <td>Email + spreadsheet notes</td>
+                                <td>Centralized governance record</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --calc-primary: #00e0d6;
+        --calc-secondary: #22c55e;
+        --calc-bg-dark: #020617;
+        --calc-bg-card: rgba(15, 23, 42, 0.96);
+        --calc-text: #e5e7eb;
+        --calc-text-muted: #9ca3af;
+        --calc-border: rgba(148, 163, 184, 0.3);
+    }
+
+    .calculator-hero {
+        padding: 120px 0 48px;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(0, 224, 214, 0.15), transparent 60%),
+            radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.12), transparent 58%),
+            var(--calc-bg-dark);
+    }
+
+    .calculator-badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        background: rgba(0, 224, 214, 0.15);
+        color: var(--calc-primary);
+        border: 1px solid rgba(0, 224, 214, 0.3);
+    }
+
+    .calculator-title {
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        font-weight: 800;
+        color: #f9fafb;
+        letter-spacing: -0.03em;
+    }
+
+    .calculator-subtitle {
+        font-size: 1.1rem;
+        color: var(--calc-text-muted);
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .calculator-section {
+        background: #f9fafb;
+        padding: 56px 0 96px;
+        min-height: 100vh;
+    }
+
+    .calculator-card {
+        background: linear-gradient(135deg, var(--calc-bg-card), rgba(15, 23, 42, 0.98));
+        border: 1px solid var(--calc-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .calculator-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #f9fafb;
+        margin-bottom: 0.5rem;
+    }
+
+    .calculator-card-subtitle {
+        color: var(--calc-text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    .calc-input-group {
+        margin-bottom: 2.25rem;
+    }
+
+    .calc-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+
+    .calc-label-text {
+        font-size: 0.95rem;
+        color: var(--calc-text);
+        font-weight: 600;
+    }
+
+    .calc-label-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--calc-primary);
+        white-space: nowrap;
+    }
+
+    .calc-text-input,
+    .calc-select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        background: rgba(2, 6, 23, 0.6);
+        border: 1px solid var(--calc-border);
+        border-radius: 10px;
+        color: var(--calc-text);
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+    .calc-text-input:focus,
+    .calc-select:focus {
+        outline: none;
+        border-color: var(--calc-primary);
+        box-shadow: 0 0 0 3px rgba(0, 224, 214, 0.15);
+    }
+
+    .calc-input-inline {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .calc-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--calc-primary), var(--calc-secondary));
+        outline: none;
+        opacity: 0.95;
+        transition: opacity 0.2s;
+    }
+
+    .calc-slider:hover {
+        opacity: 1;
+    }
+
+    .calc-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 224, 214, 0.5);
+        transition: all 0.3s;
+    }
+
+    .calc-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+        box-shadow: 0 6px 20px rgba(0, 224, 214, 0.7);
+    }
+
+    .calc-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 224, 214, 0.5);
+    }
+
+    .calc-number-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(2, 6, 23, 0.6);
+        border: 1px solid var(--calc-border);
+        border-radius: 10px;
+        padding: 0.65rem 0.8rem;
+        min-height: 48px;
+    }
+
+    .calc-number-wrap-wide {
+        min-width: 200px;
+    }
+
+    .calc-number-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: var(--calc-text);
+        font-size: 0.95rem;
+        outline: none;
+    }
+
+    .calc-prefix,
+    .calc-suffix {
+        color: var(--calc-text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .calc-range-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--calc-text-muted);
+        margin-top: 0.5rem;
+    }
+
+    .calc-help-text {
+        font-size: 0.8rem;
+        color: var(--calc-text-muted);
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .calc-note-box {
+        margin-top: 2rem;
+        padding: 1.25rem;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .calc-note-title {
+        font-size: 1rem;
+        color: #f9fafb;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .calc-note-list {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: var(--calc-text-muted);
+        font-size: 0.85rem;
+        line-height: 1.7;
+    }
+
+    .results-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+
+    .sticky-results {
+        position: sticky;
+        top: 100px;
+    }
+
+    .results-alert {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+        border: 2px solid #f59e0b;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .alert-icon {
+        font-size: 2rem;
+        line-height: 1;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #92400e;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-amount {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #dc2626;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-text {
+        font-size: 0.85rem;
+        color: #78350f;
+        margin: 0;
+    }
+
+    .results-breakdown {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .breakdown-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .breakdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .breakdown-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+
+    .breakdown-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--calc-secondary);
+        line-height: 1.2;
+    }
+
+    .breakdown-subtext {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    .scenario-box {
+        margin-bottom: 2rem;
+    }
+
+    .scenario-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .scenario-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .scenario-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 1rem;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .scenario-card-featured {
+        border-color: #00e0d6;
+        box-shadow: 0 8px 20px rgba(0, 224, 214, 0.12);
+    }
+
+    .scenario-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-bottom: 0.35rem;
+    }
+
+    .scenario-rate {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.4rem;
+    }
+
+    .scenario-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #16a34a;
+    }
+
+    .results-cta {
+        background: linear-gradient(135deg, rgba(0, 224, 214, 0.1), rgba(34, 197, 94, 0.1));
+        border: 2px solid var(--calc-primary);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+
+    .cta-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+
+    .cta-text {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-bottom: 1rem;
+    }
+
+    .lead-form {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .lead-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    .lead-input:focus {
+        outline: none;
+        border-color: var(--calc-primary);
+        box-shadow: 0 0 0 3px rgba(0, 224, 214, 0.1);
+    }
+
+    .lead-button {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(90deg, var(--calc-secondary), #06b6d4);
+        border: none;
+        border-radius: 8px;
+        color: #022c22;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .lead-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .export-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .export-button {
+        width: 100%;
+        background: linear-gradient(90deg, #2563eb, #00e0d6);
+        color: white;
+    }
+
+    .export-button:hover {
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .pdf-button {
+        width: 100%;
+        background: linear-gradient(90deg, #7c3aed, #2563eb);
+        color: white;
+    }
+
+    .pdf-button:hover {
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+    }
+
+    .share-help-text {
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+        font-size: 0.8rem;
+        color: #4b5563;
+    }
+
+    .disclaimer-box {
+        margin-top: 1rem;
+        padding: 1rem 1.1rem;
+        border-radius: 14px;
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        color: #7c2d12;
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .roadmap-card,
+    .benchmark-card,
+    .comparison-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .roadmap-title,
+    .comparison-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.25rem;
+    }
+
+    .roadmap-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .roadmap-item {
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        padding: 1rem;
+    }
+
+    .roadmap-phase {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0ea5e9;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.5rem;
+    }
+
+    .roadmap-heading {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.4rem;
+    }
+
+    .roadmap-text {
+        font-size: 0.85rem;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .benchmark-section {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .benchmark-card {
+        background: linear-gradient(135deg, rgba(0, 224, 214, 0.05), rgba(34, 197, 94, 0.05));
+        border: 1px solid rgba(0, 224, 214, 0.3);
+    }
+
+    .benchmark-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .benchmark-icon {
+        font-size: 1.5rem;
+    }
+
+    .benchmark-text {
+        font-size: 0.95rem;
+        color: #4b5563;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .comparison-table th {
+        background: #0f172a;
+        color: white;
+        font-weight: 700;
+    }
+
+    .comparison-table td {
+        color: #334155;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .calculator-hero {
+            padding: 96px 0 40px;
+        }
+
+        .calculator-title {
+            font-size: 2rem;
+        }
+
+        .calculator-subtitle {
+            font-size: 1rem;
+        }
+
+        .calculator-card,
+        .results-card,
+        .roadmap-card,
+        .benchmark-card,
+        .comparison-card {
+            padding: 1.5rem;
+        }
+
+        .sticky-results {
+            position: static;
+        }
+
+        .lead-form,
+        .export-actions {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .alert-amount {
+            font-size: 2rem;
+        }
+
+        .breakdown-value {
+            font-size: 1.5rem;
+        }
+
+        .calc-input-inline,
+        .scenario-grid,
+        .roadmap-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    const companyInput = document.getElementById('companyInput');
+
+    const spendSlider = document.getElementById('spendSlider');
+    const terminalsSlider = document.getElementById('terminalsSlider');
+    const zombieSlider = document.getElementById('zombieSlider');
+
+    const spendInput = document.getElementById('spendInput');
+    const terminalsInput = document.getElementById('terminalsInput');
+    const zombieInput = document.getElementById('zombieInput');
+
+    const managementMethod = document.getElementById('managementMethod');
+
+    const spendValue = document.getElementById('spendValue');
+    const terminalsValue = document.getElementById('terminalsValue');
+    const zombieValue = document.getElementById('zombieValue');
+
+    const leakageAmount = document.getElementById('leakageAmount');
+    const savingsAmount = document.getElementById('savingsAmount');
+    const paybackPeriod = document.getElementById('paybackPeriod');
+    const laborHours = document.getElementById('laborHours');
+    const benchmarkSpend = document.getElementById('benchmarkSpend');
+    const benchmarkPosition = document.getElementById('benchmarkPosition');
+    const conservativeSavings = document.getElementById('conservativeSavings');
+    const targetSavings = document.getElementById('targetSavings');
+    const optimisticSavings = document.getElementById('optimisticSavings');
+    const currentAuditFrequency = document.getElementById('currentAuditFrequency');
+    const currentManageCost = document.getElementById('currentManageCost');
+
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    const leadForm = document.getElementById('leadForm');
+    const emailInput = document.getElementById('emailInput');
+
+    function formatCurrency(amount) {
+        if (amount >= 1000000) {
+            return '$' + (amount / 1000000).toFixed(1) + 'M';
+        }
+        return '$' + Math.round(amount).toLocaleString();
+    }
+
+    function formatCurrencyFull(amount) {
+        return '$' + Math.round(amount).toLocaleString();
+    }
+
+    function formatIntegerString(raw) {
+        const digits = String(raw).replace(/[^\d]/g, '');
+        if (!digits) {
+            return '0';
+        }
+        return Number(digits).toLocaleString();
+    }
+
+    function parseFormattedInteger(raw) {
+        const digits = String(raw).replace(/[^\d]/g, '');
+        if (!digits) {
+            return 0;
+        }
+        return Number(digits);
+    }
+
+    function formatNumber(num) {
+        return Number(num).toLocaleString();
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function setValue(element, value, type = 'currency') {
+        if (type === 'currency') {
+            element.textContent = formatCurrency(Math.round(value));
+        } else if (type === 'months') {
+            element.textContent = Number(value).toFixed(1) + ' months';
+        } else if (type === 'hours') {
+            element.textContent = Math.round(value) + ' hours/year';
+        }
+    }
+
+    function getSpendValueUsd() {
+        const parsed = parseFormattedInteger(spendInput.value);
+        return clamp(parsed, parseFloat(spendSlider.min), parseFloat(spendSlider.max));
+    }
+
+    function getTerminalsValue() {
+        const parsed = parseFormattedInteger(terminalsInput.value);
+        return clamp(parsed, parseFloat(terminalsSlider.min), parseFloat(terminalsSlider.max));
+    }
+
+    function getZombieValue() {
+        const parsed = parseFormattedInteger(zombieInput.value);
+        return clamp(parsed, parseFloat(zombieSlider.min), parseFloat(zombieSlider.max));
+    }
+
+    function getCalculatorData() {
+        const spend = getSpendValueUsd();
+        const spendM = spend / 1000000;
+
+        const terminals = Math.round(getTerminalsValue());
+        const zombieRatePercent = Math.round(getZombieValue());
+        const zombieRate = zombieRatePercent / 100;
+
+        const method = managementMethod.value;
+
+        const zombieCost = spend * zombieRate;
+        const overlappingCost = spend * 0.08;
+        const manualCost = method === 'none' ? spend * 0.05 : spend * 0.03;
+        const totalLeakage = zombieCost + overlappingCost + manualCost;
+
+        const savings = totalLeakage * 0.70;
+        const conservative = totalLeakage * 0.50;
+        const optimistic = totalLeakage * 0.90;
+
+        const datanautCost = 50000;
+        const monthlySavings = savings / 12;
+        const payback = monthlySavings > 0 ? datanautCost / monthlySavings : 0;
+        const laborSaved = terminals * 2;
+
+        const expectedMin = spend * 0.96;
+        const expectedMax = spend * 1.24;
+
+        let benchmarkText = 'within the expected range';
+        if (spend === 0) {
+            benchmarkText = 'set your inputs to compare against the benchmark';
+        } else if (spend < expectedMin) {
+            benchmarkText = 'below typical spend (good cost control)';
+        } else if (spend > expectedMax) {
+            benchmarkText = 'above typical spend (high savings potential)';
+        }
+
+        let auditFrequencyText = 'Annual / Quarterly';
+        if (method === 'manual') {
+            auditFrequencyText = 'Quarterly / Ad hoc';
+        } else if (method === 'none') {
+            auditFrequencyText = 'Ad hoc / unmanaged';
+        } else if (method === 'basic') {
+            auditFrequencyText = 'Monthly / basic tooling';
+        }
+
+        return {
+            company_name: companyInput.value.trim() || 'Your Company',
+            annual_spend_m: Number(spendM.toFixed(4)),
+            annual_spend_usd: Math.round(spend),
+            terminals,
+            zombie_rate_percent: zombieRatePercent,
+            management_method: method,
+            zombie_cost_usd: Math.round(zombieCost),
+            overlapping_cost_usd: Math.round(overlappingCost),
+            manual_cost_usd: Math.round(manualCost),
+            annual_leakage_usd: Math.round(totalLeakage),
+            projected_savings_usd: Math.round(savings),
+            payback_months: Number(payback.toFixed(2)),
+            labor_hours_recovered: Math.round(laborSaved),
+            benchmark_position: benchmarkText,
+            conservative_savings_usd: Math.round(conservative),
+            target_savings_usd: Math.round(savings),
+            optimistic_savings_usd: Math.round(optimistic),
+            auditFrequencyText
+        };
+    }
+
+    function calculate() {
+        const data = getCalculatorData();
+
+        spendValue.textContent = formatCurrencyFull(data.annual_spend_usd);
+        terminalsValue.textContent = formatNumber(data.terminals);
+        zombieValue.textContent = data.zombie_rate_percent + '%';
+
+        benchmarkSpend.textContent = formatCurrencyFull(data.annual_spend_usd * 0.96) + ' - ' + formatCurrencyFull(data.annual_spend_usd * 1.24);
+        benchmarkPosition.textContent = data.benchmark_position;
+
+        currentAuditFrequency.textContent = data.auditFrequencyText;
+        currentManageCost.textContent = formatCurrency(data.manual_cost_usd);
+
+        setValue(leakageAmount, data.annual_leakage_usd, 'currency');
+        setValue(savingsAmount, data.projected_savings_usd, 'currency');
+        setValue(paybackPeriod, data.payback_months, 'months');
+        setValue(laborHours, data.labor_hours_recovered, 'hours');
+        setValue(conservativeSavings, data.conservative_savings_usd, 'currency');
+        setValue(targetSavings, data.target_savings_usd, 'currency');
+        setValue(optimisticSavings, data.optimistic_savings_usd, 'currency');
+    }
+
+    function syncSpendSliderToInput() {
+        spendSlider.addEventListener('input', () => {
+            spendInput.value = formatIntegerString(spendSlider.value);
+            calculate();
+        });
+    }
+
+    function syncTerminalsSliderToInput() {
+        terminalsSlider.addEventListener('input', () => {
+            terminalsInput.value = formatIntegerString(terminalsSlider.value);
+            calculate();
+        });
+    }
+
+    function syncZombieSliderToInput() {
+        zombieSlider.addEventListener('input', () => {
+            zombieInput.value = formatIntegerString(zombieSlider.value);
+            calculate();
+        });
+    }
+
+    function bindFormattedIntegerInput(input, slider) {
+        input.addEventListener('input', () => {
+            const parsed = parseFormattedInteger(input.value);
+            input.value = formatIntegerString(parsed);
+            slider.value = clamp(parsed, parseFloat(slider.min), parseFloat(slider.max));
+            calculate();
+        });
+
+        input.addEventListener('blur', () => {
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const step = parseFloat(slider.step) || 1;
+
+            let value = parseFormattedInteger(input.value);
+            value = clamp(value, min, max);
+            value = Math.round(value / step) * step;
+
+            input.value = formatIntegerString(value);
+            slider.value = value;
+            calculate();
+        });
+    }
+
+    function downloadBlob(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
+
+    async function exportToXlsx() {
+        const data = getCalculatorData();
+
+        const response = await fetch("{% url 'export_report_xlsx' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            alert("Could not generate Excel report.");
+            return;
+        }
+
+        const blob = await response.blob();
+        downloadBlob(blob, `datanaut-roi-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    async function exportToPdf() {
+        const data = getCalculatorData();
+
+        const response = await fetch("{% url 'export_report_pdf' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            alert("Could not generate PDF report.");
+            return;
+        }
+
+        const blob = await response.blob();
+        downloadBlob(blob, `datanaut-roi-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+    }
+
+    syncSpendSliderToInput();
+    syncTerminalsSliderToInput();
+    syncZombieSliderToInput();
+
+    bindFormattedIntegerInput(spendInput, spendSlider);
+    bindFormattedIntegerInput(terminalsInput, terminalsSlider);
+    bindFormattedIntegerInput(zombieInput, zombieSlider);
+
+    companyInput.addEventListener('input', calculate);
+    managementMethod.addEventListener('change', calculate);
+    exportExcelBtn.addEventListener('click', exportToXlsx);
+    exportPdfBtn.addEventListener('click', exportToPdf);
+
+    leadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = emailInput.value;
+        const data = getCalculatorData();
+
+        alert(
+            'Thank you! Your detailed report request has been captured for ' + email +
+            '\n\nCompany: ' + data.company_name +
+            '\nEstimated Annual Leakage: ' + formatCurrencyFull(data.annual_leakage_usd) +
+            '\nProjected Savings: ' + formatCurrencyFull(data.projected_savings_usd)
+        );
+
+        leadForm.reset();
+    });
+
+    spendInput.value = formatIntegerString(0);
+    terminalsInput.value = formatIntegerString(0);
+    zombieInput.value = formatIntegerString(0);
+
+    calculate();
+</script>
+
+{% endblock %}
