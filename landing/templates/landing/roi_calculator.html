@@ -8,12 +8,12 @@
 <section class="calculator-hero">
     <div class="container-lg">
         <div class="text-center mb-4" style="animation: fadeInUp 0.8s ease-out;">
-            <span class="calculator-badge">AI-POWERED BENCHMARKING · 2026</span>
+            <span class="calculator-badge">INDICATIVE MODEL</span>
             <h1 class="calculator-title mt-3 mb-3">
                 Calculate Your Market Data Savings
             </h1>
             <p class="calculator-subtitle mb-0">
-                See how much you're losing to ghost licenses, overlapping feeds, and manual audits.<br>
+                See how much you're losing to dormant licences, overlapping feeds, and manual audits.<br>
                 Build a CFO-ready savings case in under a minute.
             </p>
         </div>
@@ -181,9 +181,9 @@
                     <div class="results-alert">
                         <div class="alert-icon">⚠️</div>
                         <div class="alert-content">
-                            <h3 class="alert-title">Estimated Annual Leakage</h3>
+                            <h3 class="alert-title">Estimated annual exposure</h3>
                             <div class="alert-amount" id="leakageAmount">$0</div>
-                            <p class="alert-text">Based on ghost licenses, overlapping feeds, and manual audit inefficiency</p>
+                            <p class="alert-text">Based on dormant licences, overlapping feeds, and manual audit inefficiency</p>
                         </div>
                     </div>
 
@@ -294,7 +294,7 @@
             <div class="benchmark-card">
                 <h3 class="benchmark-title">
                     <span class="benchmark-icon">📊</span>
-                    AI-Powered Industry Benchmark
+                    Industry benchmark position
                 </h3>
                 <p class="benchmark-text">
                     Based on anonymized data from 120+ financial institutions, organizations of your size
@@ -398,7 +398,7 @@
     }
 
     .calculator-section {
-        background: #f9fafb;
+        background: var(--panel-2);
         padding: 56px 0 96px;
         min-height: 100vh;
     }
@@ -496,7 +496,7 @@
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: white;
+        background: var(--panel);
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 224, 214, 0.5);
         transition: all 0.3s;
@@ -511,7 +511,7 @@
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: white;
+        background: var(--panel);
         cursor: pointer;
         border: none;
         box-shadow: 0 4px 12px rgba(0, 224, 214, 0.5);
@@ -588,7 +588,7 @@
     }
 
     .results-card {
-        background: white;
+        background: var(--panel);
         border-radius: 20px;
         padding: 2rem;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -697,7 +697,7 @@
         border: 1px solid #e5e7eb;
         border-radius: 14px;
         padding: 1rem;
-        background: #ffffff;
+        background: var(--panel);
         text-align: center;
     }
 
@@ -820,7 +820,7 @@
         margin-top: 1rem;
         padding: 1rem 1.1rem;
         border-radius: 14px;
-        background: #fff7ed;
+        background: var(--panel-2);
         border: 1px solid #fdba74;
         color: #7c2d12;
         font-size: 0.8rem;
@@ -830,7 +830,7 @@
     .roadmap-card,
     .benchmark-card,
     .comparison-card {
-        background: white;
+        background: var(--panel);
         border-radius: 16px;
         padding: 2rem;
         box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
@@ -853,7 +853,7 @@
 
     .roadmap-item {
         border-radius: 14px;
-        background: #f8fafc;
+        background: var(--panel-2);
         border: 1px solid #e5e7eb;
         padding: 1rem;
     }
@@ -1294,7 +1294,7 @@
         alert(
             'Thank you! Your detailed report request has been captured for ' + email +
             '\n\nCompany: ' + data.company_name +
-            '\nEstimated Annual Leakage: ' + formatCurrencyFull(data.annual_leakage_usd) +
+            '\nEstimated annual exposure: ' + formatCurrencyFull(data.annual_leakage_usd) +
             '\nProjected Savings: ' + formatCurrencyFull(data.projected_savings_usd)
         );
 
@@ -1308,4 +1308,38 @@
     calculate();
 </script>
 
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* --- brought into the DataNaut design system --- */
+.calculator-badge{
+  background:rgba(76,201,232,.08)!important;border:1px solid var(--sig-dim)!important;
+  color:var(--sig)!important;font-family:var(--fm)!important;letter-spacing:.18em!important;
+  text-transform:uppercase!important;font-size:.64rem!important;border-radius:0!important;
+}
+.calculator-section,.calc-section,.results-section{background:transparent!important}
+.calc-card,.result-card,.results-card,.summary-card,.scenario-card{
+  background:var(--panel)!important;border:1px solid var(--hair)!important;
+  border-radius:0!important;color:var(--bone)!important;box-shadow:none!important;
+}
+.calc-card h2,.calc-card h3,.result-card h2,.result-card h3,
+.results-card h2,.results-card h3{color:var(--bone)!important;font-family:var(--fd)!important}
+.calc-card p,.result-card p,.results-card p,.calc-card label,.result-card label{color:var(--ash)!important}
+input[type=text],input[type=email],input[type=number],select{
+  background:var(--void)!important;border:1px solid var(--hair-2)!important;
+  color:var(--bone)!important;border-radius:0!important;
+}
+input[type=text]:focus,input[type=email]:focus,input[type=number]:focus,select:focus{
+  border-color:var(--sig)!important;box-shadow:none!important;
+}
+/* exposure is amber, not alarm-red — this is a model, not a diagnosis */
+.leakage-amount,#leakageAmount{color:var(--warn)!important}
+.savings-amount,#savingsAmount,#targetSavings,#conservativeSavings,#optimisticSavings{color:var(--good)!important}
+.text-dark,.text-black{color:var(--bone)!important}
+.border,.border-top,.border-bottom{border-color:var(--hair)!important}
+table{color:var(--ash)}
+table th{color:var(--ash-2)!important;border-color:var(--hair)!important}
+table td{border-color:var(--hair)!important}
+</style>
 {% endblock %}

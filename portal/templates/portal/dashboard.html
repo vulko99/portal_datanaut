@@ -1,4 +1,5 @@
 {% extends "portal/base_portal.html" %}
+{% load portal_extras %}
 {% load static %}
 
 {% block title_suffix %} · Dashboard{% endblock %}
@@ -54,11 +55,12 @@
             <div class="metric-label">Total data &amp; tech spend (last 12m)</div>
             <div class="metric-value">
               {% if hero_total_spend %}
-                {{ hero_total_spend|floatformat:0 }}
+                {{ hero_total_spend|money }}
               {% else %}
                 —
               {% endif %}
             </div>
+            <div class="metric-tagline">Amounts shown in EUR equivalent.</div>
             <div class="metric-sub">
               {% if hero_spend_change_pct is not None %}
                 {% if hero_spend_change_pct > 0 %}+{% endif %}
@@ -104,7 +106,7 @@
             <div class="metric-label">Dormant licence exposure</div>
             <div class="metric-value">
               {% if kpi_dormant_exposure %}
-                {{ kpi_dormant_exposure|floatformat:0 }}
+                {{ kpi_dormant_exposure|money }}
               {% else %}
                 —
               {% endif %}
@@ -121,7 +123,7 @@
             <div class="metric-label">Duplicate coverage exposure</div>
             <div class="metric-value">
               {% if kpi_duplicate_exposure %}
-                {{ kpi_duplicate_exposure|floatformat:0 }}
+                {{ kpi_duplicate_exposure|money }}
               {% else %}
                 —
               {% endif %}
@@ -145,7 +147,7 @@
             </div>
             <div class="metric-sub">
               {% if kpi_est_optimisation_amount %}
-                Indicative saving: {{ kpi_est_optimisation_amount|floatformat:0 }}
+                Indicative saving: {{ kpi_est_optimisation_amount|money }}
               {% else %}
                 Indicative saving: —
               {% endif %}
@@ -359,7 +361,7 @@
                   <td>{{ r.vendor_name }}</td>
                   <td>{{ r.category }}</td>
                   <td class="text-end">
-                    {{ r.total_spend|floatformat:0 }}
+                    {{ r.total_spend|money }}
                   </td>
                 </tr>
               {% endfor %}

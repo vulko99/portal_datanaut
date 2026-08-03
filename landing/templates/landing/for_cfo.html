@@ -1,284 +1,146 @@
 {% extends "landing/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "For CFO & finance · DataNaut" %}{% endblock %}
 
-{% block extra_head %}
-<style>
-    .persona-hero-copy p,
-    .persona-hero-copy li {
-        color: #e5e7eb;
-    }
-
-    .persona-hero-copy ul {
-        padding-left: 0;
-        list-style: none;
-        font-size: 0.95rem;
-        margin-bottom: 2rem;
-    }
-
-    .persona-hero-copy li {
-        padding: 0.5rem 0;
-        display: flex;
-        align-items: flex-start;
-        animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .persona-hero-copy li:nth-child(1) { animation-delay: 0.6s; }
-    .persona-hero-copy li:nth-child(2) { animation-delay: 0.7s; }
-    .persona-hero-copy li:nth-child(3) { animation-delay: 0.8s; }
-    .persona-hero-copy li:nth-child(4) { animation-delay: 0.9s; }
-
-    .persona-hero-copy li::before {
-        content: "✓";
-        color: #22c55e;
-        font-weight: bold;
-        margin-right: 0.75rem;
-        font-size: 1.2rem;
-        flex-shrink: 0;
-    }
-
-    .persona-hero-copy .eyebrow {
-        color: #22c55e;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        font-size: 0.8rem;
-        font-weight: 700;
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    .persona-cta-secondary {
-        border: 2px solid rgba(148, 163, 184, 0.7);
-        color: #e5e7eb;
-        background: transparent;
-        font-size: 0.9rem;
-        border-radius: 999px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .persona-cta-secondary:hover {
-        background: rgba(15, 23, 42, 0.9);
-        border-color: #22c55e;
-        color: #22c55e;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
-    }
-
-    .cfo-section {
-        background: var(--dn-bg-page);
-        padding: 72px 0 96px;
-        position: relative;
-    }
-
-    .cfo-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), transparent);
-    }
-
-    .cfo-card {
-        background: linear-gradient(135deg, #ffffff, #f9fafb);
-        color: #111827;
-        border-radius: 16px;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        padding: 2rem;
-        font-size: 0.95rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .cfo-card:nth-child(1) { animation-delay: 1s; }
-    .cfo-card:nth-child(2) { animation-delay: 1.2s; }
-    .cfo-card:nth-child(3) { animation-delay: 1.4s; }
-
-    .cfo-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #22c55e, #06b6d4);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-
-    .cfo-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
-        border-color: rgba(34, 197, 94, 0.4);
-    }
-
-    .cfo-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .cfo-card h6 {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #22c55e;
-        margin-bottom: 1rem;
-        font-weight: 700;
-        transition: color 0.3s ease;
-    }
-
-    .cfo-card:hover h6 {
-        color: #06b6d4;
-    }
-
-    .cfo-card p {
-        margin-bottom: 0;
-        line-height: 1.7;
-        color: #4b5563;
-    }
-
-    .cfo-grid-title {
-        text-align: center;
-        margin-bottom: 3rem;
-        animation: fadeInUp 0.8s ease-out 0.8s backwards;
-    }
-
-    .cfo-grid-title h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #f9fafb;
-        margin-bottom: 0.5rem;
-    }
-
-    .cfo-grid-title p {
-        color: #9ca3af;
-        font-size: 1rem;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 767.98px) {
-        .cfo-section {
-            padding: 56px 0 72px;
-        }
-
-        .cfo-card {
-            padding: 1.5rem;
-        }
-
-        .persona-hero-copy ul {
-            font-size: 0.9rem;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
-<section class="hero-section">
-    <div class="container">
-        <div class="row g-5">
-            <div class="col-lg-8 persona-hero-copy">
-                <p class="eyebrow mb-3">
-                    {% trans "For CFO & finance" %}
-                </p>
-                <h1 class="hero-title mb-4">
-                    {% trans "Turn opaque spend into a managed asset class." %}
-                </h1>
-                <p class="hero-lead mb-4">
-                    {% blocktrans trimmed %}
-                    Move market data and tech subscriptions out of the "miscellaneous IT" bucket
-                    and into a transparent, governable asset with clear ROI.
-                    {% endblocktrans %}
-                </p>
-
-                <ul>
-                    <li>
-                        {% trans "Contract-level view of spend by vendor, entity, desk and user." %}
-                    </li>
-                    <li>
-                        {% trans "Normalised usage & entitlement data to support renewal decisions." %}
-                    </li>
-                    <li>
-                        {% trans "Scenario tools for budgeting, savings initiatives and stress tests." %}
-                    </li>
-                    <li>
-                        {% trans "Audit-ready narrative for boards, regulators and internal control." %}
-                    </li>
-                </ul>
-
-                <div class="d-flex flex-wrap gap-3" style="animation: fadeInUp 0.8s ease-out 1s backwards;">
-                    <a href="{% url 'demo' %}" class="btn btn-cta-primary px-4 py-2">
-                        {% trans "View demo dashboard" %}
-                    </a>
-                    <a href="{% url 'home' %}#assessment" class="btn persona-cta-secondary px-4 py-2">
-                        {% trans "Talk to us about ROI" %}
-                    </a>
-                </div>
-            </div>
-        </div>
+<div class="dn-phero">
+  <div class="dn-shell">
+    <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
+    <h1>{% trans "Turn opaque spend into a managed asset" %}</h1>
+    <p class="dn-lede" style="margin-top:16px">
+      {% blocktrans trimmed %}
+      Market data is one of the largest lines you cannot currently explain to the board. Not because
+      anyone is careless — because the record of what was bought, billed and used sits in three
+      systems that were never designed to agree.
+      {% endblocktrans %}
+    </p>
+    <div class="dn-cta-row" style="margin-top:26px">
+      <a href="{% url 'roi_calculator' %}" class="dn-btn dn-btn-solid"><span>{% trans "Estimate your savings" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Talk to us about ROI" %}</span></a>
     </div>
+  </div>
+</div>
+
+<section class="dn-section">
+  <div class="dn-shell">
+
+    <div class="dn-grid-3 rv">
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div>
+        <h3>{% trans "Spend transparency" %}</h3>
+        <p>{% trans "Contract-level view of spend by vendor, entity, desk and user — reconciled against what was actually invoiced." %}</p>
+        <ul>
+          <li>{% trans "Normalised across currencies and billing periods" %}</li>
+          <li>{% trans "Traceable from a total back to a clause" %}</li>
+        </ul>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18V9M10 18V5M16 18v-7M22 18V3"/></svg></div>
+        <h3>{% trans "Scenario planning" %}</h3>
+        <p>{% trans "Model consolidation, renegotiation and headcount changes before you commit to them in a budget cycle." %}</p>
+        <ul>
+          <li>{% trans "Usage and entitlement data behind every assumption" %}</li>
+          <li>{% trans "Forecasting that survives a challenge from the desks" %}</li>
+        </ul>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/><path d="M9 12l2 2 4-5"/></svg></div>
+        <h3>{% trans "Governance & reporting" %}</h3>
+        <p>{% trans "An audit-ready narrative for boards, regulators and internal control — assembled once rather than rebuilt each time." %}</p>
+        <ul>
+          <li>{% trans "Exports for finance, procurement and audit" %}</li>
+          <li>{% trans "The same record for every stakeholder" %}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "Where the waste concentrates" %}</div>
+      <h2>{% trans "Four buckets, in the order they are worth attacking" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        Dormant licences come first because removing them affects nobody. Contract-level
+        renegotiation comes last because it follows the renewal calendar rather than your timetable.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="dn-grid-11 rv">
+      <div class="dn-panel">
+        <div class="dn-ph">
+          <h4>{% trans "Typical composition" %}</h4>
+          <span class="badge-sig">{% trans "Illustrative" %}</span>
+        </div>
+        <div class="dn-pb">
+          <div class="dn-brk">
+            <div>
+              <div class="dn-brk-t"><b>{% trans "Dormant licences" %}</b><i>{% trans "act immediately" %}</i></div>
+              <div class="dn-brk-b"><em class="w" data-r="12%" style="right:100%"></em></div>
+            </div>
+            <div>
+              <div class="dn-brk-t"><b>{% trans "Duplicate coverage" %}</b><i>{% trans "act immediately" %}</i></div>
+              <div class="dn-brk-b"><em class="w" data-r="32%" style="right:100%"></em></div>
+            </div>
+            <div>
+              <div class="dn-brk-t"><b>{% trans "Over-tiered packages" %}</b><i>{% trans "at renewal" %}</i></div>
+              <div class="dn-brk-b"><em class="w" data-r="53%" style="right:100%"></em></div>
+            </div>
+            <div>
+              <div class="dn-brk-t"><b>{% trans "Billing discrepancies" %}</b><i>{% trans "recoverable" %}</i></div>
+              <div class="dn-brk-b"><em class="w" data-r="66%" style="right:100%"></em></div>
+            </div>
+          </div>
+          <p class="dn-small" style="margin:22px 0 0;color:var(--ash-2)">
+            {% trans "Proportions vary by estate. The assessment produces yours, with the assumptions written down." %}
+          </p>
+        </div>
+      </div>
+
+      <div class="dn-panel">
+        <div class="dn-ph"><h4>{% trans "Why it compounds" %}</h4></div>
+        <div class="dn-pb">
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "Market data contracts renew automatically. A licence added for a three-month project four years ago is still billing today unless someone actively removed it." %}
+          </p>
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "Notice periods make it worse. Miss the window by a week and the cost is locked for another full term, whatever the usage data says." %}
+          </p>
+          <p class="dn-small" style="margin:0">
+            {% trans "This is why the fix is structural rather than a one-off cleanup. Without a system, the same drift restarts the day after the exercise ends." %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dn-legal rv" style="margin-top:44px">
+      <h4>{% trans "On the numbers" %}</h4>
+      <p>
+        {% trans "Savings ranges are indicative and depend on your contracts, your structure and how much of the recommendation you act on. The assessment exists precisely because the real number cannot be known from a slider." %}
+      </p>
+    </div>
+
+  </div>
 </section>
 
-<section class="cfo-section">
-    <div class="container">
-        <div class="cfo-grid-title">
-            <h2>{% trans "Financial control & visibility" %}</h2>
-            <p>{% trans "Turn market data into a transparent, manageable cost center" %}</p>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="cfo-card">
-                    <h6>{% trans "Spend transparency" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Map every invoice line back to vendor, feed, desk, entity and user.
-                        Understand exactly what drives the market data & tech cost line.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="cfo-card">
-                    <h6>{% trans "Scenario planning" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Model savings initiatives, vendor changes and policy tweaks before you
-                        commit. See impact by business line, entity and P&L.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="cfo-card">
-                    <h6>{% trans "Governance & reporting" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Provide boards, regulators and audit with a clear, defensible record of
-                        contracts, entitlements and usage – not just another spreadsheet.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-        </div>
+<div class="dn-band">
+  <div class="dn-shell">
+    <h2>{% trans "Get a number you can take to the board" %}</h2>
+    <p class="dn-lede">
+      {% trans "A fixed-fee assessment produces a savings range with the assumptions written down, and a prioritised list of what to act on first." %}
+    </p>
+    <div class="dn-cta-row">
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'pricing' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See pricing" %}</span></a>
     </div>
-</section>
+  </div>
+</div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.dnBars) window.dnBars();
+</script>
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends "portal/base_portal.html" %}
+{% load portal_extras %}
 
 {% block title_suffix %} · Usage{% endblock %}
 
@@ -31,7 +32,7 @@
                     <div class="col-6">
                         <div class="metric-label">Potential savings</div>
                         <div class="metric-value">
-                            {{ kpis.potential_savings|default:"0" }}
+                            {{ kpis.potential_savings|money }}
                         </div>
                         <div class="portal-card-muted small">
                             From low-usage &amp; dormant licences (illustrative).

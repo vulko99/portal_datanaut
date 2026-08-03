@@ -1,280 +1,122 @@
 {% extends "landing/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "For investors & board · DataNaut" %}{% endblock %}
 
-{% block extra_head %}
-<style>
-    .investor-hero-copy p,
-    .investor-hero-copy li {
-        color: #e5e7eb;
-    }
-
-    .investor-hero-copy ul {
-        padding-left: 0;
-        list-style: none;
-        font-size: 0.95rem;
-        margin-bottom: 2rem;
-    }
-
-    .investor-hero-copy li {
-        padding: 0.5rem 0;
-        display: flex;
-        align-items: flex-start;
-        animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .investor-hero-copy li:nth-child(1) { animation-delay: 0.6s; }
-    .investor-hero-copy li:nth-child(2) { animation-delay: 0.7s; }
-    .investor-hero-copy li:nth-child(3) { animation-delay: 0.8s; }
-
-    .investor-hero-copy li::before {
-        content: "✓";
-        color: #a855f7;
-        font-weight: bold;
-        margin-right: 0.75rem;
-        font-size: 1.2rem;
-        flex-shrink: 0;
-    }
-
-    .investor-hero-copy .eyebrow {
-        color: #a855f7;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        font-size: 0.8rem;
-        font-weight: 700;
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    .investor-cta-btn-secondary {
-        border: 2px solid rgba(148, 163, 184, 0.7);
-        color: #e5e7eb;
-        background: transparent;
-        font-size: 0.9rem;
-        border-radius: 999px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .investor-cta-btn-secondary:hover {
-        background: rgba(15, 23, 42, 0.9);
-        border-color: #a855f7;
-        color: #a855f7;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
-    }
-
-    .investor-roadmap-section {
-        background: var(--dn-bg-page);
-        padding: 72px 0 96px;
-        position: relative;
-    }
-
-    .investor-roadmap-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
-    }
-
-    .investor-phase-card {
-        background: linear-gradient(135deg, #ffffff, #f9fafb);
-        color: #111827;
-        border-radius: 16px;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        padding: 2rem;
-        font-size: 0.95rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .investor-phase-card:nth-child(1) { animation-delay: 1s; }
-    .investor-phase-card:nth-child(2) { animation-delay: 1.2s; }
-    .investor-phase-card:nth-child(3) { animation-delay: 1.4s; }
-
-    .investor-phase-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #a855f7, #2563eb);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-
-    .investor-phase-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
-        border-color: rgba(168, 85, 247, 0.4);
-    }
-
-    .investor-phase-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .investor-phase-card h6 {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #a855f7;
-        margin-bottom: 1rem;
-        font-weight: 700;
-        transition: color 0.3s ease;
-    }
-
-    .investor-phase-card:hover h6 {
-        color: #2563eb;
-    }
-
-    .investor-phase-card p {
-        margin-bottom: 0;
-        line-height: 1.7;
-        color: #4b5563;
-    }
-
-    .investor-grid-title {
-        text-align: center;
-        margin-bottom: 3rem;
-        animation: fadeInUp 0.8s ease-out 0.8s backwards;
-    }
-
-    .investor-grid-title h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #f9fafb;
-        margin-bottom: 0.5rem;
-    }
-
-    .investor-grid-title p {
-        color: #9ca3af;
-        font-size: 1rem;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 767.98px) {
-        .investor-roadmap-section {
-            padding: 56px 0 72px;
-        }
-
-        .investor-phase-card {
-            padding: 1.5rem;
-        }
-
-        .investor-hero-copy ul {
-            font-size: 0.9rem;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
-<section class="hero-section">
-    <div class="container">
-        <div class="row g-5">
-            <div class="col-lg-8 investor-hero-copy">
-                <p class="eyebrow mb-3">
-                    {% trans "For investors & boards" %}
-                </p>
-                <h1 class="hero-title mb-4">
-                    {% trans "A focused platform with clear ROI levers." %}
-                </h1>
-                <p class="hero-lead mb-4">
-                    {% blocktrans trimmed %}
-                    DataNaut is built for institutions where market data and technology subscriptions
-                    are one of the largest – and least transparent – cost lines.
-                    {% endblocktrans %}
-                </p>
-
-                <ul>
-                    <li>
-                        {% trans "Contracts-first approach – no dependence on reselling data." %}
-                    </li>
-                    <li>
-                        {% trans "Clear value story: subscription as a fraction of realised savings." %}
-                    </li>
-                    <li>
-                        {% trans "Expandable product roadmap from cost visibility to optimisation engine." %}
-                    </li>
-                </ul>
-
-                <div class="d-flex flex-wrap gap-3" style="animation: fadeInUp 0.8s ease-out 1s backwards;">
-                    <a href="{% url 'demo' %}" class="btn btn-cta-primary px-4 py-2">
-                        {% trans "View demo dashboard" %}
-                    </a>
-                    <a href="{% url 'home' %}#assessment" class="btn investor-cta-btn-secondary px-4 py-2">
-                        {% trans "Discuss investor use cases" %}
-                    </a>
-                </div>
-            </div>
-        </div>
+<div class="dn-phero">
+  <div class="dn-shell">
+    <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
+    <h1>{% trans "A focused platform with clear ROI levers" %}</h1>
+    <p class="dn-lede" style="margin-top:16px">
+      {% blocktrans trimmed %}
+      Control you can demonstrate rather than assert. The value story is arithmetic: a subscription
+      priced as a fraction of the savings it makes visible.
+      {% endblocktrans %}
+    </p>
+    <div class="dn-cta-row" style="margin-top:26px">
+      <a href="{% url 'demo' %}" class="dn-btn dn-btn-solid"><span>{% trans "View the platform" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Discuss investor use cases" %}</span></a>
     </div>
+  </div>
+</div>
+
+<section class="dn-section">
+  <div class="dn-shell">
+
+    <div class="dn-grid-3 rv">
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/></svg></div>
+        <h3>{% trans "Contracts-first" %}</h3>
+        <p>{% trans "No dependence on reselling data. We have no commercial relationship with the vendors whose contracts we analyse — which is what makes the analysis defensible." %}</p>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M7 7h7a3 3 0 010 6H7h8"/></svg></div>
+        <h3>{% trans "Legible value story" %}</h3>
+        <p>{% trans "The subscription is a fraction of realised savings. If an assessment cannot show that, we say so — which keeps the pipeline honest and the churn low." %}</p>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div>
+        <h3>{% trans "Expandable roadmap" %}</h3>
+        <p>{% trans "From cost visibility, to usage analytics, to an optimisation engine — each phase built on data the previous one already collects." %}</p>
+      </div>
+    </div>
+
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "Product roadmap" %}</div>
+      <h2>{% trans "From initial assessment to long-term optimisation" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        Each phase earns the right to the next. The wedge is narrow on purpose: contract and spend
+        visibility is a problem every firm recognises and few have solved.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="dn-grid-11 rv">
+      <div class="dn-tl">
+        <div>
+          <span class="wk">{% trans "Phase 1 — initial wedge" %}</span>
+          <h3>{% trans "Contract & spend visibility" %}</h3>
+          <p>{% trans "Import contracts, invoices and entitlement files. Normalised mapping by vendor, desk, user and entity, with exports for finance and compliance." %}</p>
+        </div>
+        <div>
+          <span class="wk">{% trans "Phase 2 — platform" %}</span>
+          <h3>{% trans "Usage & entitlement analytics" %}</h3>
+          <p>{% trans "Deeper duplicate and dormancy detection across vendors, what-if scenarios for consolidation, and APIs into internal BI tooling." %}</p>
+        </div>
+        <div>
+          <span class="wk">{% trans "Phase 3 — upside" %}</span>
+          <h3>{% trans "Optimisation engine" %}</h3>
+          <p>{% trans "Data-driven recommendations at each renewal, automated alerts for licence breaches, and negotiation playbooks built from accumulated evidence." %}</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="dn-panel">
+          <div class="dn-ph"><h4>{% trans "Why the wedge holds" %}</h4></div>
+          <div class="dn-pb">
+            <p class="dn-small" style="margin:0 0 14px">
+              {% trans "Once contract, invoice and entitlement history lives in one place, that record becomes the reference for procurement, finance and audit alike." %}
+            </p>
+            <p class="dn-small" style="margin:0 0 14px">
+              {% trans "The switching cost is not the software. It is the reconciled history, which cannot be rebuilt retroactively by a competitor." %}
+            </p>
+            <p class="dn-small" style="margin:0">
+              {% trans "Renewals recur annually, which makes the value recurring rather than a one-off cleanup." %}
+            </p>
+          </div>
+        </div>
+
+        <div class="dn-panel" style="margin-top:16px">
+          <div class="dn-ph"><h4>{% trans "Honest constraints" %}</h4></div>
+          <div class="dn-pb">
+            <p class="dn-small" style="margin:0 0 14px">
+              {% trans "Procurement cycles in banks are slow, and the first sale in any institution is measured in quarters rather than weeks." %}
+            </p>
+            <p class="dn-small" style="margin:0">
+              {% trans "We would rather state that up front than model a pipeline that assumes otherwise." %}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </section>
 
-<section class="investor-roadmap-section">
-    <div class="container">
-        <div class="investor-grid-title">
-            <h2>{% trans "Product roadmap" %}</h2>
-            <p>{% trans "From initial assessment to long-term optimization" %}</p>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="investor-phase-card">
-                    <h6>{% trans "Initial wedge" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Data Cost Assessment – focused 4–6 week engagement on a subset of vendors,
-                        validating saving potential and building the normalised data model.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="investor-phase-card">
-                    <h6>{% trans "Platform phase" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Ongoing subscription across entities and desks, with dashboards for trading,
-                        finance and procurement, plus automation of renewal decisions.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="investor-phase-card">
-                    <h6>{% trans "Longer-term upside" %}</h6>
-                    <p>
-                        {% blocktrans trimmed %}
-                        Optimisation engine that can benchmark usage patterns, vendor packages and
-                        internal costs to recommend the most efficient configuration over time.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-        </div>
+<div class="dn-band">
+  <div class="dn-shell">
+    <h2>{% trans "Want the detail behind the model?" %}</h2>
+    <p class="dn-lede">
+      {% trans "We are happy to walk through the assumptions, the pipeline and where the numbers are soft rather than firm." %}
+    </p>
+    <div class="dn-cta-row">
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Get in touch" %}</span></a>
+      <a href="{% url 'about' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "About DataNaut" %}</span></a>
     </div>
-</section>
+  </div>
+</div>
 
 {% endblock %}

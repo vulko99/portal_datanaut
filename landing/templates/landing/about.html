@@ -1,336 +1,132 @@
 {% extends "landing/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "About · DataNaut" %}{% endblock %}
 
 {% block content %}
 
-<section class="dn-hero">
-    <div class="container-lg">
-        <h1 class="dn-hero-title mb-3" style="animation: fadeInUp 0.8s ease-out;">
-            {% trans "Why DataNaut exists" %}
-        </h1>
-        <p class="dn-hero-lead mb-3" style="animation: fadeInUp 0.8s ease-out 0.2s backwards;">
-            {% blocktrans trimmed %}
-            Market data and technology subscriptions are one of the largest – and least transparent –
-            cost lines in trading and financial firms. DataNaut was created to bring contract, usage
-            and cost data into a single, trusted view.
-            {% endblocktrans %}
-        </p>
-        <p class="text-white-50 small mb-0" style="animation: fadeInUp 0.8s ease-out 0.4s backwards; max-width: 700px;">
-            {% blocktrans trimmed %}
-            Our goal is simple: cut waste without slowing down the desks, and give CFOs and investors a
-            clean story on efficiency and control.
-            {% endblocktrans %}
-        </p>
+<div class="dn-phero">
+  <div class="dn-shell">
+    <div class="dn-eyebrow">{% trans "About" %}</div>
+    <h1>{% trans "Why DataNaut exists" %}</h1>
+    <p class="dn-lede" style="margin-top:16px">
+      {% blocktrans trimmed %}
+      Because the same conversation happens in every trading floor and finance team: spend is up,
+      nobody can say precisely why, and the vendor knows more about your usage than you do.
+      {% endblocktrans %}
+    </p>
+  </div>
+</div>
+
+<section class="dn-section">
+  <div class="dn-shell">
+
+    <div class="dn-grid-11 rv">
+      <div class="dn-panel">
+        <div class="dn-ph"><h4>{% trans "The problem" %}</h4></div>
+        <div class="dn-pb">
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "Market data and technology contracts are negotiated by procurement, paid by finance, and used by desks — and none of those three hold the whole record." %}
+          </p>
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "The result is predictable: duplicated coverage across entities, licences nobody has opened in a year, and renewals negotiated against a spreadsheet somebody rebuilt from a partial export." %}
+          </p>
+          <p class="dn-small" style="margin:0">
+            {% trans "None of that is carelessness. It is what happens when a record is split three ways and reassembled by hand each quarter." %}
+          </p>
+        </div>
+      </div>
+      <div class="dn-panel">
+        <div class="dn-ph"><h4>{% trans "Our approach" %}</h4></div>
+        <div class="dn-pb">
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "Contracts first. Everything else — usage, invoices, entitlements — is mapped back to the commercial terms that created the obligation." %}
+          </p>
+          <p class="dn-small" style="margin:0 0 14px">
+            {% trans "We do not resell data and we hold no commercial relationship with the vendors whose contracts we analyse. There is no version of this where we benefit from you buying more." %}
+          </p>
+          <p class="dn-small" style="margin:0">
+            {% trans "And we start small: a fixed-scope assessment on two vendors, so the method proves itself before anyone commits to a platform." %}
+          </p>
+        </div>
+      </div>
     </div>
+
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "Product roadmap" %}</div>
+      <h2>{% trans "Three phases, each earning the next" %}</h2>
+    </div>
+
+    <div class="dn-pipe rv">
+      <div class="dn-step">
+        <span class="n">{% trans "Phase 1 — MVP" %}</span>
+        <h3>{% trans "Contract & spend visibility" %}</h3>
+        <ul>
+          <li>{% trans "Import contracts, invoices and entitlement files" %}</li>
+          <li>{% trans "Normalised mapping by vendor, desk, user and entity" %}</li>
+          <li>{% trans "Dashboards with spend visibility and quick wins" %}</li>
+          <li>{% trans "Exports for finance and compliance (Excel / PDF)" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Phase 2" %}</span>
+        <h3>{% trans "Usage & entitlement analytics" %}</h3>
+        <ul>
+          <li>{% trans "Deeper duplicate and dormancy detection across vendors" %}</li>
+          <li>{% trans "What-if scenarios for consolidation and renegotiation" %}</li>
+          <li>{% trans "APIs for integrating with internal BI tools" %}</li>
+          <li>{% trans "Governance-ready reporting for risk and compliance" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Phase 3" %}</span>
+        <h3>{% trans "Optimisation engine" %}</h3>
+        <ul>
+          <li>{% trans "Data-driven recommendations at each renewal" %}</li>
+          <li>{% trans "Automated alerts for compliance and licence breaches" %}</li>
+          <li>{% trans "Benchmarking across clients, anonymised" %}</li>
+          <li>{% trans "Playbooks for vendor negotiations" %}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "Who builds it" %}</div>
+      <h2>{% trans "People who have reconciled contracts for a living" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        A small team with a background in payments operations, risk and energy price analytics —
+        sectors where checking what was contracted against what was actually delivered is the daily
+        work rather than an annual exercise. Engagements are run directly, not through a layer of
+        account managers.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="dn-legal rv">
+      <h4>{% trans "On client data" %}</h4>
+      <p>
+        {% trans "Client files are handled under NDA, on infrastructure agreed with you, and only for the scope of the engagement. They are returned or destroyed at the end, at your choice." %}
+      </p>
+      <p>
+        {% trans "We do not aggregate client contract terms into a benchmark product. Your negotiated pricing is not going to become someone else's leverage." %}
+      </p>
+    </div>
+
+  </div>
 </section>
 
-<section class="dn-section-light py-5" style="padding-bottom: 8rem !important;">
-    <div class="container-lg">
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="about-info-card" style="animation: fadeInUp 0.8s ease-out 0.6s backwards;">
-                    <h2 class="about-card-title mb-3">
-                        {% trans "The problem" %}
-                    </h2>
-                    <p class="small mb-0 about-card-text">
-                        {% blocktrans trimmed %}
-                        Trading and market data teams rely on dozens of vendors – Bloomberg, ICE, Refinitiv,
-                        EnAppSys and many more – each with their own contracts, entitlement files and invoices.
-                        Overlapping feeds, unused licences and renewals with little time to analyse options mean
-                        spend keeps rising while transparency lags behind.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="about-info-card" style="animation: fadeInUp 0.8s ease-out 0.8s backwards;">
-                    <h2 class="about-card-title mb-3">
-                        {% trans "Our approach" %}
-                    </h2>
-                    <p class="small mb-0 about-card-text">
-                        {% blocktrans trimmed %}
-                        DataNaut is <strong>contract-first</strong>, not a data-reselling platform.
-                        We ingest invoices, contracts, entitlement files and usage data into a single schema,
-                        then normalise it into a single cost &amp; usage repository. Dashboards and alerts sit
-                        on top, giving desks, CFOs and procurement a shared source of truth.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="about-info-card" style="animation: fadeInUp 0.8s ease-out 1s backwards;">
-                    <h2 class="about-card-title mb-3">
-                        {% trans "Why now" %}
-                    </h2>
-                    <p class="small mb-0 about-card-text">
-                        {% blocktrans trimmed %}
-                        Market data and technology spend keeps growing faster than revenues. At the same time,
-                        regulators and boards expect tighter governance and full auditability. With cloud adoption
-                        and stricter cost discipline, firms need a dedicated system of record for data contracts and
-                        entitlements – not just another Excel file.
-                        {% endblocktrans %}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <h2 class="h4 text-center mb-4 fw-bold" style="color: #0f172a; animation: fadeInUp 0.8s ease-out 1.2s backwards;">
-            {% trans "Product roadmap" %}
-        </h2>
-
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="dn-card-light roadmap-card p-4 h-100" style="animation: fadeInUp 0.8s ease-out 1.4s backwards;">
-                    <p class="dn-pill-badge mb-3">
-                        {% trans "PHASE 1 – MVP" %}
-                    </p>
-                    <h3 class="h6 mb-3 fw-bold" style="color: #0f172a;">
-                        {% trans "Contract & spend visibility" %}
-                    </h3>
-                    <ul class="roadmap-list small mb-0">
-                        <li>{% trans "Import contracts, invoices and entitlement files." %}</li>
-                        <li>{% trans "Normalised mapping by vendor, desk, user and entity." %}</li>
-                        <li>{% trans "Basic dashboards with spend visibility and quick wins." %}</li>
-                        <li>{% trans "Exports for finance and compliance (Excel / PDF)." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="dn-card-light roadmap-card roadmap-featured p-4 h-100" style="animation: fadeInUp 0.8s ease-out 1.6s backwards;">
-                    <p class="dn-pill-badge text-primary mb-3">
-                        {% trans "PHASE 2" %}
-                    </p>
-                    <h3 class="h6 mb-3 fw-bold" style="color: #0f172a;">
-                        {% trans "Usage & entitlement analytics" %}
-                    </h3>
-                    <ul class="roadmap-list small mb-0">
-                        <li>{% trans "Deeper duplicate / underuse detection across vendors." %}</li>
-                        <li>{% trans "What-if scenarios for consolidation and renegotiation." %}</li>
-                        <li>{% trans "APIs for integrating with internal BI tools." %}</li>
-                        <li>{% trans "Governance-ready reporting for risk and compliance." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="dn-card-light roadmap-card p-4 h-100" style="animation: fadeInUp 0.8s ease-out 1.8s backwards;">
-                    <p class="dn-pill-badge mb-3">
-                        {% trans "PHASE 3" %}
-                    </p>
-                    <h3 class="h6 mb-3 fw-bold" style="color: #0f172a;">
-                        {% trans "Optimisation engine" %}
-                    </h3>
-                    <ul class="roadmap-list small mb-0">
-                        <li>{% trans "Data-driven recommendations at each renewal." %}</li>
-                        <li>{% trans "Automated alerts for compliance and licence breaches." %}</li>
-                        <li>{% trans "Benchmarking across clients (anonymised)." %}</li>
-                        <li>{% trans "Playbooks for vendor negotiations." %}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center" style="animation: fadeInUp 0.8s ease-out 2s backwards;">
-            <a href="{% url 'contact' %}"
-               class="btn btn-cta-primary px-5 py-3">
-                {% trans "Talk to us about DataNaut" %}
-            </a>
-        </div>
+<div class="dn-band">
+  <div class="dn-shell">
+    <h2>{% trans "Talk to us about DataNaut" %}</h2>
+    <p class="dn-lede">
+      {% trans "Name one vendor and one problem. That is enough to start a useful conversation." %}
+    </p>
+    <div class="dn-cta-row">
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Get in touch" %}</span></a>
+      <a href="{% url 'how_it_works' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See how it works" %}</span></a>
     </div>
-</section>
-
-<style>
-    /* Hero */
-    .dn-hero {
-        padding: 120px 0 64px;
-        background:
-            radial-gradient(circle at 0% 0%, rgba(0, 224, 214, 0.15), transparent 60%),
-            radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.12), transparent 58%),
-            #020617;
-        color: #f9fafb;
-    }
-
-    .dn-hero-title {
-        font-weight: 800;
-        font-size: clamp(2.2rem, 4vw, 3rem);
-        letter-spacing: -0.03em;
-        color: #f9fafb;
-    }
-
-    .dn-hero-lead {
-        font-size: 1.1rem;
-        color: #d1d5db;
-        max-width: 700px;
-        line-height: 1.7;
-    }
-
-    /* Section */
-    .dn-section-light {
-        background: #f9fafb;
-        padding: 72px 0 96px;
-    }
-
-    /* Info cards */
-    .about-info-card {
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98));
-        border: 1px solid rgba(0, 224, 214, 0.3);
-        border-radius: 16px;
-        padding: 2rem;
-        height: 100%;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .about-info-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(0, 224, 214, 0.5);
-        box-shadow: 0 20px 50px rgba(0, 224, 214, 0.2);
-    }
-
-    .about-card-title {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #00e0d6;
-        font-weight: 700;
-    }
-
-    .about-card-text {
-        color: #d1d5db;
-        line-height: 1.7;
-    }
-
-    .about-card-text strong {
-        color: #f9fafb;
-    }
-
-    /* Cards */
-    .dn-card-light {
-        background: #ffffff;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    }
-
-    /* Roadmap cards */
-    .roadmap-card {
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .roadmap-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #00e0d6, #22c55e);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-
-    .roadmap-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(0, 224, 214, 0.2);
-        border-color: rgba(0, 224, 214, 0.4);
-    }
-
-    .roadmap-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .roadmap-featured {
-        border-color: rgba(0, 224, 214, 0.4);
-        box-shadow: 0 15px 40px rgba(0, 224, 214, 0.15);
-    }
-
-    .roadmap-featured:hover {
-        box-shadow: 0 25px 60px rgba(0, 224, 214, 0.25);
-    }
-
-    /* Badge */
-    .dn-pill-badge {
-        display: inline-block;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding: 0.35rem 0.75rem;
-        border-radius: 999px;
-        background: rgba(0, 224, 214, 0.15);
-        color: #00e0d6;
-        border: 1px solid rgba(0, 224, 214, 0.3);
-    }
-
-    .dn-pill-badge.text-primary {
-        background: rgba(34, 197, 94, 0.15);
-        color: #22c55e;
-        border-color: rgba(34, 197, 94, 0.3);
-    }
-
-    /* List */
-    .roadmap-list {
-        list-style: none;
-        padding-left: 0;
-    }
-
-    .roadmap-list li {
-        padding: 0.5rem 0;
-        padding-left: 1.5rem;
-        position: relative;
-        line-height: 1.6;
-        color: #4b5563;
-    }
-
-    .roadmap-list li::before {
-        content: "→";
-        position: absolute;
-        left: 0;
-        color: #00e0d6;
-        font-weight: bold;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 991.98px) {
-        .dn-hero {
-            padding: 96px 0 48px;
-        }
-
-        .dn-hero-title {
-            font-size: 2rem;
-        }
-
-        .dn-hero-lead {
-            font-size: 1rem;
-        }
-
-        .dn-section-light {
-            padding: 56px 0 72px;
-        }
-
-        .about-info-card,
-        .roadmap-card {
-            padding: 1.5rem;
-        }
-    }
-</style>
+  </div>
+</div>
 
 {% endblock %}

@@ -6,6 +6,9 @@
   <title>DataNaut · Reports{% block title_suffix %}{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
@@ -15,20 +18,25 @@
 
   <style>
     :root{
-      --dn-bg: #070A12;
-      --dn-surface: rgba(15, 23, 42, .92);
+      --dn-bg: #070A0F;
+      --dn-surface: #0C1119;
       --dn-surface-2: rgba(10, 15, 25, .90);
-      --dn-border: rgba(148,163,184,.22);
-      --dn-border-strong: rgba(148,163,184,.40);
-      --dn-text: #E5E7EB;
-      --dn-muted: #9CA3AF;
-      --dn-strong: #F9FAFB;
-      --dn-accent: #14F4D4;
-      --dn-accent-2: #60A5FA;
-      --dn-radius-lg: 18px;
-      --dn-radius-md: 12px;
-      --dn-radius-sm: 10px;
-      --dn-shadow: 0 22px 60px rgba(15,23,42,.65);
+      --dn-border: #1D2733;
+      --dn-border-strong: #2B3745;
+      --dn-text: #E7ECF3;
+      --dn-muted: #818E9F;
+      --dn-strong: #FFFFFF;
+      --dn-accent: #4CC9E8;
+      --dn-accent-2: #93E5F5;
+      --dn-radius-lg: 2px;
+      --dn-radius-md: 2px;
+      --dn-radius-sm: 2px;
+      /* typography — shared with the marketing site */
+      --dn-fd: 'Space Grotesk', system-ui, sans-serif;
+      --dn-fb: 'Inter', system-ui, sans-serif;
+      --dn-fm: 'IBM Plex Mono', ui-monospace, monospace;
+
+      --dn-shadow: 0 18px 44px rgba(0,0,0,.42);
     }
 
     html, body { height: 100%; }
@@ -37,11 +45,11 @@
       margin:0;
       color: var(--dn-text);
       background:
-        radial-gradient(1200px 600px at 0% 0%, rgba(20,244,212,.18), transparent 60%),
-        radial-gradient(1200px 600px at 100% 0%, rgba(96,165,250,.16), transparent 55%),
-        radial-gradient(900px 500px at 50% 100%, rgba(147,51,234,.12), transparent 55%),
+        radial-gradient(1100px 620px at 50% -8%, rgba(76,201,232,.10), transparent 62%),
         var(--dn-bg);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: var(--dn-fb);
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
     }
 
     .reports-layout{
@@ -54,7 +62,7 @@
     .reports-shell{
       background:
         radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(147,51,234,0.18), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(76,201,232,0.18), transparent 55%),
         rgba(2,6,23,.72);
       border-radius: var(--dn-radius-lg);
       border: 1px solid var(--dn-border-strong);
@@ -96,8 +104,8 @@
       font-size:.86rem;
     }
     .btn-ghost:hover{
-      border-color: rgba(20,244,212,.55);
-      background: rgba(20,244,212,.10);
+      border-color: rgba(76,201,232,.55);
+      background: rgba(76,201,232,.10);
     }
 
     .page-title{
@@ -116,7 +124,7 @@
 
     .portal-card{
       background: var(--dn-surface);
-      border: 1px solid rgba(31,41,55,.95);
+      border: 1px solid var(--dn-border);
       border-radius: var(--dn-radius-md);
       box-shadow: var(--dn-shadow);
       padding: 18px 18px 16px;
@@ -182,7 +190,7 @@
       color:rgba(229,231,235,.92);
     }
     .portal-table tbody tr:hover{
-      background:rgba(20,244,212,.06);
+      background:rgba(76,201,232,.06);
     }
 
     .reports-table-shell{
@@ -202,7 +210,7 @@
     .dn-rows-select{
       width:auto;
       min-width:90px;
-      background-color: rgba(15,23,42,.96);
+      background-color: #0C1119;
       border-color: rgba(148,163,184,.45);
       color: var(--dn-text);
       padding:2px 10px;
@@ -231,7 +239,7 @@
       border-radius: 12px;
       border:1px solid rgba(148,163,184,.35);
       background:
-        radial-gradient(220% 220% at 0% 0%, rgba(20,244,212,.18), rgba(15,23,42,.96));
+        radial-gradient(220% 220% at 0% 0%, rgba(76,201,232,.18), #0C1119);
       color: var(--dn-strong);
       font-size:.9rem;
       padding:10px 14px;
@@ -266,7 +274,7 @@
     .portal-card .form-control,
     .portal-card .form-select {
       color: var(--dn-text);
-      background-color: rgba(15,23,42,.96);
+      background-color: #0C1119;
       border-color: rgba(148,163,184,.45);
     }
 
@@ -290,8 +298,8 @@
       border: 1px solid rgba(148,163,184,.32);
       background:
         radial-gradient(circle at top left, rgba(56,189,248,.22), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(20,244,212,.10), transparent 55%),
-        rgba(15,23,42,.96);
+        radial-gradient(circle at bottom right, rgba(76,201,232,.10), transparent 55%),
+        #0C1119;
       box-shadow: 0 18px 40px rgba(15,23,42,.9);
       align-self:flex-start;
     }
@@ -339,16 +347,16 @@
       color:rgba(148,163,184,.95);
     }
     .reports-nav-link:hover{
-      border-color: rgba(96,165,250,.85);
+      border-color: rgba(147,229,245,.85);
       background: radial-gradient(circle at top left,
         rgba(37,99,235,.5),
         rgba(15,23,42,1));
       color:var(--dn-strong);
     }
     .reports-nav-link.active{
-      border-color: rgba(20,244,212,.9);
+      border-color: rgba(76,201,232,.9);
       background: radial-gradient(circle at top left,
-        rgba(20,244,212,.36),
+        rgba(76,201,232,.36),
         rgba(15,23,42,1));
       color:#0B1120;
       box-shadow: 0 14px 40px rgba(15,23,42,1);
@@ -384,8 +392,70 @@
   </style>
 
   {% block extra_head %}{% endblock %}
+
+  <style>
+    /* ====================================================================
+       Alignment layer — same visual language as the marketing site.
+       ==================================================================== */
+    h1,h2,h3,h4,h5,.dn-title,.page-title{
+      font-family: var(--dn-fd); font-weight:600; letter-spacing:-.022em; color:var(--dn-strong);
+    }
+    .dn-kpi-value,.kpi-value,.metric-value,.stat-value,
+    td.num,.num,.mono,code,pre{ font-family:var(--dn-fm); font-variant-numeric:tabular-nums; }
+    .dn-kpi-label,.kpi-label,.metric-label,.section-label,.eyebrow,.dn-eyebrow{
+      font-family:var(--dn-fm); font-size:.64rem; letter-spacing:.17em;
+      text-transform:uppercase; color:var(--dn-muted);
+    }
+    .table, table{ color:var(--dn-text); font-size:.82rem; }
+    .table thead th, table thead th{
+      font-family:var(--dn-fm); font-size:.6rem; letter-spacing:.15em; text-transform:uppercase;
+      color:var(--dn-muted); font-weight:500; border-bottom:1px solid var(--dn-border); background:transparent;
+    }
+    .table tbody td, table tbody td{ border-color:rgba(29,39,51,.65); vertical-align:middle; }
+    .table tbody tr:hover td, table tbody tr:hover td{ background:rgba(76,201,232,.045); color:var(--dn-strong); }
+
+    .btn{ border-radius:2px; font-size:.84rem; }
+    .btn-primary{ background:var(--dn-accent); border-color:var(--dn-accent); color:#04202A; font-weight:600; }
+    .btn-primary:hover{ background:var(--dn-accent-2); border-color:var(--dn-accent-2); color:#04202A; }
+    .btn-outline-secondary,.btn-outline-light{ border-color:var(--dn-border-strong); color:var(--dn-text); }
+    .btn-outline-secondary:hover,.btn-outline-light:hover{ background:#18212D; border-color:var(--dn-muted); color:var(--dn-strong); }
+
+    .form-control,.form-select,input[type=text],input[type=search],input[type=email],
+    input[type=number],input[type=date],select,textarea{
+      background:var(--dn-bg); border:1px solid var(--dn-border-strong); color:var(--dn-text);
+      border-radius:2px; font-size:.88rem;
+    }
+    .form-control:focus,.form-select:focus,input:focus,select:focus,textarea:focus{
+      background:var(--dn-bg); border-color:var(--dn-accent); box-shadow:none; color:var(--dn-strong);
+    }
+    .form-control::placeholder{ color:#4F5B6B; }
+
+    .badge{ border-radius:2px; font-family:var(--dn-fm); font-weight:500; letter-spacing:.06em; font-size:.64rem; }
+    .sidebar a,.nav-link{ font-size:.86rem; border-radius:2px; }
+
+    .text-success,.dn-good{ color:#3FCF8E !important; }
+    .text-warning,.dn-warn{ color:#F0A93B !important; }
+    .text-danger{ color:#F4635E !important; }
+    .text-info,.dn-sig{ color:var(--dn-accent) !important; }
+    .text-muted{ color:var(--dn-muted) !important; }
+
+    a{ color:var(--dn-accent); } a:hover{ color:var(--dn-accent-2); }
+    ::selection{ background:var(--dn-accent); color:#04202A; }
+    :focus-visible{ outline:2px solid var(--dn-accent); outline-offset:2px; }
+
+    *::-webkit-scrollbar{ width:10px; height:10px; }
+    *::-webkit-scrollbar-track{ background:var(--dn-bg); }
+    *::-webkit-scrollbar-thumb{ background:#1D2733; border:2px solid var(--dn-bg); }
+    *::-webkit-scrollbar-thumb:hover{ background:#2B3745; }
+  </style>
 </head>
 <body>
+  <div class="dn-demo-note" role="note">
+    <span class="dot"></span>
+    <span><b>Demonstration data.</b> Vendor names are real market participants; entities, desks and
+    figures are synthetic. No client information is shown.</span>
+  </div>
+
 <div class="reports-layout">
   <div class="reports-shell">
 

@@ -46,11 +46,11 @@
            onerror="this.style.display='none'; document.getElementById('demo-screenshot-fallback').style.display='block';">
       <div id="demo-screenshot-fallback" class="demo-screenshot-fallback" style="display: none;">
         <div class="demo-screenshot-placeholder">
-          <p class="mb-2 text-muted">{% trans "Снимка на началната страница на портала" %}</p>
+          <p class="mb-2 text-muted">{% trans "Dashboard preview unavailable" %}</p>
           <p class="small text-muted mb-0">
             {% blocktrans trimmed %}
-            Добавете файл <code>dashboard-screenshot.png</code> в папката
-            <code>landing/static/landing/</code> — след презареждане снимката ще се покаже тук.
+            The screenshot could not be loaded. Book a live walkthrough and we will show you the
+            portal running against real data instead.
             {% endblocktrans %}
           </p>
         </div>

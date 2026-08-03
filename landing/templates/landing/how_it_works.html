@@ -1,257 +1,192 @@
 {% extends "landing/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "How it works · DataNaut" %}{% endblock %}
 
 {% block content %}
 
-<section class="how-hero">
-    <div class="container-lg">
-        <h1 class="how-hero-title mb-3">{% trans "How DataNaut works" %}</h1>
-        <p class="how-hero-lead mb-3">
-            {% trans "A contract-first platform that connects your vendors, contracts, invoices and entitlement files into a single, actionable view." %}
-        </p>
-        <p class="how-hero-sub small mb-0">
-            {% trans "This page expands the How it works section from the homepage with more detail for desks, finance and investors." %}
-        </p>
+<div class="dn-phero">
+  <div class="dn-shell">
+    <div class="dn-eyebrow">{% trans "Method" %}</div>
+    <h1>{% trans "Ingest, normalise, optimise" %}</h1>
+    <p class="dn-lede" style="margin-top:16px">
+      {% blocktrans trimmed %}
+      In that order, because the order is the point. You cannot renegotiate a contract you cannot
+      trace to a person, and you cannot cut a licence without knowing whose screen goes dark.
+      {% endblocktrans %}
+    </p>
+  </div>
+</div>
+
+<section class="dn-section">
+  <div class="dn-shell">
+
+    <div class="dn-pipe rv">
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 01" %}</span>
+        <h3>{% trans "Ingest" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Contracts, invoices and entitlement files, in whatever shape they arrive." %}</p>
+        <ul>
+          <li>{% trans "Core market data and technology vendors" %}</li>
+          <li>{% trans "Vendor exports, internal feeds, APIs and SFTP drops" %}</li>
+          <li>{% trans "PDFs, CSVs and spreadsheets, parsed rather than retyped" %}</li>
+          <li>{% trans "Commercial terms, notice periods and renewal dates captured" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 02" %}</span>
+        <h3>{% trans "Normalise" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "One cost and usage model, by vendor, desk, user and legal entity." %}</p>
+        <ul>
+          <li>{% trans "Entities, desks and cost centres mapped to a common structure" %}</li>
+          <li>{% trans "Every line of spend tied to a desk, team and function" %}</li>
+          <li>{% trans "Currencies and billing periods reconciled to one basis" %}</li>
+          <li>{% trans "An audit trail that holds up when it is questioned" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 03" %}</span>
+        <h3>{% trans "Optimise" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Dashboards, alerts and evidence you can take into a negotiation." %}</p>
+        <ul>
+          <li>{% trans "Dormant licences and duplicate coverage, quantified" %}</li>
+          <li>{% trans "Renewals surfaced ahead of the notice window" %}</li>
+          <li>{% trans "Negotiation packs built from your own usage data" %}</li>
+          <li>{% trans "Exports for finance, procurement, desks and audit" %}</li>
+        </ul>
+      </div>
     </div>
-</section>
 
-<section class="py-5">
-    <div class="container-lg">
-        <div class="row g-4 mb-5">
-            <!-- 1. Ingest -->
-            <div class="col-md-4">
-                <div class="how-step-card h-100">
-                    <div class="how-step-number">01</div>
-                    <p class="how-step-label mb-2">
-                        {% trans "1. Ingest" %}
-                    </p>
-                    <h2 class="how-step-title mb-3">
-                        {% trans "Contracts, invoices & entitlement files" %}
-                    </h2>
-                    <p class="how-step-text small mb-0">
-                        {% trans "We ingest contracts, invoices and entitlement files from your core market data and technology vendors – Bloomberg, ICE, Refinitiv, EnAppSys and internal feeds. No code changes required on your side." %}
-                    </p>
-                </div>
-            </div>
+    <!-- what comes out -->
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "What comes out" %}</div>
+      <h2>{% trans "Five questions the platform answers on demand" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        Each of these currently takes days of manual work across procurement, finance and the
+        desks — and produces a different answer depending on who assembles it.
+        {% endblocktrans %}
+      </p>
+    </div>
 
-            <!-- 2. Normalise -->
-            <div class="col-md-4">
-                <div class="how-step-card h-100">
-                    <div class="how-step-number">02</div>
-                    <p class="how-step-label mb-2">
-                        {% trans "2. Normalise" %}
-                    </p>
-                    <h2 class="how-step-title mb-3">
-                        {% trans "Single cost & usage model" %}
-                    </h2>
-                    <p class="how-step-text small mb-0">
-                        {% trans "DataNaut maps everything to a common model by vendor, desk, user and legal entity – turning PDFs and CSVs into a clean data layer. The result is a single repository where finance, trading and procurement see the same numbers." %}
-                    </p>
-                </div>
-            </div>
+    <div class="dn-ledger rv">
+      <div class="dn-row">
+        <span class="idx">01</span>
+        <div>
+          <h3>{% trans "Who is actually using this feed?" %}</h3>
+          <p>{% trans "Entitlements mapped to named desks and users, with recent activity, so the answer is evidence rather than assumption." %}</p>
+        </div>
+        <span class="amt dn-sig">{% trans "Usage view" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">02</span>
+        <div>
+          <h3>{% trans "Are we paying twice for the same thing?" %}</h3>
+          <p>{% trans "Overlapping coverage detected across vendors and entities, including cases where two contracts were never visible to each other." %}</p>
+        </div>
+        <span class="amt dn-sig">{% trans "Duplicate detection" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">03</span>
+        <div>
+          <h3>{% trans "What renews next quarter?" %}</h3>
+          <p>{% trans "Renewal dates with their notice periods, surfaced before the window closes rather than after it has passed." %}</p>
+        </div>
+        <span class="amt dn-sig">{% trans "Renewal calendar" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">04</span>
+        <div>
+          <h3>{% trans "Why did spend rise this year?" %}</h3>
+          <p>{% trans "Movement broken down by vendor, entity and desk, so the answer is a set of decisions rather than a shrug." %}</p>
+        </div>
+        <span class="amt dn-sig">{% trans "Spend attribution" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">05</span>
+        <div>
+          <h3>{% trans "Can we prove this to an auditor?" %}</h3>
+          <p>{% trans "Contract, invoice and entitlement records linked together, exportable without a rebuild each time the question is asked." %}</p>
+        </div>
+        <span class="amt dn-sig">{% trans "Audit trail" %}</span>
+      </div>
+    </div>
 
-            <!-- 3. Optimise -->
-            <div class="col-md-4">
-                <div class="how-step-card h-100">
-                    <div class="how-step-number">03</div>
-                    <p class="how-step-label mb-2">
-                        {% trans "3. Optimise" %}
-                    </p>
-                    <h2 class="how-step-title mb-3">
-                        {% trans "Dashboards, alerts & savings" %}
-                    </h2>
-                    <p class="how-step-text small mb-0">
-                        {% trans "Dashboards highlight duplicate and underused licences, upcoming renewals and saving opportunities. Exports for CFO, procurement and desks make it easy to take decisions and document the savings story for investors and regulators." %}
-                    </p>
-                </div>
-            </div>
+    <!-- assessment timeline -->
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "How engagements start" %}</div>
+      <h2>{% trans "Small enough to prove, before it is large enough to matter" %}</h2>
+    </div>
+
+    <div class="dn-grid-11 rv">
+      <div class="dn-tl">
+        <div>
+          <span class="wk">{% trans "Weeks 1–2" %}</span>
+          <h3>{% trans "Ingest and normalise" %}</h3>
+          <p>{% trans "Selected contracts, invoices and entitlement files loaded and mapped to your entity and desk structure." %}</p>
+        </div>
+        <div>
+          <span class="wk">{% trans "Weeks 3–4" %}</span>
+          <h3>{% trans "Reconcile and find the gaps" %}</h3>
+          <p>{% trans "Line-by-line matching against contract terms. Overlaps, dormant licences and billing discrepancies surfaced with evidence attached." %}</p>
+        </div>
+        <div>
+          <span class="wk">{% trans "Weeks 5–6" %}</span>
+          <h3>{% trans "Quantify and read out" %}</h3>
+          <p>{% trans "A savings range with the assumptions written down, a prioritised list of actions, and a phased rollout plan your teams can run." %}</p>
+        </div>
+        <div>
+          <span class="wk">{% trans "After" %}</span>
+          <h3>{% trans "Platform, if it earns it" %}</h3>
+          <p>{% trans "The subscription only makes sense if it costs a fraction of what it recovers. That test is yours to apply at the end, not ours to assert at the start." %}</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="dn-panel">
+          <div class="dn-ph"><h4>{% trans "What you provide" %}</h4></div>
+          <div class="dn-pb">
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px">
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Contracts and schedules for the vendors in scope" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Twelve months of invoices, in any format" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "A current entitlement export from each vendor" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Your desk and legal entity structure" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "An hour with someone who knows the history" %}</li>
+            </ul>
+            <p class="dn-small" style="margin:20px 0 0;color:var(--ash-2)">
+              {% trans "Everything under NDA. Files stay yours and are returned or destroyed at the end of the engagement — your choice." %}
+            </p>
+          </div>
         </div>
 
-        <div class="text-center mt-5">
-            <a href="{% url 'contact' %}" class="btn btn-cta-primary px-5 py-3">
-                {% trans "Start with a Data Cost Assessment" %}
-            </a>
+        <div class="dn-panel" style="margin-top:16px">
+          <div class="dn-ph"><h4>{% trans "What we do not do" %}</h4></div>
+          <div class="dn-pb">
+            <p class="dn-small" style="margin:0 0 12px">
+              {% trans "We are not a market data vendor or reseller, and we have no commercial relationship with the vendors whose contracts we help you analyse." %}
+            </p>
+            <p class="dn-small" style="margin:0">
+              {% trans "That independence is the reason the analysis is worth reading — there is no version of this where we benefit from you buying more." %}
+            </p>
+          </div>
         </div>
+      </div>
     </div>
+
+  </div>
 </section>
 
-<style>
-    .how-hero {
-        padding: 120px 0 64px;
-        background:
-            radial-gradient(circle at 0% 0%, rgba(15, 118, 110, 0.4) 0%, transparent 45%),
-            radial-gradient(circle at 100% 0%, rgba(76, 29, 149, 0.35) 0%, transparent 55%),
-            #020617;
-        color: #f9fafb;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .how-hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: 
-            radial-gradient(1200px 800px at 0% 0%, rgba(0, 224, 214, 0.15), transparent 60%),
-            radial-gradient(1000px 600px at 100% 0%, rgba(168, 85, 247, 0.12), transparent 58%);
-        pointer-events: none;
-        opacity: 0.8;
-    }
-
-    .how-hero > .container-lg {
-        position: relative;
-        z-index: 1;
-    }
-
-    .how-hero-title {
-        font-weight: 800;
-        font-size: clamp(2.2rem, 4vw, 3rem);
-        letter-spacing: -0.03em;
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    .how-hero-lead {
-        font-size: 1.1rem;
-        color: #e5e7eb;
-        max-width: 700px;
-        line-height: 1.7;
-        animation: fadeInUp 0.8s ease-out 0.2s backwards;
-    }
-
-    .how-hero-sub {
-        color: #9ca3af;
-        max-width: 640px;
-        font-size: 0.9rem;
-        line-height: 1.6;
-        animation: fadeInUp 0.8s ease-out 0.4s backwards;
-    }
-
-    .how-step-card {
-        background:
-            radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.15), transparent 70%),
-            radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.12), transparent 70%),
-            #020617;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        border-radius: 16px;
-        padding: 2rem;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .how-step-card:nth-child(1) {
-        animation-delay: 0.6s;
-    }
-
-    .how-step-card:nth-child(2) {
-        animation-delay: 0.8s;
-    }
-
-    .how-step-card:nth-child(3) {
-        animation-delay: 1s;
-    }
-
-    .how-step-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #00e0d6, #a855f7);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-
-    .how-step-card:hover {
-        transform: translateY(-8px);
-        border-color: rgba(0, 224, 214, 0.5);
-        box-shadow: 0 20px 50px rgba(0, 224, 214, 0.15);
-    }
-
-    .how-step-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .how-step-number {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        font-size: 3rem;
-        font-weight: 800;
-        color: rgba(0, 224, 214, 0.15);
-        line-height: 1;
-        transition: all 0.4s ease;
-    }
-
-    .how-step-card:hover .how-step-number {
-        color: rgba(0, 224, 214, 0.3);
-        transform: scale(1.1);
-    }
-
-    .how-step-label {
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-size: 0.75rem;
-        color: #00e0d6;
-        font-weight: 700;
-    }
-
-    .how-step-title {
-        font-size: 1.15rem;
-        color: #f9fafb;
-        font-weight: 700;
-        line-height: 1.3;
-    }
-
-    .how-step-text {
-        color: #d1d5db;
-        line-height: 1.7;
-        font-size: 0.95rem;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive */
-    @media (max-width: 767.98px) {
-        .how-hero {
-            padding: 96px 0 48px;
-        }
-
-        .how-hero-title {
-            font-size: 2rem;
-        }
-
-        .how-hero-lead {
-            font-size: 1rem;
-        }
-
-        .how-step-card {
-            padding: 1.5rem;
-        }
-
-        .how-step-number {
-            font-size: 2.5rem;
-            top: 1rem;
-            right: 1rem;
-        }
-    }
-</style>
+<div class="dn-band">
+  <div class="dn-shell">
+    <h2>{% trans "Start with a data cost assessment" %}</h2>
+    <p class="dn-lede">
+      {% trans "Two vendors, a handful of desks, a fixed scope. You get a quantified savings range before committing to a platform." %}
+    </p>
+    <div class="dn-cta-row">
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'pricing' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See pricing" %}</span></a>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

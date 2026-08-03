@@ -1,476 +1,486 @@
 {% extends "landing/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "DataNaut — Smart Data. Smarter Decisions." %}{% endblock %}
+{% block title %}{% trans "DataNaut — Contract & market data cost platform" %}{% endblock %}
 
 {% block content %}
 
-<!-- HERO: New split layout -->
-<section class="hero-section" id="top">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <!-- Left: narrative -->
-            <div class="col-lg-6">
-                <div class="mb-3">
-                    <span class="badge rounded-pill bg-dark border border-secondary-subtle px-3 py-2"
-                          style="backdrop-filter: blur(8px); font-size: 0.75rem; letter-spacing: .12em; text-transform: uppercase;">
-                        {% trans "Contract & market data cost platform" %}
-                    </span>
-                </div>
-
-                <h1 class="hero-title mb-3">
-                    {% trans "See every contract," %}<br>
-                    {% trans "own every euro of spend." %}
-                </h1>
-
-                <p class="hero-lead mb-3">
-                    {% blocktrans trimmed %}
-                    DataNaut connects contracts, invoices and entitlements in one place so you
-                    can cut 10–30% of market data & technology spend without breaking trading.
-                    {% endblocktrans %}
-                </p>
-
-                <ul class="hero-value-list">
-                    <li>{% trans "Contract‑first view across vendors, entities and desks." %}</li>
-                    <li>{% trans "Usage, underused licenses and overlaps in a single pane." %}</li>
-                    <li>{% trans "Ready for regulators, ready for negotiation, ready for the board." %}</li>
-                </ul>
-
-                <div class="d-flex flex-wrap gap-3 mt-3 mb-2">
-                    <a href="{% url 'contact' %}" class="btn btn-cta-primary px-4 py-2">
-                        {% trans "Request a live demo" %}
-                    </a>
-                    <a href="{% url 'how_it_works' %}" class="btn btn-cta-secondary px-4 py-2">
-                        {% trans "See how it works" %}
-                    </a>
-                </div>
-
-                <p class="hero-subtext">
-                    {% blocktrans trimmed %}
-                    We typically start with a 4–6 week assessment on a subset of contracts
-                    and invoices to size the savings and build your roadmap.
-                    {% endblocktrans %}
-                </p>
-            </div>
-
-            <!-- Right: “live” overview card -->
-            <div class="col-lg-5 ms-lg-auto">
-                <div class="metrics-card shadow-lg">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="metrics-label">
-                            {% trans "DataNaut overview · Sample client" %}
-                        </span>
-                        <span class="metrics-tagline">
-                            {% trans "Connected to Bloomberg, ICE, Refinitiv, EnAppSys…" %}
-                        </span>
-                    </div>
-
-                    <div class="row text-center mb-3 g-3">
-                        <div class="col-4">
-                            <div class="metrics-label mb-1">{% trans "Annual spend" %}</div>
-                            <div class="metrics-value">$113.8M</div>
-                            <div class="metrics-sub">{% trans "Target: -15%" %}</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="metrics-label mb-1">{% trans "Identified savings" %}</div>
-                            <div class="metrics-value">$8.4M</div>
-                            <div class="metrics-sub text-warning">{% trans "In negotiation" %}</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="metrics-label mb-1">{% trans "Underused licenses" %}</div>
-                            <div class="metrics-value">27%</div>
-                            <div class="metrics-sub text-info">{% trans "High opportunity" %}</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <small class="metrics-label">{% trans "Vendors tracked" %}</small>
-                        <small class="metrics-label">{% trans "Desks & teams" %}</small>
-                    </div>
-                    <div class="metrics-progress-rail mb-2">
-                        <div class="metrics-progress-bar" data-width="78%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between metrics-tagline mb-3">
-                        <span>{% trans "12+ vendors" %}</span>
-                        <span>{% trans "34 desks" %}</span>
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-2 small">
-                        <span class="badge rounded-pill bg-dark border border-secondary-subtle">
-                            {% trans "Invoice to contract matching" %}
-                        </span>
-                        <span class="badge rounded-pill bg-dark border border-secondary-subtle">
-                            {% trans "User & desk‑level entitlements" %}
-                        </span>
-                        <span class="badge rounded-pill bg-dark border border-secondary-subtle">
-                            {% trans "Audit & regulatory reporting" %}
-                        </span>
-                    </div>
-                </div>
-            </div>
+<!-- ============================ HERO ============================ -->
+<section class="dn-section" style="padding-top:clamp(38px,5vw,70px)">
+  <div class="dn-shell">
+    <div style="display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(30px,4vw,58px);align-items:start" class="dn-hero-grid">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:10px;padding:6px 13px;border:1px solid var(--hair);background:var(--panel);font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ash);margin-bottom:24px">
+          <span class="dn-pulse"></span>{% trans "Contract &amp; market data cost platform" %}
         </div>
+
+        <h1>
+          {% trans "Three systems say" %}<br>
+          {% trans "you pay for it." %}<br>
+          <span class="dn-sig">{% trans "None of them agree." %}</span>
+        </h1>
+
+        <p class="dn-lede" style="margin:24px 0 30px;font-size:1.07rem;max-width:52ch">
+          {% blocktrans trimmed %}
+          Contracts sit with legal. Invoices sit with finance. Entitlements sit with the vendor.
+          DataNaut reconciles all three into one ledger — so you can see who actually uses what,
+          and cut market data spend without taking a feed off a desk that needs it.
+          {% endblocktrans %}
+        </p>
+
+        <div class="dn-cta-row">
+          <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a data cost assessment" %}</span></a>
+          <a href="{% url 'demo' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See the platform" %}</span></a>
+        </div>
+
+        <p style="margin-top:26px;padding-top:22px;border-top:1px solid var(--hair);font-size:.88rem;color:var(--ash-2);max-width:48ch">
+          {% blocktrans trimmed %}
+          Engagements start with a focused assessment on a subset of vendors and desks.
+          You get a quantified savings range before committing to a platform.
+          {% endblocktrans %}
+        </p>
+      </div>
+
+      <!-- ---------- signature: the reconciliation ---------- -->
+      <div class="dn-recon" id="dnRecon">
+        <div class="dn-recon-head">
+          <h4>{% trans "Reconciliation — quarterly invoice run" %}</h4>
+          <div class="dn-recon-toggle" role="group">
+            <button type="button" data-state="before">{% trans "Before" %}</button>
+            <button type="button" class="on" data-state="after">{% trans "After" %}</button>
+          </div>
+        </div>
+        <div class="dn-recon-stage" id="dnStage" aria-hidden="true"></div>
+        <div class="dn-recon-foot">
+          <span><b id="dnCount">—</b> {% trans "line items" %}</span>
+          <span><b id="dnMatch">—</b> {% trans "matched to contract" %}</span>
+          <span class="dn-warn"><b id="dnDup">—</b> {% trans "duplicated" %}</span>
+          <span class="dn-legend"><i></i> {% trans "overlap" %}</span>
+        </div>
+      </div>
     </div>
+
+    <!-- ---------- counters ---------- -->
+    <div class="dn-counters">
+      <div>
+        <b class="dn-mono" data-count="3">0</b>
+        <span>{% trans "Sources reconciled" %}</span>
+      </div>
+      <div>
+        <b class="dn-mono" data-count="12" data-suffix="+">0</b>
+        <span>{% trans "Vendors per deployment" %}</span>
+      </div>
+      <div>
+        <b class="dn-mono" data-count="30" data-suffix="+">0</b>
+        <span>{% trans "Desks in scope" %}</span>
+      </div>
+      <div>
+        <b class="dn-mono" data-count="6" data-suffix=" wks">0</b>
+        <span>{% trans "To a quantified answer" %}</span>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- TRUSTED BY -->
-<section class="section-light section-padding">
-    <div class="container text-center">
-        <p class="eyebrow mb-3">{% trans "Built around the tooling you already use" %}</p>
-        <h2 class="h5 mb-4 fw-semibold">
-            {% trans "Designed for teams working with leading market data & trading platforms" %}
-        </h2>
-        <div class="trusted-logos mt-3">
-            <div class="trusted-logo-pill">Bloomberg</div>
-            <div class="trusted-logo-pill">ICE</div>
-            <div class="trusted-logo-pill">Refinitiv</div>
-            <div class="trusted-logo-pill">EnAppSys</div>
-            <div class="trusted-logo-pill">{% trans "Internal feeds" %}</div>
-            <div class="trusted-logo-pill">APIs &amp; SFTP</div>
-        </div>
+<!-- ============================ TICKER ============================ -->
+<div class="dn-ticker"><div class="dn-tt" id="dnTicker"></div></div>
+
+<!-- ============================ WHY ============================ -->
+<section class="dn-section">
+  <div class="dn-shell">
+    <div class="dn-sec-head rv">
+      <div class="dn-eyebrow">{% trans "Why it happens" %}</div>
+      <h2>{% trans "Nobody is careless. The record is just split three ways." %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        What you bought, what you were billed, and what your people can actually open live in
+        three systems that were never designed to agree with each other. Everything downstream
+        follows from that.
+        {% endblocktrans %}
+      </p>
     </div>
+
+    <div class="dn-grid-3 rv">
+      <div class="dn-card">
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/></svg>
+        </div>
+        <h3>{% trans "Contracts" %}</h3>
+        <p>{% blocktrans trimmed %}Master agreements, schedules and amendments, held by legal. Commercial terms buried in clauses nobody re-reads until renewal week.{% endblocktrans %}</p>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="M3 10h18M7 14h4"/></svg>
+        </div>
+        <h3>{% trans "Invoices" %}</h3>
+        <p>{% blocktrans trimmed %}Line items in vendor formats that change without notice, reconciled by hand into a spreadsheet that lives on one person's drive.{% endblocktrans %}</p>
+      </div>
+      <div class="dn-card">
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>
+        </div>
+        <h3>{% trans "Entitlements" %}</h3>
+        <p>{% blocktrans trimmed %}Who can open what, controlled by the vendor, exported in a format designed for their systems rather than yours.{% endblocktrans %}</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- THREE PILLARS -->
-<section class="section-light section-padding" id="how-it-works">
-    <div class="container">
-        <div class="row g-4 align-items-stretch">
-            <div class="col-lg-5">
-                <p class="eyebrow mb-3">
-                    {% trans "The problem" %}
-                </p>
-                <h2 class="h4 fw-bold mb-3">
-                    {% trans "Market data is one of your biggest costs – and one of the least transparent." %}
-                </h2>
-                <p class="text-muted mb-3" style="font-size: 0.95rem; line-height: 1.8;">
-                    {% blocktrans trimmed %}
-                    Multiple vendors, complex entitlement files, opaque invoices and local spreadsheets
-                    make it hard to answer basic questions: who uses what, where are we overspending,
-                    and what happens if we change this contract?
-                    {% endblocktrans %}
-                </p>
-                <ul class="mb-0 text-muted" style="font-size: 0.95rem; line-height: 1.8;">
-                    <li class="mb-2">{% trans "Overlapping feeds across vendors and entities." %}</li>
-                    <li class="mb-2">{% trans "Little visibility into who actually uses which licenses." %}</li>
-                    <li class="mb-2">{% trans "Compliance and audit questions answered with manual Excel work." %}</li>
-                    <li>{% trans "Rising costs with no clear narrative for the board." %}</li>
-                </ul>
-            </div>
-
-            <div class="col-lg-7">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="persona-card h-100">
-                            <h5 class="fw-bold mb-1">{% trans "1. Ingest" %}</h5>
-                            <small class="d-block mb-2">{% trans "Contracts, invoices, entitlements." %}</small>
-                            <ul class="mb-0">
-                                <li>{% trans "Connect vendor exports and internal feeds." %}</li>
-                                <li>{% trans "Normalise entities, desks and cost centres." %}</li>
-                                <li>{% trans "Capture key commercial terms and dates." %}</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="persona-card h-100">
-                            <h5 class="fw-bold mb-1">{% trans "2. Map" %}</h5>
-                            <small class="d-block mb-2">{% trans "From contract to every user." %}</small>
-                            <ul class="mb-0">
-                                <li>{% trans "Tie spend to desks, teams and functions." %}</li>
-                                <li>{% trans "Spot overlaps and underused licenses." %}</li>
-                                <li>{% trans "Build a defensible audit trail." %}</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="persona-card h-100">
-                            <h5 class="fw-bold mb-1">{% trans "3. Act" %}</h5>
-                            <small class="d-block mb-2">{% trans "Negotiate, re‑allocate, prove control." %}</small>
-                            <ul class="mb-0">
-                                <li>{% trans "Prepare vendor‑ready negotiation packs." %}</li>
-                                <li>{% trans "Share clear views with trading, finance and the board." %}</li>
-                                <li>{% trans "Report to regulators with one click." %}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- ============================ SYMPTOMS ============================ -->
+<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
+  <div class="dn-shell">
+    <div class="dn-sec-head rv">
+      <div class="dn-eyebrow">{% trans "What it costs" %}</div>
+      <h2>{% trans "Five symptoms, one root cause" %}</h2>
     </div>
+
+    <div class="dn-ledger rv">
+      <div class="dn-row">
+        <span class="idx">01</span>
+        <div>
+          <h3>{% trans "The same feed, bought twice" %}</h3>
+          <p>{% blocktrans trimmed %}Two entities licence the same data under separate paper. Nothing in either contract reveals the other exists, and both invoices look correct in isolation.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Pure duplication" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">02</span>
+        <div>
+          <h3>{% trans "Licences nobody opens" %}</h3>
+          <p>{% blocktrans trimmed %}A trader moves desks, leaves, or changes strategy. The entitlement stays live and stays billed until someone notices — usually at renewal, sometimes years later.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Silent recurring cost" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">03</span>
+        <div>
+          <h3>{% trans "Renewals negotiated blind" %}</h3>
+          <p>{% blocktrans trimmed %}The vendor knows exactly what you use. You have a spreadsheet somebody rebuilt last quarter from a partial export. That asymmetry has a price and it appears in the renewal.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Weak position" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">04</span>
+        <div>
+          <h3>{% trans "Audit answered by hand" %}</h3>
+          <p>{% blocktrans trimmed %}Every entitlement question becomes a week of manual work across desks, procurement and finance — repeated in full the next time it is asked.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Recurring effort" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">05</span>
+        <div>
+          <h3>{% trans "No narrative for the board" %}</h3>
+          <p>{% blocktrans trimmed %}Spend grows, and the available explanation is that data got more expensive. Nobody can show what was added, by whom, or whether it is still used.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Unexplained growth" %}</span>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- WHO IT'S FOR (PERSONAS) -->
-<section class="section-light section-padding" id="personas">
-    <div class="container">
-        <div class="row align-items-center mb-4">
-            <div class="col-lg-7">
-                <p class="eyebrow mb-3">{% trans "Who DataNaut is for" %}</p>
-                <h2 class="h4 fw-bold mb-3">
-                    {% trans "One platform, three very different conversations." %}
-                </h2>
-                <p class="text-muted mb-0" style="font-size:1rem; max-width:700px; line-height: 1.7;">
-                    {% blocktrans trimmed %}
-                    Trading, finance and investors care about different outcomes. DataNaut gives each of them
-                    the view they need while keeping the underlying data consistent.
-                    {% endblocktrans %}
-                </p>
-            </div>
-            <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-                <a href="{% url 'contact' %}" class="btn btn-outline-dark rounded-pill px-4 py-2">
-                    {% trans "Talk to us about your setup" %}
-                </a>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <!-- Trading -->
-            <div class="col-md-4" id="personas-trading">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold">{% trans "Trading & dealing desks" %}</h5>
-                    <small class="d-block mb-3">{% trans "Less admin, more trading." %}</small>
-                    <ul class="mb-0">
-                        <li>{% trans "Single view of all market data feeds per desk, trader and strategy." %}</li>
-                        <li>{% trans "Spot overlapping feeds and unused licenses before renewals." %}</li>
-                        <li>{% trans "Entitlement checks so every desk has exactly what they need." %}</li>
-                        <li>{% trans "Export‑ready reports for regulators and internal audit." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- CFO -->
-            <div class="col-md-4" id="personas-cfo">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold">{% trans "CFO & finance" %}</h5>
-                    <small class="d-block mb-3">{% trans "Turn opaque spend into a managed asset class." %}</small>
-                    <ul class="mb-0">
-                        <li>{% trans "Contract‑level view of spend by vendor, desk, user and entity." %}</li>
-                        <li>{% trans "Usage & entitlement analytics to support renewals and re‑pricing." %}</li>
-                        <li>{% trans "Forecasting tools to support budgeting and scenario analysis." %}</li>
-                        <li>{% trans "Clear, defensible narrative for cost optimisation and ROI." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Investors -->
-            <div class="col-md-4" id="personas-investors">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold">{% trans "Investors & board" %}</h5>
-                    <small class="d-block mb-3">{% trans "Clear story on efficiency, control and growth." %}</small>
-                    <ul class="mb-0">
-                        <li>{% trans "Show how market data and tech subscriptions are under control." %}</li>
-                        <li>{% trans "Bridge between cost‑savings agenda and growth initiatives." %}</li>
-                        <li>{% trans "Governance trail from contracts through to desks and entities." %}</li>
-                        <li>{% trans "Scalable operating model that won't break as volumes grow." %}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<!-- ============================ PIPELINE ============================ -->
+<section class="dn-section">
+  <div class="dn-shell">
+    <div class="dn-sec-head rv">
+      <div class="dn-eyebrow">{% trans "How it works" %}</div>
+      <h2>{% trans "Ingest, map, act — in that order" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        Savings come last on purpose. You cannot renegotiate a contract you cannot trace to a
+        person, and you cannot cut a licence without knowing whose screen goes dark.
+        {% endblocktrans %}
+      </p>
     </div>
+
+    <div class="dn-pipe rv">
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 01" %}</span>
+        <h3>{% trans "Ingest" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Contracts, invoices and entitlement files, in whatever shape they arrive." %}</p>
+        <ul>
+          <li>{% trans "Vendor exports, internal feeds, APIs and SFTP drops" %}</li>
+          <li>{% trans "Entities, desks and cost centres normalised to one model" %}</li>
+          <li>{% trans "Commercial terms, notice periods and renewal dates captured" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 02" %}</span>
+        <h3>{% trans "Map" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "From a clause in a contract to the person who opens the terminal." %}</p>
+        <ul>
+          <li>{% trans "Every line of spend tied to a desk, team and function" %}</li>
+          <li>{% trans "Overlaps and dormant licences surfaced with evidence" %}</li>
+          <li>{% trans "An audit trail that holds up when it is questioned" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "Stage 03" %}</span>
+        <h3>{% trans "Act" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Renegotiate, reallocate, and show your working." %}</p>
+        <ul>
+          <li>{% trans "Negotiation packs built from your own usage data" %}</li>
+          <li>{% trans "One view trading, finance and the board all accept" %}</li>
+          <li>{% trans "Regulatory and audit reporting without a rebuild" %}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px" class="rv">
+      <a href="{% url 'how_it_works' %}" class="dn-btn dn-btn-lg"><span>{% trans "See the full method" %}</span></a>
+    </div>
+  </div>
 </section>
 
-<!-- OPTIMISE STRIP (inspired by Calero sections) -->
-<section class="section-light section-padding">
-    <div class="container">
-        <div class="text-center mb-5">
-            <p class="eyebrow mb-2">
-                {% trans "From quick wins to long‑term control" %}
-            </p>
-            <h2 class="h4 fw-bold mb-2">
-                {% trans "One platform to optimize costs, inventory and governance." %}
-            </h2>
-            <p class="text-muted mb-0" style="max-width: 720px; margin: 0 auto; font-size: 0.98rem; line-height: 1.7;">
-                {% blocktrans trimmed %}
-                Start with a focused Data Cost Assessment, then roll out a single contract‑first platform that
-                keeps technology and market data spend under control across vendors, entities and desks.
-                {% endblocktrans %}
-            </p>
+<!-- ============================ PLATFORM PREVIEW ============================ -->
+<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
+  <div class="dn-shell">
+    <div style="display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,4vw,56px);align-items:center" class="dn-hero-grid">
+      <div class="rv">
+        <div class="dn-eyebrow">{% trans "The platform" %}</div>
+        <h2>{% trans "One cockpit instead of eleven spreadsheets." %}</h2>
+        <p class="dn-lede" style="margin-top:16px">
+          {% blocktrans trimmed %}
+          Contracts, invoices and entitlements stay in sync in one place, rather than being
+          reassembled by hand each quarter by whoever has the most recent export.
+          {% endblocktrans %}
+        </p>
+        <ul style="list-style:none;padding:0;margin:24px 0 0;display:flex;flex-direction:column;gap:11px">
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Spend and usage by vendor, entity, desk and user" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Dormant licence and duplicate coverage exposure, quantified" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Renewals surfaced ahead of the notice window" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Exports for trading, finance, procurement and audit" %}</li>
+        </ul>
+        <div class="dn-cta-row" style="margin-top:30px">
+          <a href="{% url 'demo' %}" class="dn-btn"><span>{% trans "View the platform" %}</span></a>
         </div>
+      </div>
 
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold mb-1">{% trans "Optimize spend" %}</h5>
-                    <small class="d-block mb-3 text-muted">{% trans "Cut waste while protecting the desks." %}</small>
-                    <ul class="mb-0" style="color: #4b5563; font-size: 0.9rem;">
-                        <li>{% trans "See total spend by vendor, entity, desk and user." %}</li>
-                        <li>{% trans "Identify overlaps and underused licenses before renewals." %}</li>
-                        <li>{% trans "Support negotiations with contract‑level evidence." %}</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold mb-1">{% trans "Optimize inventory" %}</h5>
-                    <small class="d-block mb-3 text-muted">{% trans "Right access, in the right place." %}</small>
-                    <ul class="mb-0" style="color: #4b5563; font-size: 0.9rem;">
-                        <li>{% trans "Single inventory of contracts, services and entitlements." %}</li>
-                        <li>{% trans "Trace every license back to desks, teams and functions." %}</li>
-                        <li>{% trans "Standardised workflows for onboarding and changes." %}</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="persona-card h-100">
-                    <h5 class="fw-bold mb-1">{% trans "Optimize governance" %}</h5>
-                    <small class="d-block mb-3 text-muted">{% trans "Confidence for boards and regulators." %}</small>
-                    <ul class="mb-0" style="color: #4b5563; font-size: 0.9rem;">
-                        <li>{% trans "Audit‑ready trail from contract to invoice to user." %}</li>
-                        <li>{% trans "Consistent story across trading, finance and risk." %}</li>
-                        <li>{% trans "Reporting packs you can share with investors and audit." %}</li>
-                    </ul>
-                </div>
-            </div>
+      <div class="rv">
+        <div class="dn-shot">
+          <div class="dn-shot-bar"><i></i><i></i><i></i><span>{% trans "DataNaut portal — cost &amp; usage overview" %}</span></div>
+          <img src="{% static 'landing/dashboard-screenshot.png' %}" alt="{% trans 'DataNaut portal dashboard' %}" loading="lazy">
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- PLATFORM PREVIEW (screenshot + key outcomes) -->
-<section class="section-light section-padding">
-    <div class="container">
-        <div class="row g-4 align-items-center">
-            <div class="col-lg-6">
-                <p class="eyebrow mb-2">
-                    {% trans "What DataNaut looks like in practice" %}
-                </p>
-                <h2 class="h4 fw-bold mb-3">
-                    {% trans "A single cockpit for contracts, invoices and entitlements." %}
-                </h2>
-                <p class="text-muted mb-3" style="font-size: 0.98rem; line-height: 1.7;">
-                    {% blocktrans trimmed %}
-                    Instead of chasing PDFs, CSVs and spreadsheets across desks, entities and vendors, DataNaut
-                    gives you one place where contracts, invoices and entitlements stay in sync.
-                    {% endblocktrans %}
-                </p>
-                <ul class="mb-3" style="color: #4b5563; font-size: 0.9rem; line-height: 1.7;">
-                    <li>{% trans "See total spend and usage per vendor, entity, desk and user." %}</li>
-                    <li>{% trans "Drill into contracts and invoices without leaving the screen." %}</li>
-                    <li>{% trans "Export views for trading, finance, procurement and audit in seconds." %}</li>
-                </ul>
-                <a href="{% url 'demo' %}" class="btn btn-cta-secondary px-4 py-2">
-                    {% trans "Open demo dashboard" %}
-                </a>
-            </div>
-            <div class="col-lg-6">
-                <div class="dn-surface">
-                    <div class="dn-surface-inner">
-                        <img src="{% static 'landing/dashboard-screenshot.png' %}"
-                             alt="{% trans 'DataNaut portal dashboard preview' %}"
-                             class="img-fluid rounded-3 shadow-sm w-100"
-                             style="border: 1px solid rgba(148, 163, 184, 0.35);">
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- ============================ AUDIENCES ============================ -->
+<section class="dn-section">
+  <div class="dn-shell">
+    <div class="dn-sec-head rv">
+      <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
+      <h2>{% trans "One dataset, three conversations that rarely agree." %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        Trading fears losing a feed mid-quarter. Finance needs the spend to reconcile. The board
+        wants to know it is controlled. Arguments happen because each side arrives with different
+        numbers.
+        {% endblocktrans %}
+      </p>
     </div>
+
+    <div class="dn-grid-3 rv">
+      <a href="{% url 'for_trading_desks' %}" class="dn-card">
+        <span class="dn-tag">{% trans "Desks" %}</span>
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div>
+        <h3>{% trans "Trading &amp; dealing" %}</h3>
+        <p>{% trans "Nothing goes dark unannounced." %}</p>
+        <ul>
+          <li>{% trans "Every feed per desk, trader and strategy" %}</li>
+          <li>{% trans "Overlaps flagged before renewal" %}</li>
+          <li>{% trans "Evidence ready for audit and regulators" %}</li>
+        </ul>
+      </a>
+      <a href="{% url 'for_cfo' %}" class="dn-card">
+        <span class="dn-tag">{% trans "Finance" %}</span>
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M7 7h7a3 3 0 010 6H7h8"/></svg></div>
+        <h3>{% trans "CFO &amp; finance" %}</h3>
+        <p>{% trans "An opaque line becomes a managed asset." %}</p>
+        <ul>
+          <li>{% trans "Spend by vendor, desk, user and entity" %}</li>
+          <li>{% trans "Usage analytics that support repricing" %}</li>
+          <li>{% trans "A cost narrative that survives challenge" %}</li>
+        </ul>
+      </a>
+      <a href="{% url 'for_investors' %}" class="dn-card">
+        <span class="dn-tag">{% trans "Board" %}</span>
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z"/><path d="M9 12l2 2 4-5"/></svg></div>
+        <h3>{% trans "Investors &amp; board" %}</h3>
+        <p>{% trans "Control you can demonstrate, not assert." %}</p>
+        <ul>
+          <li>{% trans "Evidence that data spend is governed" %}</li>
+          <li>{% trans "Traceability from contract to desk" %}</li>
+          <li>{% trans "An operating model that holds as you grow" %}</li>
+        </ul>
+      </a>
+    </div>
+  </div>
 </section>
 
-<!-- TESTIMONIAL / PROOF STRIP -->
-<section class="section-light section-padding" style="padding-top: 0;">
-    <div class="container">
-        <div class="row g-4 align-items-stretch">
-            <div class="col-md-6">
-                <div class="persona-card h-100">
-                    <p class="eyebrow mb-2" style="color:#22c55e;">
-                        {% trans "What teams care about" %}
-                    </p>
-                    <p class="mb-3" style="font-size:0.96rem; color:#111827; line-height:1.7;">
-                        {% blocktrans trimmed %}
-                        Trading wants fewer surprises at renewals. Finance wants a clear link between contracts,
-                        usage and cost. Investors want to see that technology and data spend are under control.
-                        DataNaut is built to give each of them the story they need from the same underlying data.
-                        {% endblocktrans %}
-                    </p>
-                    <p class="small text-muted mb-1">
-                        {% trans "Typical outcomes our clients look for:" %}
-                    </p>
-                    <ul class="mb-0" style="color:#4b5563; font-size:0.9rem;">
-                        <li>{% trans "10–30% reduction in market data & technology spend over 12–24 months." %}</li>
-                        <li>{% trans "Faster, more defensible renewals with vendors." %}</li>
-                        <li>{% trans "Less manual Excel work for desks, finance and audit." %}</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="persona-card h-100">
-                    <p class="eyebrow mb-2" style="color:#2563eb;">
-                        {% trans "How we usually start" %}
-                    </p>
-                    <p class="mb-3" style="font-size:0.96rem; color:#111827; line-height:1.7;">
-                        {% blocktrans trimmed %}
-                        We start small – one or two key vendors, a handful of entities and desks – to prove the
-                        data model and quantify savings. If the numbers stack up and the workflow fits how your
-                        teams operate, we scale from there.
-                        {% endblocktrans %}
-                    </p>
-                    <ul class="mb-3" style="color:#4b5563; font-size:0.9rem;">
-                        <li>{% trans "4–6 week Data Cost Assessment on selected vendors." %}</li>
-                        <li>{% trans "Executive read‑out with quantified savings range." %}</li>
-                        <li>{% trans "Roll‑out plan across vendors, entities and desks." %}</li>
-                    </ul>
-                    <a href="{% url 'contact' %}" class="btn btn-cta-primary px-4 py-2">
-                        {% trans "Talk to us about an assessment" %}
-                    </a>
-                </div>
-            </div>
-        </div>
+<!-- ============================ CTA ============================ -->
+<div class="dn-band">
+  <div class="dn-shell">
+    <h2>{% trans "Start with two vendors and one argument." %}</h2>
+    <p class="dn-lede">
+      {% blocktrans trimmed %}
+      Tell us which vendor causes the most internal disagreement. We come back with a savings
+      range and a way to phase the work around your teams.
+      {% endblocktrans %}
+    </p>
+    <div class="dn-cta-row">
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'roi_calculator' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "Estimate your savings" %}</span></a>
     </div>
-</section>
+  </div>
+</div>
 
-<!-- BOTTOM CTA / CONTACT -->
-<section class="section-light section-padding" id="assessment">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
-                <div class="text-center mb-5">
-                    <p class="eyebrow mb-2">{% trans "Next step" %}</p>
-                    <h2 class="h3 mb-3 fw-bold">
-                        {% trans "Book a free Data Cost Assessment" %}
-                    </h2>
-                    <p class="text-muted" style="font-size:1rem; line-height: 1.7; max-width: 640px; margin: 0 auto;">
-                        {% blocktrans trimmed %}
-                        Leave your details and we'll get back to you with an estimated savings range and
-                        a concrete proposal for how to phase the work with your internal teams.
-                        {% endblocktrans %}
-                    </p>
-                </div>
+{% endblock %}
 
-                <div class="card border-0 shadow-sm p-4 p-md-5"
-                     style="transition: all 0.3s ease; border-radius: 18px;">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        <p class="small text-muted mb-0" style="max-width: 460px;">
-                            {% trans "We will reply from a real person, not a bot, typically within 1–2 business days." %}
-                        </p>
-                        <a href="{% url 'contact' %}" class="btn btn-primary px-5 py-2"
-                           style="background: linear-gradient(90deg, #22c55e, #06b6d4); border: none; font-weight: 600; border-radius: 999px; transition: all 0.3s ease;">
-                            {% trans "Go to contact form" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
+{% block extra_head %}
 <style>
-    /* Home-specific refinements on top of base styles */
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12) !important;
-    }
+.dn-pulse{width:6px;height:6px;border-radius:50%;background:var(--sig);box-shadow:0 0 0 0 rgba(76,201,232,.6);animation:dnPl 2.4s infinite}
+@keyframes dnPl{70%{box-shadow:0 0 0 8px rgba(76,201,232,0)}100%{box-shadow:0 0 0 0 rgba(76,201,232,0)}}
 
-    .form-control:focus {
-        border-color: #22c55e !important;
-        box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.15) !important;
-    }
+@media(max-width:1060px){ .dn-hero-grid{grid-template-columns:1fr!important;gap:38px!important} }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3) !important;
-        filter: brightness(1.05);
-    }
+/* reconciliation signature */
+.dn-recon{border:1px solid var(--hair);background:var(--panel);position:relative;overflow:hidden}
+.dn-recon::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sig),transparent);opacity:.5}
+.dn-recon-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--panel-2);flex-wrap:wrap}
+.dn-recon-head h4{font-family:var(--fm);font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);font-weight:500}
+.dn-recon-toggle{display:flex;border:1px solid var(--hair-2)}
+.dn-recon-toggle button{border:0;background:transparent;padding:6px 13px;font-family:var(--fm);
+  font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ash);transition:.2s}
+.dn-recon-toggle button.on{background:var(--sig);color:#04202A}
+.dn-recon-stage{position:relative;height:326px;background-image:linear-gradient(var(--hair) 1px,transparent 1px);background-size:100% 27.6px}
+@media(max-width:560px){.dn-recon-stage{height:290px}}
+.dn-frag{position:absolute;font-family:var(--fm);font-size:.7rem;white-space:nowrap;
+  background:var(--panel-2);border:1px solid var(--hair-2);padding:5px 9px;color:var(--ash);
+  transition:transform .8s cubic-bezier(.65,.02,.25,1),opacity .5s,border-color .4s,background .4s;will-change:transform}
+.dn-frag .s{color:var(--sig);margin-right:9px}
+.dn-frag .a{color:var(--bone);margin-left:11px}
+.dn-frag.dup{border-color:var(--warn);background:var(--warn-dim)}
+.dn-frag.dup .a,.dn-frag.dup .s{color:var(--warn)}
+.dn-recon-foot{display:flex;gap:20px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--hair);
+  background:var(--panel-2);font-family:var(--fm);font-size:.68rem;color:var(--ash)}
+.dn-recon-foot b{color:var(--bone);font-weight:600}
+.dn-legend{display:inline-flex;align-items:center;gap:7px}
+.dn-legend i{width:9px;height:9px;border:1px solid var(--warn);background:var(--warn-dim);display:block}
 
-    /* Progress bar starts at 0 and is animated in base.js */
-    .metrics-progress-bar {
-        width: 0;
-    }
+/* ticker */
+.dn-ticker{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);background:var(--panel);overflow:hidden;white-space:nowrap}
+.dn-tt{display:inline-flex;animation:dnSlide 52s linear infinite}
+.dn-ticker:hover .dn-tt{animation-play-state:paused}
+@keyframes dnSlide{to{transform:translateX(-50%)}}
+.dn-tt span{font-family:var(--fm);font-size:.7rem;padding:11px 20px;color:var(--ash);display:inline-flex;gap:9px}
+.dn-tt span i{font-style:normal;color:var(--ash-2)}
+
+/* audience cards are links — keep them looking like cards */
+a.dn-card{display:block;color:inherit;text-decoration:none}
 </style>
+{% endblock %}
 
+
+{% block extra_js %}
+<script>
+(function(){
+'use strict';
+var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- ticker ---------- */
+var TK=[['BLOOMBERG','4 entities','dup x2'],['REFINITIV','2 entities','ok'],['ICE','3 entities','dup x1'],
+['NASDAQ','1 entity','ok'],['INTERNAL FEED','5 desks','review'],['MARKIT','2 entities','ok'],
+['LSEG','3 entities','dup x1'],['MORNINGSTAR','1 entity','ok'],['TRADEWEB','2 entities','review']];
+var tt=document.getElementById('dnTicker');
+if(tt){
+  var html=TK.map(function(r){
+    var cls = r[2].indexOf('dup')>-1 ? 'dn-warn' : (r[2]==='review' ? 'dn-sig' : 'dn-good');
+    return '<span><i>'+r[0]+'</i> '+r[1]+' <b class="'+cls+'">'+r[2]+'</b></span>';
+  }).join('');
+  tt.innerHTML = html + html;
+}
+
+/* ---------- reconciliation ---------- */
+var ROWS=[
+  {s:'INV',ref:'INV-4471-02',amt:'18,400',dup:false},
+  {s:'CTR',ref:'MSA 4.2(a)', amt:'18,400',dup:false},
+  {s:'ENT',ref:'seat 0114',  amt:'—',     dup:false},
+  {s:'INV',ref:'INV-4471-09',amt:'22,150',dup:true},
+  {s:'CTR',ref:'MSA 4.2(d)', amt:'22,150',dup:true},
+  {s:'INV',ref:'INV-8802-01',amt:'22,150',dup:true},
+  {s:'ENT',ref:'seat 0207',  amt:'—',     dup:false},
+  {s:'INV',ref:'INV-4471-15',amt:'9,600', dup:false},
+  {s:'CTR',ref:'MSA 4.2(f)', amt:'9,600', dup:false},
+  {s:'ENT',ref:'seat 0341',  amt:'—',     dup:false}
+];
+var SX=[0.42,0.06,0.55,0.13,0.61,0.28,0.02,0.47,0.20,0.58];
+var SY=[0.05,0.31,0.58,0.79,0.13,0.44,0.68,0.90,0.22,0.52];
+
+var stage=document.getElementById('dnStage');
+if(stage){
+  var nodes=[];
+  ROWS.forEach(function(r){
+    var el=document.createElement('div');
+    el.className='dn-frag'+(r.dup?' dup':'');
+    el.innerHTML='<span class="s">'+r.s+'</span>'+r.ref+'<span class="a">'+r.amt+'</span>';
+    stage.appendChild(el);nodes.push(el);
+  });
+
+  var state='after';
+  function layout(st){
+    var w=stage.clientWidth,h=stage.clientHeight;
+    nodes.forEach(function(el,i){
+      var x,y;
+      if(st==='after'){
+        var rh=Math.min(27.6,(h-24)/ROWS.length);
+        x=18;y=12+i*rh;el.style.opacity='1';
+      }else{
+        x=10+SX[i]*Math.max(40,w-215);
+        y=6+SY[i]*Math.max(40,h-44);
+        el.style.opacity='.86';
+      }
+      el.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+      el.style.transitionDelay=RM?'0ms':(i*42)+'ms';
+    });
+    var dup=ROWS.filter(function(r){return r.dup;}).length;
+    document.getElementById('dnCount').textContent=ROWS.length;
+    document.getElementById('dnMatch').textContent=(st==='after')?(ROWS.length-dup):'?';
+    document.getElementById('dnDup').textContent=(st==='after')?dup:'?';
+  }
+  layout(state);
+  addEventListener('resize',function(){layout(state);});
+
+  document.querySelectorAll('.dn-recon-toggle button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');state=b.dataset.state;layout(state);
+    });
+  });
+
+  /* play it once when it first scrolls into view */
+  if(!RM){
+    var played=false;
+    var rio=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting||played)return;played=true;
+        document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){
+          x.classList.toggle('on',x.dataset.state==='before');});
+        state='before';layout('before');
+        setTimeout(function(){
+          document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){
+            x.classList.toggle('on',x.dataset.state==='after');});
+          state='after';layout('after');
+        },1500);
+      });
+    },{threshold:.35});
+    rio.observe(document.getElementById('dnRecon'));
+  }
+}
+})();
+</script>
 {% endblock %}
