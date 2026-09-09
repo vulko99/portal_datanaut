@@ -358,6 +358,57 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;background:var(--sig)
 .lead{color:var(--ash)}
 code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
 
+/* =========================================================================
+   Light / neutral marketing surfaces — visual balance only.
+   Applied per-section on the homepage. Components keep their structure,
+   padding, radius, shadows and hierarchy; only the surface colour and text
+   contrast adapt so the section reads well on a light background.
+   Light sections sit above the ambient wash so they stay clean.
+   ========================================================================= */
+.dn-light{background:#FAFBFC}
+.dn-neutral{background:#EEF1F5}
+.dn-light,.dn-neutral{color:#1E2733;position:relative;z-index:51}
+.dn-light h1,.dn-light h2,.dn-light h3,.dn-light h4,.dn-light h5,
+.dn-neutral h1,.dn-neutral h2,.dn-neutral h3,.dn-neutral h4,.dn-neutral h5{color:#0F1720}
+.dn-light .dn-lede,.dn-neutral .dn-lede,
+.dn-light .dn-small,.dn-neutral .dn-small,
+.dn-light p,.dn-neutral p{color:#4A5563}
+.dn-light .dn-eyebrow,.dn-neutral .dn-eyebrow{color:#0E7C93}
+.dn-light .dn-eyebrow::before,.dn-neutral .dn-eyebrow::before{background:#9AD9E8}
+
+/* cards */
+.dn-light .dn-card,.dn-neutral .dn-card{background:#FFFFFF;border-color:#E3E7EC}
+.dn-light .dn-card h3,.dn-neutral .dn-card h3{color:#0F1720}
+.dn-light .dn-card p,.dn-neutral .dn-card p,
+.dn-light .dn-card li,.dn-neutral .dn-card li{color:#4A5563}
+
+/* stepped pipeline */
+.dn-light .dn-pipe,.dn-neutral .dn-pipe{background:#E3E7EC;border-color:#E3E7EC}
+.dn-light .dn-step,.dn-neutral .dn-step{background:#FFFFFF}
+.dn-light .dn-step:hover,.dn-neutral .dn-step:hover{background:#F4F6F8}
+.dn-light .dn-step .n,.dn-neutral .dn-step .n{color:#0E7C93}
+.dn-light .dn-step p,.dn-neutral .dn-step p,
+.dn-light .dn-step li,.dn-neutral .dn-step li{color:#4A5563}
+.dn-light .dn-step li::before,.dn-neutral .dn-step li::before{background:#C4CBD4}
+
+/* ledger rows (problem) */
+.dn-light .dn-ledger,.dn-neutral .dn-ledger{border-top-color:#E3E7EC}
+.dn-light .dn-row,.dn-neutral .dn-row{border-bottom-color:#E3E7EC}
+.dn-light .dn-row:hover,.dn-neutral .dn-row:hover{background:#F2F4F7}
+.dn-light .dn-row p,.dn-neutral .dn-row p{color:#4A5563}
+.dn-light .dn-row .idx,.dn-neutral .dn-row .idx{color:#98A2B0}
+.dn-light .dn-row .amt,.dn-neutral .dn-row .amt{color:#A66A12}
+.dn-light .dn-row .amt.dn-sig,.dn-neutral .dn-row .amt.dn-sig{color:#0E7C93}
+
+/* panels (before / after) */
+.dn-light .dn-panel,.dn-neutral .dn-panel{background:#FFFFFF;border-color:#E3E7EC}
+.dn-light .dn-ph,.dn-neutral .dn-ph{border-bottom-color:#E3E7EC}
+.dn-light .dn-ph h4,.dn-neutral .dn-ph h4{color:#4A5563}
+.dn-light .dn-ph h4.dn-sig,.dn-neutral .dn-ph h4.dn-sig{color:#0E7C93}
+
+/* default (ghost-cyan) button on a light surface */
+.dn-light .dn-btn:not(.dn-btn-solid),.dn-neutral .dn-btn:not(.dn-btn-solid){color:#0B6076;border-color:#BFE1EA}
+
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
   .rv{opacity:1;transform:none}
