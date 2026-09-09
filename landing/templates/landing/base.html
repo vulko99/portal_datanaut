@@ -379,18 +379,16 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
     </a>
 
     <ul class="dn-links">
-      <li><a href="{% url 'how_it_works' %}">{% trans "How it works" %}</a></li>
-      <li><a href="{% url 'demo' %}">{% trans "Platform" %}</a></li>
+      <li><a href="{% url 'how_it_works' %}">{% trans "Product" %}</a></li>
       <li class="dn-dd">
-        <a href="#" onclick="return false;">{% trans "Who it's for" %}<span class="dn-caret">▼</span></a>
+        <a href="#" onclick="return false;">{% trans "Solutions" %}<span class="dn-caret">▼</span></a>
         <ul class="dn-dd-menu">
-          <li><a href="{% url 'for_trading_desks' %}">{% trans "Trading &amp; dealing desks" %}</a></li>
-          <li><a href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a></li>
+          <li><a href="{% url 'for_cfo' %}">{% trans "Finance &amp; operations" %}</a></li>
+          <li><a href="{% url 'for_trading_desks' %}">{% trans "Market data" %}</a></li>
           <li><a href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a></li>
         </ul>
       </li>
-      <li><a href="{% url 'roi_calculator' %}">{% trans "ROI calculator" %}</a></li>
-      <li><a href="{% url 'pricing' %}">{% trans "Pricing" %}</a></li>
+      <li><a href="{% url 'demo' %}">{% trans "Demo" %}</a></li>
       <li><a href="{% url 'about' %}">{% trans "About" %}</a></li>
       <li class="dn-dd dn-lang">
         <a href="#" onclick="return false;">{{ LANGUAGE_CODE|upper }}<span class="dn-caret">▼</span></a>
@@ -411,23 +409,21 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
       </li>
     </ul>
 
-    <a class="dn-btn dn-nav-cta" href="{% url 'contact' %}"><span>{% trans "Book assessment" %}</span></a>
+    <a class="dn-btn dn-nav-cta" href="{% url 'contact' %}"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
     <button class="dn-burger" id="dnBurger" aria-label="{% trans 'Menu' %}" aria-expanded="false"><i></i><i></i><i></i></button>
   </div>
 </header>
 
 <div id="dn-drawer">
-  <a href="{% url 'how_it_works' %}">{% trans "How it works" %}</a>
-  <a href="{% url 'demo' %}">{% trans "Platform" %}</a>
-  <div class="grp">{% trans "Who it's for" %}</div>
-  <a class="sub" href="{% url 'for_trading_desks' %}">{% trans "Trading &amp; dealing desks" %}</a>
-  <a class="sub" href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a>
+  <a href="{% url 'how_it_works' %}">{% trans "Product" %}</a>
+  <div class="grp">{% trans "Solutions" %}</div>
+  <a class="sub" href="{% url 'for_cfo' %}">{% trans "Finance &amp; operations" %}</a>
+  <a class="sub" href="{% url 'for_trading_desks' %}">{% trans "Market data" %}</a>
   <a class="sub" href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a>
   <div class="grp">{% trans "More" %}</div>
-  <a href="{% url 'roi_calculator' %}">{% trans "ROI calculator" %}</a>
-  <a href="{% url 'pricing' %}">{% trans "Pricing" %}</a>
+  <a href="{% url 'demo' %}">{% trans "Demo" %}</a>
   <a href="{% url 'about' %}">{% trans "About" %}</a>
-  <a href="{% url 'contact' %}">{% trans "Book assessment" %}</a>
+  <a href="{% url 'contact' %}">{% trans "Book a Free Cost Assessment" %}</a>
 </div>
 
 <main class="page-offset">
