@@ -11,7 +11,7 @@
     <div style="display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(30px,4vw,58px);align-items:start" class="dn-hero-grid">
       <div>
         <div style="display:inline-flex;align-items:center;gap:10px;padding:6px 13px;border:1px solid var(--hair);background:var(--panel);font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ash);margin-bottom:24px">
-          <span class="dn-pulse"></span>{% trans "Enterprise Cost Intelligence" %}
+          <span class="dn-pulse"></span>{% trans "Enterprise Cost Intelligence Platform" %}
         </div>
 
         <h1>
@@ -19,23 +19,22 @@
           <span class="dn-sig">{% trans "Find every saving." %}</span>
         </h1>
 
-        <p class="dn-lede" style="margin:24px 0 30px;font-size:1.07rem;max-width:54ch">
+        <p class="dn-lede" style="margin:24px 0 30px;font-size:1.07rem;max-width:52ch">
           {% blocktrans trimmed %}
-          DataNaut connects contracts, invoices, vendors, usage and cost centers in one intelligent
-          platform — helping companies understand their true cost base and uncover savings
-          opportunities.
+          DataNaut connects contracts, invoices, vendors, usage and cost centers in one place,
+          giving companies a clear view of where their money goes and where they can save.
           {% endblocktrans %}
         </p>
 
         <div class="dn-cta-row">
-          <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
-          <a href="{% url 'demo' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "Explore the Platform" %}</span></a>
+          <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a data cost assessment" %}</span></a>
+          <a href="{% url 'demo' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See the platform" %}</span></a>
         </div>
 
-        <p style="margin-top:26px;padding-top:22px;border-top:1px solid var(--hair);font-size:.88rem;color:var(--ash-2);max-width:50ch">
+        <p style="margin-top:26px;padding-top:22px;border-top:1px solid var(--hair);font-size:.88rem;color:var(--ash-2);max-width:48ch">
           {% blocktrans trimmed %}
-          One platform for your entire cost ecosystem — from vendor contracts to invoices and usage.
-          Market data is one of the most complex environments we handle, not the limit of what we do.
+          Engagements start with a focused assessment on a subset of vendors and desks.
+          You get a quantified savings range before committing to a platform.
           {% endblocktrans %}
         </p>
       </div>
@@ -62,16 +61,16 @@
     <!-- ---------- counters ---------- -->
     <div class="dn-counters">
       <div>
-        <b class="dn-mono" data-count="7">0</b>
-        <span>{% trans "Cost sources connected" %}</span>
+        <b class="dn-mono" data-count="3">0</b>
+        <span>{% trans "Sources reconciled" %}</span>
       </div>
       <div>
         <b class="dn-mono" data-count="12" data-suffix="+">0</b>
         <span>{% trans "Vendors per deployment" %}</span>
       </div>
       <div>
-        <b class="dn-mono" data-count="6" data-suffix="+">0</b>
-        <span>{% trans "Cost categories covered" %}</span>
+        <b class="dn-mono" data-count="30" data-suffix="+">0</b>
+        <span>{% trans "Desks in scope" %}</span>
       </div>
       <div>
         <b class="dn-mono" data-count="6" data-suffix=" wks">0</b>
@@ -84,259 +83,144 @@
 <!-- ============================ TICKER ============================ -->
 <div class="dn-ticker"><div class="dn-tt" id="dnTicker"></div></div>
 
-<!-- ============================ SEE / UNDERSTAND / SAVE ============================ -->
+<!-- ============================ WHY ============================ -->
 <section class="dn-section">
   <div class="dn-shell">
     <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "The idea" %}</div>
-      <h2>{% trans "See. Understand. Save." %}</h2>
-      <p class="dn-lede">
-        {% blocktrans trimmed %}
-        DataNaut turns fragmented company spend into a clear, actionable view of where your money
-        goes, what you are paying for, and where you can save.
-        {% endblocktrans %}
-      </p>
-    </div>
-
-    <div class="dn-pipe rv">
-      <div class="dn-step">
-        <span class="n">{% trans "See" %}</span>
-        <h3>{% trans "Know what you are paying for." %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Connect vendors, contracts, invoices, services and cost centers into one source of truth." %}</p>
-      </div>
-      <div class="dn-step">
-        <span class="n">{% trans "Understand" %}</span>
-        <h3>{% trans "Understand why you are paying it." %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Analyze usage, utilization, trends, renewals and vendor concentration across the business." %}</p>
-      </div>
-      <div class="dn-step">
-        <span class="n">{% trans "Save" %}</span>
-        <h3>{% trans "Find where you can reduce costs." %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Identify unused services, duplicate spend, contract opportunities and potential savings." %}</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ PROBLEM ============================ -->
-<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
-  <div class="dn-shell">
-    <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "The problem" %}</div>
+      <div class="dn-eyebrow">{% trans "Why it happens" %}</div>
       <h2>{% trans "Your company knows how much it spends. But does it know why?" %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        Cost information is spread across contracts, PDFs, Excel files, ERP systems, invoices, vendor
-        portals, procurement and finance systems, usage reports and department spreadsheets. Nothing
-        was designed to agree with anything else.
-        {% endblocktrans %}
-      </p>
-    </div>
-
-    <div class="dn-ledger rv">
-      <div class="dn-row">
-        <span class="idx">01</span>
-        <div>
-          <h3>{% trans "What are we actually paying for?" %}</h3>
-          <p>{% trans "Spend sits in different systems under different names. The total is known; the detail behind it is not." %}</p>
-        </div>
-        <span class="amt">{% trans "No clear picture" %}</span>
-      </div>
-      <div class="dn-row">
-        <span class="idx">02</span>
-        <div>
-          <h3>{% trans "Which contracts are renewing soon?" %}</h3>
-          <p>{% trans "Renewal dates and notice periods are buried in clauses nobody re-reads until the window has already closed." %}</p>
-        </div>
-        <span class="amt">{% trans "Renewal surprises" %}</span>
-      </div>
-      <div class="dn-row">
-        <span class="idx">03</span>
-        <div>
-          <h3>{% trans "Are we paying for unused services?" %}</h3>
-          <p>{% trans "Licenses, seats and subscriptions stay live and billed long after anyone stopped using them." %}</p>
-        </div>
-        <span class="amt">{% trans "Silent recurring cost" %}</span>
-      </div>
-      <div class="dn-row">
-        <span class="idx">04</span>
-        <div>
-          <h3>{% trans "Do departments have overlapping vendors?" %}</h3>
-          <p>{% trans "Two teams buy the same service under separate paper, and neither contract reveals the other exists." %}</p>
-        </div>
-        <span class="amt">{% trans "Duplicate spend" %}</span>
-      </div>
-      <div class="dn-row">
-        <span class="idx">05</span>
-        <div>
-          <h3>{% trans "Are invoices consistent with our contracts?" %}</h3>
-          <p>{% trans "What was agreed, what is billed and what is used live in three places that are reconciled by hand, if at all." %}</p>
-        </div>
-        <span class="amt">{% trans "Billing drift" %}</span>
-      </div>
-      <div class="dn-row">
-        <span class="idx">06</span>
-        <div>
-          <h3>{% trans "Where are our biggest savings opportunities?" %}</h3>
-          <p>{% trans "Spend grows and the only available explanation is that things got more expensive. DataNaut turns these fragmented data points into one connected cost view." %}</p>
-        </div>
-        <span class="amt dn-sig">{% trans "Answerable" %}</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ CONTRACT -> OPPORTUNITY CHAIN ============================ -->
-<section class="dn-section">
-  <div class="dn-shell">
-    <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "The connected record" %}</div>
-      <h2>{% trans "From what you agreed to where you can save" %}</h2>
-      <p class="dn-lede">
-        {% blocktrans trimmed %}
-        DataNaut's strongest advantage is connecting the whole chain. Each step is linked to the next,
-        so a total can always be traced back to a clause — and forward to an opportunity.
-        {% endblocktrans %}
-      </p>
-    </div>
-
-    <div class="dn-chain rv">
-      <div class="dn-chain-item"><span class="k">{% trans "Contract" %}</span><span class="q">{% trans "What did we agree to?" %}</span></div>
-      <div class="dn-chain-arrow">↓</div>
-      <div class="dn-chain-item"><span class="k">{% trans "Invoice" %}</span><span class="q">{% trans "What are we being charged?" %}</span></div>
-      <div class="dn-chain-arrow">↓</div>
-      <div class="dn-chain-item"><span class="k">{% trans "Usage" %}</span><span class="q">{% trans "What are we actually using?" %}</span></div>
-      <div class="dn-chain-arrow">↓</div>
-      <div class="dn-chain-item"><span class="k">{% trans "Cost" %}</span><span class="q">{% trans "What does it really cost us?" %}</span></div>
-      <div class="dn-chain-arrow">↓</div>
-      <div class="dn-chain-item feat"><span class="k">{% trans "Opportunity" %}</span><span class="q">{% trans "Where can we save?" %}</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ USE CASES ============================ -->
-<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
-  <div class="dn-shell">
-    <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "Coverage" %}</div>
-      <h2>{% trans "One platform. Every cost." %}</h2>
-      <p class="dn-lede">
-        {% blocktrans trimmed %}
-        If a cost has a vendor, contract, invoice or usage pattern, DataNaut can help you understand
-        it. These are some of the areas companies start with.
+        Contracts, invoices, vendors, usage data and spreadsheets often live in different places,
+        making it difficult to understand what you are paying for, where costs overlap and where
+        savings opportunities exist.
         {% endblocktrans %}
       </p>
     </div>
 
     <div class="dn-grid-3 rv">
       <div class="dn-card">
-        <h3>{% trans "Technology" %}</h3>
-        <p>{% trans "SaaS subscriptions, cloud infrastructure, software licenses, IT services and cybersecurity." %}</p>
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5"/></svg>
+        </div>
+        <h3>{% trans "Contracts" %}</h3>
+        <p>{% blocktrans trimmed %}Master agreements, schedules and amendments, held by legal. Commercial terms buried in clauses nobody re-reads until renewal week.{% endblocktrans %}</p>
       </div>
       <div class="dn-card">
-        <h3>{% trans "Finance" %}</h3>
-        <p>{% trans "Banking fees, payment processing, financial services, FX costs and other financial expenses." %}</p>
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="M3 10h18M7 14h4"/></svg>
+        </div>
+        <h3>{% trans "Invoices" %}</h3>
+        <p>{% blocktrans trimmed %}Line items in vendor formats that change without notice, reconciled by hand into a spreadsheet that lives on one person's drive.{% endblocktrans %}</p>
       </div>
       <div class="dn-card">
-        <h3>{% trans "Operations" %}</h3>
-        <p>{% trans "Suppliers, logistics, telecom, facilities and recurring operational costs." %}</p>
-      </div>
-      <div class="dn-card">
-        <h3>{% trans "Market Data" %}</h3>
-        <p>{% trans "Market data vendors, exchanges, terminals, feeds, APIs and entitlements." %}</p>
-      </div>
-      <div class="dn-card">
-        <h3>{% trans "Marketing" %}</h3>
-        <p>{% trans "Advertising platforms, agencies, software and marketing services." %}</p>
-      </div>
-      <div class="dn-card">
-        <h3>{% trans "HR" %}</h3>
-        <p>{% trans "Recruitment platforms, HR software, benefits, payroll services and training." %}</p>
+        <div class="dn-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>
+        </div>
+        <h3>{% trans "Entitlements" %}</h3>
+        <p>{% blocktrans trimmed %}Who can open what, controlled by the vendor, exported in a format designed for their systems rather than yours.{% endblocktrans %}</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================ BEFORE / AFTER ============================ -->
-<section class="dn-section">
+<!-- ============================ SYMPTOMS ============================ -->
+<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
   <div class="dn-shell">
     <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "The shift" %}</div>
-      <h2>{% trans "From fragmented spend to actionable savings." %}</h2>
+      <div class="dn-eyebrow">{% trans "What it costs" %}</div>
+      <h2>{% trans "Five symptoms, one root cause" %}</h2>
     </div>
 
-    <div class="dn-grid-11 rv">
-      <div class="dn-panel">
-        <div class="dn-ph"><h4>{% trans "Before DataNaut" %}</h4></div>
-        <div class="dn-pb">
-          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px">
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Fragmented contracts" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Multiple spreadsheets" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Manual invoice analysis" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Limited usage visibility" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Renewal surprises" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "Difficult vendor negotiations" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--warn);display:block"></span>{% trans "No single source of truth" %}</li>
-          </ul>
+    <div class="dn-ledger rv">
+      <div class="dn-row">
+        <span class="idx">01</span>
+        <div>
+          <h3>{% trans "The same feed, bought twice" %}</h3>
+          <p>{% blocktrans trimmed %}Two entities licence the same data under separate paper. Nothing in either contract reveals the other exists, and both invoices look correct in isolation.{% endblocktrans %}</p>
         </div>
+        <span class="amt">{% trans "Pure duplication" %}</span>
       </div>
-      <div class="dn-panel">
-        <div class="dn-ph"><h4 class="dn-sig">{% trans "After DataNaut" %}</h4></div>
-        <div class="dn-pb">
-          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px">
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Centralized cost intelligence" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Connected contracts and invoices" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Vendor-level visibility" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Usage and entitlement analysis" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Renewal visibility" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Evidence-based negotiations" %}</li>
-            <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--good);display:block"></span>{% trans "Actionable savings opportunities" %}</li>
-          </ul>
+      <div class="dn-row">
+        <span class="idx">02</span>
+        <div>
+          <h3>{% trans "Licences nobody opens" %}</h3>
+          <p>{% blocktrans trimmed %}A trader moves desks, leaves, or changes strategy. The entitlement stays live and stays billed until someone notices — usually at renewal, sometimes years later.{% endblocktrans %}</p>
         </div>
+        <span class="amt">{% trans "Silent recurring cost" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">03</span>
+        <div>
+          <h3>{% trans "Renewals negotiated blind" %}</h3>
+          <p>{% blocktrans trimmed %}The vendor knows exactly what you use. You have a spreadsheet somebody rebuilt last quarter from a partial export. That asymmetry has a price and it appears in the renewal.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Weak position" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">04</span>
+        <div>
+          <h3>{% trans "Audit answered by hand" %}</h3>
+          <p>{% blocktrans trimmed %}Every entitlement question becomes a week of manual work across desks, procurement and finance — repeated in full the next time it is asked.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Recurring effort" %}</span>
+      </div>
+      <div class="dn-row">
+        <span class="idx">05</span>
+        <div>
+          <h3>{% trans "No narrative for the board" %}</h3>
+          <p>{% blocktrans trimmed %}Spend grows, and the available explanation is that data got more expensive. Nobody can show what was added, by whom, or whether it is still used.{% endblocktrans %}</p>
+        </div>
+        <span class="amt">{% trans "Unexplained growth" %}</span>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============================ PIPELINE ============================ -->
-<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
+<section class="dn-section">
   <div class="dn-shell">
     <div class="dn-sec-head rv">
       <div class="dn-eyebrow">{% trans "How it works" %}</div>
-      <h2>{% trans "Ingest, connect, analyze, identify, act" %}</h2>
+      <h2>{% trans "Ingest, map, act — in that order" %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        Savings come last on purpose. You cannot renegotiate a contract you cannot trace to a service,
-        and you cannot cut a cost without knowing who depends on it.
+        Savings come last on purpose. You cannot renegotiate a contract you cannot trace to a
+        person, and you cannot cut a licence without knowing whose screen goes dark.
         {% endblocktrans %}
       </p>
     </div>
 
     <div class="dn-pipe rv">
       <div class="dn-step">
-        <span class="n">{% trans "01 — Ingest" %}</span>
+        <span class="n">{% trans "Stage 01" %}</span>
         <h3>{% trans "Ingest" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Bring in contracts, invoices, spreadsheets, usage data and vendor information." %}</p>
+        <p class="dn-small" style="margin:0">{% trans "Contracts, invoices, vendors, services and usage data, in whatever shape they arrive." %}</p>
+        <ul>
+          <li>{% trans "Vendor exports, internal feeds, APIs and SFTP drops" %}</li>
+          <li>{% trans "Entities, desks and cost centres normalised to one model" %}</li>
+          <li>{% trans "Commercial terms, notice periods and renewal dates captured" %}</li>
+        </ul>
       </div>
       <div class="dn-step">
-        <span class="n">{% trans "02 — Connect" %}</span>
-        <h3>{% trans "Connect" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Map vendors, services, contracts, invoices, users, departments and cost centers." %}</p>
+        <span class="n">{% trans "Stage 02" %}</span>
+        <h3>{% trans "Map" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Connect spend to vendors, services, departments, entities and cost centers." %}</p>
+        <ul>
+          <li>{% trans "Every line of spend tied to a desk, team and function" %}</li>
+          <li>{% trans "Overlaps and dormant licences surfaced with evidence" %}</li>
+          <li>{% trans "An audit trail that holds up when it is questioned" %}</li>
+        </ul>
       </div>
       <div class="dn-step">
-        <span class="n">{% trans "03 — Analyze" %}</span>
-        <h3>{% trans "Analyze" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Understand spend, utilization, renewals and cost trends." %}</p>
-      </div>
-      <div class="dn-step">
-        <span class="n">{% trans "04 — Identify" %}</span>
-        <h3>{% trans "Identify" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Find anomalies, unused spend, duplication and savings opportunities." %}</p>
-      </div>
-      <div class="dn-step">
-        <span class="n">{% trans "05 — Act" %}</span>
+        <span class="n">{% trans "Stage 03" %}</span>
         <h3>{% trans "Act" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Use the findings to optimize contracts, vendors and recurring costs." %}</p>
+        <p class="dn-small" style="margin:0">{% trans "Identify savings opportunities, optimize vendors and support negotiations." %}</p>
+        <ul>
+          <li>{% trans "Negotiation packs built from your own usage data" %}</li>
+          <li>{% trans "One view trading, finance and the board all accept" %}</li>
+          <li>{% trans "Regulatory and audit reporting without a rebuild" %}</li>
+        </ul>
       </div>
     </div>
 
@@ -347,26 +231,26 @@
 </section>
 
 <!-- ============================ PLATFORM PREVIEW ============================ -->
-<section class="dn-section">
+<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
   <div class="dn-shell">
     <div style="display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,4vw,56px);align-items:center" class="dn-hero-grid">
       <div class="rv">
         <div class="dn-eyebrow">{% trans "The platform" %}</div>
-        <h2>{% trans "Explore the DataNaut Platform" %}</h2>
+        <h2>{% trans "One cockpit instead of eleven spreadsheets." %}</h2>
         <p class="dn-lede" style="margin-top:16px">
           {% blocktrans trimmed %}
-          Vendors, contracts, invoices, usage and cost centers stay connected in one cockpit, rather
-          than being reassembled by hand each quarter by whoever has the most recent export.
+          Contracts, invoices, vendors, usage and costs stay in sync in one place, rather than being
+          reassembled by hand each quarter by whoever has the most recent export.
           {% endblocktrans %}
         </p>
         <ul style="list-style:none;padding:0;margin:24px 0 0;display:flex;flex-direction:column;gap:11px">
-          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Spend and usage by vendor, department, cost center and user" %}</li>
-          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Unused service and duplicate spend exposure, quantified" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Spend and usage by vendor, entity, desk and user" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Dormant licence and duplicate coverage exposure, quantified" %}</li>
           <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Renewals surfaced ahead of the notice window" %}</li>
-          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Exports for finance, procurement, operations and audit" %}</li>
+          <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Exports for trading, finance, procurement and audit" %}</li>
         </ul>
         <div class="dn-cta-row" style="margin-top:30px">
-          <a href="{% url 'demo' %}" class="dn-btn"><span>{% trans "Explore the Platform" %}</span></a>
+          <a href="{% url 'demo' %}" class="dn-btn"><span>{% trans "View the platform" %}</span></a>
         </div>
       </div>
 
@@ -380,76 +264,41 @@
   </div>
 </section>
 
-<!-- ============================ ILLUSTRATIVE ANALYSIS ============================ -->
-<section class="dn-section" style="border-top:1px solid var(--hair);background:linear-gradient(180deg,var(--panel),transparent)">
-  <div class="dn-shell">
-    <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "Illustrative DataNaut Analysis" %}</div>
-      <h2>{% trans "What a connected cost view makes visible" %}</h2>
-    </div>
-
-    <div class="dn-stats rv">
-      <div class="dn-stat">
-        <b class="dn-mono">$113.8M</b>
-        <span>{% trans "Annual Spend" %}</span>
-      </div>
-      <div class="dn-stat">
-        <b class="dn-mono dn-good">$8.4M</b>
-        <span>{% trans "Potential Savings" %}</span>
-      </div>
-      <div class="dn-stat">
-        <b class="dn-mono dn-warn">27%</b>
-        <span>{% trans "Underutilized Spend" %}</span>
-      </div>
-      <div class="dn-stat">
-        <b class="dn-mono">34</b>
-        <span>{% trans "Departments / Desks" %}</span>
-      </div>
-    </div>
-
-    <div class="dn-legal rv" style="margin-top:32px">
-      <h4>{% trans "Illustrative example" %}</h4>
-      <p>{% trans "Illustrative example based on simulated company data. Actual savings depend on vendor mix, contracts, utilization and spend profile." %}</p>
-    </div>
-  </div>
-</section>
-
 <!-- ============================ AUDIENCES ============================ -->
 <section class="dn-section">
   <div class="dn-shell">
     <div class="dn-sec-head rv">
       <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
-      <h2>{% trans "One dataset, every team that touches cost." %}</h2>
+      <h2>{% trans "One dataset, three conversations that rarely agree." %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        Finance, Procurement and Operations get one intelligent view of company spend. Technology
-        leaders track SaaS and cloud. Market data teams manage their most complex environment. Audit
-        keeps the trail intact.
+        Different teams see different parts of the cost ecosystem, but DataNaut keeps the underlying
+        data connected — so finance, procurement, trading and the board work from the same numbers.
         {% endblocktrans %}
       </p>
     </div>
 
     <div class="dn-grid-3 rv">
+      <a href="{% url 'for_trading_desks' %}" class="dn-card">
+        <span class="dn-tag">{% trans "Desks" %}</span>
+        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div>
+        <h3>{% trans "Trading &amp; dealing" %}</h3>
+        <p>{% trans "Nothing goes dark unannounced." %}</p>
+        <ul>
+          <li>{% trans "Every feed per desk, trader and strategy" %}</li>
+          <li>{% trans "Overlaps flagged before renewal" %}</li>
+          <li>{% trans "Evidence ready for audit and regulators" %}</li>
+        </ul>
+      </a>
       <a href="{% url 'for_cfo' %}" class="dn-card">
         <span class="dn-tag">{% trans "Finance" %}</span>
         <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M7 7h7a3 3 0 010 6H7h8"/></svg></div>
-        <h3>{% trans "Finance &amp; operations" %}</h3>
-        <p>{% trans "Understand where company money goes and identify cost reduction opportunities." %}</p>
+        <h3>{% trans "CFO &amp; finance" %}</h3>
+        <p>{% trans "An opaque line becomes a managed asset." %}</p>
         <ul>
-          <li>{% trans "Spend by vendor, department, cost center and user" %}</li>
+          <li>{% trans "Spend by vendor, desk, user and entity" %}</li>
           <li>{% trans "Usage analytics that support repricing" %}</li>
           <li>{% trans "A cost narrative that survives challenge" %}</li>
-        </ul>
-      </a>
-      <a href="{% url 'for_trading_desks' %}" class="dn-card">
-        <span class="dn-tag">{% trans "Vertical" %}</span>
-        <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div>
-        <h3>{% trans "Market data" %}</h3>
-        <p>{% trans "One of the most complex cost environments — and a flagship use case for DataNaut." %}</p>
-        <ul>
-          <li>{% trans "Vendors, contracts, entitlements and usage" %}</li>
-          <li>{% trans "Overlaps flagged before renewal" %}</li>
-          <li>{% trans "Evidence ready for audit and regulators" %}</li>
         </ul>
       </a>
       <a href="{% url 'for_investors' %}" class="dn-card">
@@ -458,8 +307,8 @@
         <h3>{% trans "Investors &amp; board" %}</h3>
         <p>{% trans "Control you can demonstrate, not assert." %}</p>
         <ul>
-          <li>{% trans "Evidence that spend is governed" %}</li>
-          <li>{% trans "Traceability from contract to cost center" %}</li>
+          <li>{% trans "Evidence that data spend is governed" %}</li>
+          <li>{% trans "Traceability from contract to desk" %}</li>
           <li>{% trans "An operating model that holds as you grow" %}</li>
         </ul>
       </a>
@@ -470,15 +319,15 @@
 <!-- ============================ CTA ============================ -->
 <div class="dn-band">
   <div class="dn-shell">
-    <h2>{% trans "From fragmented spend to actionable savings." %}</h2>
+    <h2>{% trans "Start with two vendors and one argument." %}</h2>
     <p class="dn-lede">
       {% blocktrans trimmed %}
-      We analyze your current cost structure and identify where visibility and savings opportunities
-      exist. Start with the vendors and departments that cause the most uncertainty.
+      Tell us which vendor causes the most internal disagreement. We come back with a savings
+      range and a way to phase the work around your teams.
       {% endblocktrans %}
     </p>
     <div class="dn-cta-row">
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
       <a href="{% url 'roi_calculator' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "Estimate your savings" %}</span></a>
     </div>
   </div>
@@ -530,30 +379,6 @@
 
 /* audience cards are links — keep them looking like cards */
 a.dn-card{display:block;color:inherit;text-decoration:none}
-
-/* contract -> opportunity chain */
-.dn-chain{display:flex;flex-direction:column;align-items:stretch;gap:0;max-width:640px;margin:0 auto}
-.dn-chain-item{border:1px solid var(--hair);background:var(--panel);padding:18px 22px;display:flex;
-  justify-content:space-between;align-items:baseline;gap:18px;flex-wrap:wrap;transition:.3s}
-.dn-chain-item:hover{border-color:var(--sig-dim);transform:translateX(3px)}
-.dn-chain-item .k{font-family:var(--fd);font-weight:600;font-size:1.1rem}
-.dn-chain-item .q{font-family:var(--fb);color:var(--ash);font-size:.9rem}
-.dn-chain-item.feat{border-color:var(--sig);background:linear-gradient(180deg,rgba(76,201,232,.06),transparent 60%)}
-.dn-chain-item.feat .k{color:var(--sig)}
-.dn-chain-arrow{text-align:center;color:var(--sig);font-family:var(--fm);padding:6px 0;opacity:.7}
-
-/* illustrative stat grid */
-.dn-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--hair);background:var(--panel)}
-.dn-stat{padding:28px 22px;border-right:1px solid var(--hair)}
-.dn-stat:last-child{border-right:0}
-.dn-stat b{display:block;font-family:var(--fd);font-size:clamp(1.7rem,3vw,2.3rem);font-weight:700;letter-spacing:-.02em}
-.dn-stat span{font-family:var(--fm);font-size:.61rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash-2);display:block;margin-top:8px}
-@media(max-width:820px){
-  .dn-stats{grid-template-columns:1fr 1fr}
-  .dn-stat{border-bottom:1px solid var(--hair)}
-  .dn-stat:nth-child(2n){border-right:0}
-}
-@media(max-width:460px){.dn-stats{grid-template-columns:1fr}.dn-stat{border-right:0}}
 </style>
 {% endblock %}
 
@@ -565,9 +390,9 @@ a.dn-card{display:block;color:inherit;text-decoration:none}
 var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- ticker ---------- */
-var TK=[['CLOUD / AWS','4 depts','dup x2'],['SALESFORCE','3 depts','review'],['BLOOMBERG','4 entities','dup x1'],
-['MS 365','all staff','ok'],['TELECOM','6 sites','review'],['DATADOG','2 teams','ok'],
-['REFINITIV','3 entities','dup x1'],['ADOBE','2 depts','review'],['PAYMENTS','2 entities','ok']];
+var TK=[['BLOOMBERG','4 entities','dup x2'],['REFINITIV','2 entities','ok'],['ICE','3 entities','dup x1'],
+['NASDAQ','1 entity','ok'],['INTERNAL FEED','5 desks','review'],['MARKIT','2 entities','ok'],
+['LSEG','3 entities','dup x1'],['MORNINGSTAR','1 entity','ok'],['TRADEWEB','2 entities','review']];
 var tt=document.getElementById('dnTicker');
 if(tt){
   var html=TK.map(function(r){
@@ -581,14 +406,14 @@ if(tt){
 var ROWS=[
   {s:'INV',ref:'INV-4471-02',amt:'18,400',dup:false},
   {s:'CTR',ref:'MSA 4.2(a)', amt:'18,400',dup:false},
-  {s:'USE',ref:'seat 0114',  amt:'—',     dup:false},
+  {s:'ENT',ref:'seat 0114',  amt:'—',     dup:false},
   {s:'INV',ref:'INV-4471-09',amt:'22,150',dup:true},
   {s:'CTR',ref:'MSA 4.2(d)', amt:'22,150',dup:true},
   {s:'INV',ref:'INV-8802-01',amt:'22,150',dup:true},
-  {s:'USE',ref:'seat 0207',  amt:'—',     dup:false},
+  {s:'ENT',ref:'seat 0207',  amt:'—',     dup:false},
   {s:'INV',ref:'INV-4471-15',amt:'9,600', dup:false},
   {s:'CTR',ref:'MSA 4.2(f)', amt:'9,600', dup:false},
-  {s:'USE',ref:'seat 0341',  amt:'—',     dup:false}
+  {s:'ENT',ref:'seat 0341',  amt:'—',     dup:false}
 ];
 var SX=[0.42,0.06,0.55,0.13,0.61,0.28,0.02,0.47,0.20,0.58];
 var SY=[0.05,0.31,0.58,0.79,0.13,0.44,0.68,0.90,0.22,0.52];

@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <title>{% block title %}{% trans "DataNaut | Enterprise Cost Intelligence Platform" %}{% endblock %}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="{% block meta_description %}{% trans "DataNaut connects vendors, contracts, invoices, usage and cost centers to give companies a complete view of spend and identify actionable savings opportunities." %}{% endblock %}">
+<meta name="description" content="{% block meta_description %}{% trans "DataNaut connects vendors, contracts, invoices, usage and cost centers to give companies a clear view of spend and identify savings opportunities." %}{% endblock %}">
 <meta name="theme-color" content="#070A0F">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -382,14 +382,14 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
       <li><a href="{% url 'how_it_works' %}">{% trans "How it works" %}</a></li>
       <li><a href="{% url 'demo' %}">{% trans "Platform" %}</a></li>
       <li class="dn-dd">
-        <a href="#" onclick="return false;">{% trans "Solutions" %}<span class="dn-caret">▼</span></a>
+        <a href="#" onclick="return false;">{% trans "Who it's for" %}<span class="dn-caret">▼</span></a>
         <ul class="dn-dd-menu">
-          <li><a href="{% url 'for_cfo' %}">{% trans "Finance &amp; operations" %}</a></li>
-          <li><a href="{% url 'for_trading_desks' %}">{% trans "Market data" %}</a></li>
+          <li><a href="{% url 'for_trading_desks' %}">{% trans "Trading &amp; dealing desks" %}</a></li>
+          <li><a href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a></li>
           <li><a href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a></li>
         </ul>
       </li>
-      <li><a href="{% url 'roi_calculator' %}">{% trans "Savings calculator" %}</a></li>
+      <li><a href="{% url 'roi_calculator' %}">{% trans "ROI calculator" %}</a></li>
       <li><a href="{% url 'pricing' %}">{% trans "Pricing" %}</a></li>
       <li><a href="{% url 'about' %}">{% trans "About" %}</a></li>
       <li class="dn-dd dn-lang">
@@ -411,7 +411,7 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
       </li>
     </ul>
 
-    <a class="dn-btn dn-nav-cta" href="{% url 'contact' %}"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
+    <a class="dn-btn dn-nav-cta" href="{% url 'contact' %}"><span>{% trans "Book assessment" %}</span></a>
     <button class="dn-burger" id="dnBurger" aria-label="{% trans 'Menu' %}" aria-expanded="false"><i></i><i></i><i></i></button>
   </div>
 </header>
@@ -419,15 +419,15 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
 <div id="dn-drawer">
   <a href="{% url 'how_it_works' %}">{% trans "How it works" %}</a>
   <a href="{% url 'demo' %}">{% trans "Platform" %}</a>
-  <div class="grp">{% trans "Solutions" %}</div>
-  <a class="sub" href="{% url 'for_cfo' %}">{% trans "Finance &amp; operations" %}</a>
-  <a class="sub" href="{% url 'for_trading_desks' %}">{% trans "Market data" %}</a>
+  <div class="grp">{% trans "Who it's for" %}</div>
+  <a class="sub" href="{% url 'for_trading_desks' %}">{% trans "Trading &amp; dealing desks" %}</a>
+  <a class="sub" href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a>
   <a class="sub" href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a>
   <div class="grp">{% trans "More" %}</div>
-  <a href="{% url 'roi_calculator' %}">{% trans "Savings calculator" %}</a>
+  <a href="{% url 'roi_calculator' %}">{% trans "ROI calculator" %}</a>
   <a href="{% url 'pricing' %}">{% trans "Pricing" %}</a>
   <a href="{% url 'about' %}">{% trans "About" %}</a>
-  <a href="{% url 'contact' %}">{% trans "Book a Free Cost Assessment" %}</a>
+  <a href="{% url 'contact' %}">{% trans "Book assessment" %}</a>
 </div>
 
 <main class="page-offset">
@@ -442,18 +442,18 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
           <img src="{% static 'landing/logo.png' %}" alt="{% trans 'DataNaut logo' %}" style="height:28px">
           <span class="dn-brand-text">DataNaut</span>
         </a>
-        <p>{% trans "Enterprise cost intelligence — connecting vendors, contracts, invoices, usage and cost centers in one view." %}</p>
+        <p>{% trans "Enterprise Cost Intelligence Platform." %}</p>
       </div>
       <div>
         <h5>{% trans "Product" %}</h5>
         <a href="{% url 'how_it_works' %}">{% trans "How it works" %}</a>
         <a href="{% url 'demo' %}">{% trans "Platform" %}</a>
-        <a href="{% url 'roi_calculator' %}">{% trans "Savings calculator" %}</a>
+        <a href="{% url 'roi_calculator' %}">{% trans "ROI calculator" %}</a>
       </div>
       <div>
-        <h5>{% trans "Solutions" %}</h5>
-        <a href="{% url 'for_cfo' %}">{% trans "Finance &amp; operations" %}</a>
-        <a href="{% url 'for_trading_desks' %}">{% trans "Market data" %}</a>
+        <h5>{% trans "Who it's for" %}</h5>
+        <a href="{% url 'for_trading_desks' %}">{% trans "Trading desks" %}</a>
+        <a href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a>
         <a href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a>
       </div>
       <div>

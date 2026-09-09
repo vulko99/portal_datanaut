@@ -1,7 +1,7 @@
 {% extends "landing/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Explore the DataNaut Platform · DataNaut" %}{% endblock %}
+{% block title %}{% trans "DataNaut demo dashboard · DataNaut" %}{% endblock %}
 
 {% block content %}
 
@@ -10,27 +10,26 @@
     <div class="row mb-4">
       <div class="col-lg-7">
         <h1 class="h2 fw-bold mb-3" style="animation: fadeInUp 0.8s ease-out;">
-          {% trans "Explore the DataNaut Platform" %}
+          {% trans "DataNaut demo dashboard" %}
         </h1>
         <p class="lead mb-2" style="animation: fadeInUp 0.8s ease-out 0.2s backwards;">
           {% blocktrans trimmed %}
-          A preview of DataNaut as an internal platform: vendors, contracts, invoices, usage and cost
-          centers combined into a single cost intelligence cockpit.
+          Preview of how DataNaut can look as an internal platform: contracts, invoices and
+          entitlements combined into a single cost & usage cockpit.
           {% endblocktrans %}
         </p>
         <p class="mb-0" style="animation: fadeInUp 0.8s ease-out 0.4s backwards;">
           {% blocktrans trimmed %}
-          The sample data shown is from a market data environment — one of the most complex cost
-          areas — but the same structure applies to any spend: by vendor, department, cost center and
-          user.
+          Numbers and entities below are illustrative, but the structure reflects what a real
+          deployment looks like – by vendor, entity, desk and user.
           {% endblocktrans %}
         </p>
       </div>
       <div class="col-lg-5 mt-3 mt-lg-0 text-lg-end" style="animation: fadeInUp 0.8s ease-out 0.6s backwards;">
         <div class="small text-muted mb-2">{% trans "Typical deployment:" %}</div>
         <ul class="small text-muted mb-3" style="list-style-position: inside;">
-          <li>{% trans "12+ vendors, 5–10 entities, 30+ departments." %}</li>
-          <li>{% trans "Connected from contracts, invoices and usage files." %}</li>
+          <li>{% trans "12+ vendors, 5–10 entities, 30+ desks." %}</li>
+          <li>{% trans "Direct feeds from contracts, invoices and entitlement files." %}</li>
           <li>{% trans "Optional export into PowerBI / internal data warehouse." %}</li>
         </ul>
         <a href="{% url 'contact' %}" class="btn btn-primary btn-sm me-2">{% trans "Book a live demo" %}</a>
@@ -66,11 +65,11 @@
     <h2 class="h4 fw-bold mb-2">{% trans "Ready to plug in your own contracts & invoices?" %}</h2>
     <p class="text-muted mb-3">
       {% blocktrans trimmed %}
-      Start with a focused Free Cost Assessment on a subset of vendors – typically 4–6 weeks from
+      Start with a focused Data Cost Assessment on a subset of vendors – typically 4–6 weeks from
       data ingestion to first savings.
       {% endblocktrans %}
     </p>
-    <a href="{% url 'contact' %}" class="btn btn-primary btn-lg px-4">{% trans "Book a Free Cost Assessment" %}</a>
+    <a href="{% url 'contact' %}" class="btn btn-primary btn-lg px-4">{% trans "Book a free assessment" %}</a>
   </div>
 </section>
 

@@ -52,19 +52,15 @@ def contact(request):
         company = request.POST.get("company", "").strip()
         role = request.POST.get("role", "").strip()
         email = request.POST.get("email", "").strip()
-        annual_spend = request.POST.get("annual_spend", "").strip()
-        challenge = request.POST.get("challenge", "").strip()
         message = request.POST.get("message", "").strip()
 
         if name and company and email:
-            subject = f"[DataNaut cost assessment] {name} – {company}"
+            subject = f"[DataNaut demo] {name} – {company}"
             body = (
                 f"Name: {name}\n"
                 f"Company: {company}\n"
                 f"Role: {role}\n"
-                f"Email: {email}\n"
-                f"Approximate annual spend: {annual_spend}\n"
-                f"Primary challenge: {challenge}\n\n"
+                f"Email: {email}\n\n"
                 f"Message:\n{message}"
             )
 
@@ -299,7 +295,7 @@ def export_report_pdf(request):
 
         pdf.setFillColor(colors.HexColor("#0F172A"))
         pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(margin_x, y, "Executive Summary: Cost Optimization Analysis")
+        pdf.drawString(margin_x, y, "Executive Summary: Market Data Cost Optimization Analysis")
         y -= 10 * mm
 
         pdf.setFont("Helvetica", 10)
@@ -313,7 +309,7 @@ def export_report_pdf(request):
 
         section_title("1. Opportunity Overview")
         body_text(
-            f"Based on an annual spend of {_format_usd(report['annual_spend_usd'])} and "
+            f"Based on an annual market data spend of {_format_usd(report['annual_spend_usd'])} and "
             f"a user base of {report['terminals']:,}, our analysis identifies estimated annual leakage "
             f"of {_format_usd(report['annual_leakage_usd'])}. This represents reclaimable spend tied to "
             f"inactive licenses, overlapping feeds, and spreadsheet-led control overhead."
@@ -534,7 +530,7 @@ def export_report_xlsx(request):
         ws_summary.column_dimensions["C"].width = 70
 
         ws_summary.merge_cells("A5:C5")
-        ws_summary["A5"] = "EXECUTIVE SUMMARY: Cost Optimization Analysis"
+        ws_summary["A5"] = "EXECUTIVE SUMMARY: Market Data Cost Optimization Analysis"
         _apply_title_style(ws_summary, "A5")
         ws_summary.row_dimensions[5].height = 24
 
@@ -551,7 +547,7 @@ def export_report_xlsx(request):
         _apply_section_header(ws_summary, 11, 1, 3, "1. Opportunity Overview")
         ws_summary.merge_cells("A12:C12")
         ws_summary["A12"] = (
-            f"Based on an annual spend of {_format_usd(report['annual_spend_usd'])} "
+            f"Based on an annual market data spend of {_format_usd(report['annual_spend_usd'])} "
             f"and a user base of {report['terminals']:,}, our analysis identifies estimated annual leakage "
             f"of {_format_usd(report['annual_leakage_usd'])}. This represents reclaimable spend tied to inactive "
             f"licenses, overlapping feeds, and spreadsheet-led control overhead."
@@ -624,8 +620,8 @@ def export_report_xlsx(request):
         _apply_section_header(ws_breakdown, 1, 1, 2, "Detailed Breakdown")
         rows = [
             ("Company Name", report["company_name"]),
-            ("Annual Spend (USD)", report["annual_spend_usd"]),
-            ("Annual Spend ($M)", report["annual_spend_m"]),
+            ("Annual Market Data Spend (USD)", report["annual_spend_usd"]),
+            ("Annual Market Data Spend ($M)", report["annual_spend_m"]),
             ("Number of Terminals / Users", report["terminals"]),
             ("Zombie License Rate (%)", report["zombie_rate_percent"]),
             ("Management Method", report["management_method"]),
