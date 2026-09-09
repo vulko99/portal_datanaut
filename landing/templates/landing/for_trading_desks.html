@@ -1,23 +1,25 @@
 {% extends "landing/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "For trading & dealing desks · DataNaut" %}{% endblock %}
+{% block title %}{% trans "Market data · DataNaut" %}{% endblock %}
 
 {% block content %}
 
 <div class="dn-phero">
   <div class="dn-shell">
-    <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
-    <h1>{% trans "Less admin. More trading." %}</h1>
+    <div class="dn-eyebrow">{% trans "Solutions — vertical" %}</div>
+    <h1>{% trans "Market data: the hardest cost environment we know." %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
-      Give every desk a clear view of the market data and tech feeds it relies on, without getting
-      stuck in spreadsheets and email threads with procurement.
+      Market data combines many vendors, complex contracts, multiple entities, recurring invoices,
+      usage-based pricing and entitlements — which is exactly why it is one of the strongest examples
+      of what DataNaut does. It is one of the areas where DataNaut can deliver immediate visibility,
+      not the limit of the platform.
       {% endblocktrans %}
     </p>
     <div class="dn-cta-row" style="margin-top:26px">
-      <a href="{% url 'demo' %}" class="dn-btn dn-btn-solid"><span>{% trans "View the platform" %}</span></a>
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Discuss trading use cases" %}</span></a>
+      <a href="{% url 'demo' %}" class="dn-btn dn-btn-solid"><span>{% trans "Explore the Platform" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
     </div>
   </div>
 </div>
@@ -26,13 +28,15 @@
   <div class="dn-shell">
 
     <div class="dn-sec-head rv">
-      <div class="dn-eyebrow">{% trans "The fear, named" %}</div>
-      <h2>{% trans "Nothing goes dark unannounced." %}</h2>
+      <div class="dn-eyebrow">{% trans "Built for complex spend" %}</div>
+      <h2>{% trans "Where DataNaut earns its place." %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        Desks resist cost exercises for a good reason: the last one took a feed away mid-quarter and
-        nobody asked first. Usage mapping comes before any recommendation, and the desk reviews the
-        list before anything is actioned.
+        DataNaut is especially useful where companies have many vendors, complex contracts, multiple
+        departments, recurring invoices, usage-based pricing, entitlements, difficult-to-track
+        renewals and fragmented spreadsheets. Market data is one of the most complex cost
+        environments — and one of the areas where DataNaut can deliver immediate visibility. But the
+        platform is not limited to it.
         {% endblocktrans %}
       </p>
     </div>
@@ -110,12 +114,12 @@
 
 <div class="dn-band">
   <div class="dn-shell">
-    <h2>{% trans "Start with the desks that argue most" %}</h2>
+    <h2>{% trans "Start where the friction is highest" %}</h2>
     <p class="dn-lede">
-      {% trans "Pick the two vendors that cause the most friction between trading and procurement. That is usually where the evidence is most useful." %}
+      {% trans "Pick the vendors that cause the most friction between the desks and procurement. That is usually where the evidence is most useful." %}
     </p>
     <div class="dn-cta-row">
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
       <a href="{% url 'how_it_works' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See the method" %}</span></a>
     </div>
   </div>

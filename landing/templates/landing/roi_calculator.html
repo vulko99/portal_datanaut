@@ -1,7 +1,7 @@
 {% extends "landing/base.html" %}
 {% load i18n %}
 
-{% block title %}ROI Calculator · DataNaut{% endblock %}
+{% block title %}Savings Calculator · DataNaut{% endblock %}
 
 {% block content %}
 
@@ -10,10 +10,10 @@
         <div class="text-center mb-4" style="animation: fadeInUp 0.8s ease-out;">
             <span class="calculator-badge">INDICATIVE MODEL</span>
             <h1 class="calculator-title mt-3 mb-3">
-                Calculate Your Market Data Savings
+                How much could you save?
             </h1>
             <p class="calculator-subtitle mb-0">
-                See how much you're losing to dormant licences, overlapping feeds, and manual audits.<br>
+                See how much you're losing to unused services, overlapping spend, and manual reconciliation across your cost base.<br>
                 Build a CFO-ready savings case in under a minute.
             </p>
         </div>
@@ -47,7 +47,7 @@
 
                         <div class="calc-input-group">
                             <label class="calc-label">
-                                <span class="calc-label-text">Annual Market Data Spend</span>
+                                <span class="calc-label-text">Annual Company Spend</span>
                                 <span class="calc-label-value" id="spendValue">$0</span>
                             </label>
 
@@ -83,7 +83,7 @@
 
                         <div class="calc-input-group">
                             <label class="calc-label">
-                                <span class="calc-label-text">Number of Terminals / Users</span>
+                                <span class="calc-label-text">Number of Licenses / Users</span>
                                 <span class="calc-label-value" id="terminalsValue">0</span>
                             </label>
 
@@ -117,7 +117,7 @@
 
                         <div class="calc-input-group">
                             <label class="calc-label">
-                                <span class="calc-label-text">Estimated "Zombie" License Rate</span>
+                                <span class="calc-label-text">Estimated Unused / Underused Rate</span>
                                 <span class="calc-label-value" id="zombieValue">0%</span>
                             </label>
 
@@ -148,7 +148,7 @@
                                 <span>0%</span>
                                 <span>40%</span>
                             </div>
-                            <p class="calc-help-text">Industry average: 10–20% of licenses are unused or redundant</p>
+                            <p class="calc-help-text">Typical savings opportunities range 10–30%, depending on vendor mix, contracts and utilization</p>
                         </div>
 
                         <div class="calc-input-group">
@@ -166,9 +166,9 @@
                         <div class="calc-note-box">
                             <h3 class="calc-note-title">How the estimate works</h3>
                             <ul class="calc-note-list">
-                                <li>Zombie license cost is based on your input waste rate.</li>
-                                <li>Overlapping feed cost assumes 8% average redundancy.</li>
-                                <li>Manual audit cost reflects process overhead from non-automated governance.</li>
+                                <li>Unused service cost is based on your input waste rate.</li>
+                                <li>Overlapping spend assumes 8% average redundancy across vendors.</li>
+                                <li>Manual reconciliation cost reflects process overhead from non-automated governance.</li>
                                 <li>Target savings assumes 70% recoverability with continuous optimization.</li>
                             </ul>
                         </div>
@@ -183,7 +183,7 @@
                         <div class="alert-content">
                             <h3 class="alert-title">Estimated annual exposure</h3>
                             <div class="alert-amount" id="leakageAmount">$0</div>
-                            <p class="alert-text">Based on dormant licences, overlapping feeds, and manual audit inefficiency</p>
+                            <p class="alert-text">Based on unused services, overlapping spend, and manual reconciliation inefficiency</p>
                         </div>
                     </div>
 
@@ -260,7 +260,7 @@
                     </div>
 
                     <div class="disclaimer-box">
-                        <strong>Directional estimate:</strong> Results are based on benchmark assumptions for market data governance, license utilization, overlapping entitlements, and manual control overhead. Final savings depend on vendor mix, usage patterns, and remediation scope.
+                        <strong>Illustrative estimate only:</strong> Results are based on benchmark assumptions for cost governance, license utilization, overlapping spend, and manual control overhead. Actual savings depend on the company's vendor mix, contracts, utilization and spend profile.
                     </div>
                 </div>
             </div>
@@ -274,12 +274,12 @@
                     <div class="roadmap-item">
                         <div class="roadmap-phase">Phase 1</div>
                         <div class="roadmap-heading">Inventory Discovery</div>
-                        <div class="roadmap-text">Auto-sync HR records and terminal inventories to identify inactive users and stale entitlements.</div>
+                        <div class="roadmap-text">Connect vendor, contract and usage records to identify inactive users and stale services.</div>
                     </div>
                     <div class="roadmap-item">
                         <div class="roadmap-phase">Phase 2</div>
                         <div class="roadmap-heading">Duplicate Analysis</div>
-                        <div class="roadmap-text">Flag users and desks with overlapping feed coverage across multiple vendors.</div>
+                        <div class="roadmap-text">Flag users and departments with overlapping coverage across multiple vendors.</div>
                     </div>
                     <div class="roadmap-item">
                         <div class="roadmap-phase">Phase 3</div>
@@ -297,8 +297,8 @@
                     Industry benchmark position
                 </h3>
                 <p class="benchmark-text">
-                    Based on anonymized data from 120+ financial institutions, organizations of your size
-                    typically spend <strong id="benchmarkSpend">$0 - $0</strong> annually on market data.
+                    Based on an indicative benchmark model, organizations of your size
+                    typically spend <strong id="benchmarkSpend">$0 - $0</strong> annually in this cost area.
                     Your inputs suggest you're <strong id="benchmarkPosition">set your inputs to compare against the benchmark</strong>.
                 </p>
             </div>
@@ -335,7 +335,7 @@
                             <tr>
                                 <td>Redundancy Detection</td>
                                 <td>Ad hoc / spreadsheet-led</td>
-                                <td>Continuous duplicate feed detection</td>
+                                <td>Continuous duplicate spend detection</td>
                             </tr>
                             <tr>
                                 <td>Control Trail</td>

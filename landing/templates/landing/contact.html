@@ -8,11 +8,12 @@
 <div class="dn-phero">
   <div class="dn-shell">
     <div class="dn-eyebrow">{% trans "Contact" %}</div>
-    <h1>{% trans "Book a data cost assessment" %}</h1>
+    <h1>{% trans "Book a Free Cost Assessment" %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
-      Tell us which vendors cause the most internal disagreement. We come back with an estimated
-      savings range and a concrete way to phase the work around your teams.
+      We analyze your current cost structure and identify where visibility and savings opportunities
+      exist. Tell us which vendors or cost categories cause the most uncertainty, and we come back
+      with an estimated savings range and a concrete way to phase the work around your teams.
       {% endblocktrans %}
     </p>
   </div>
@@ -53,12 +54,37 @@
               <div class="dn-field">
                 <label for="id_role">{% trans "Role" %}</label>
                 <input type="text" id="id_role" name="role" autocomplete="organization-title"
-                       placeholder="{% trans 'CFO, procurement, market data manager…' %}">
+                       placeholder="{% trans 'Finance, procurement, operations, CIO/CTO, market data…' %}">
               </div>
 
               <div class="dn-field">
                 <label for="id_email">{% trans "Work email" %}</label>
                 <input type="email" id="id_email" name="email" required autocomplete="email">
+              </div>
+
+              <div class="dn-field">
+                <label for="id_annual_spend">{% trans "Approximate annual spend" %}</label>
+                <select id="id_annual_spend" name="annual_spend">
+                  <option value="">{% trans "Select a range…" %}</option>
+                  <option value="Under €500K">{% trans "Under €500K" %}</option>
+                  <option value="€500K–€2M">{% trans "€500K–€2M" %}</option>
+                  <option value="€2M–€10M">{% trans "€2M–€10M" %}</option>
+                  <option value="€10M+">{% trans "€10M+" %}</option>
+                </select>
+              </div>
+
+              <div class="dn-field">
+                <label for="id_challenge">{% trans "Primary challenge" %}</label>
+                <select id="id_challenge" name="challenge">
+                  <option value="">{% trans "Select a challenge…" %}</option>
+                  <option value="Cost visibility">{% trans "Cost visibility" %}</option>
+                  <option value="Contract management">{% trans "Contract management" %}</option>
+                  <option value="Vendor optimization">{% trans "Vendor optimization" %}</option>
+                  <option value="Invoice reconciliation">{% trans "Invoice reconciliation" %}</option>
+                  <option value="Usage / utilization">{% trans "Usage / utilization" %}</option>
+                  <option value="Renewals">{% trans "Renewals" %}</option>
+                  <option value="Other">{% trans "Other" %}</option>
+                </select>
               </div>
 
               <div class="dn-field">
@@ -69,7 +95,7 @@
               </div>
 
               <button type="submit" class="dn-btn dn-btn-solid" style="width:100%;justify-content:center">
-                <span>{% trans "Send request" %}</span>
+                <span>{% trans "Book a Free Cost Assessment" %}</span>
               </button>
             </form>
           {% endif %}

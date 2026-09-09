@@ -11,7 +11,8 @@
     <h1>{% trans "Priced on structure, not on spend" %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
-      Entities, desks and vendors in scope. The cost stays predictable as the savings grow, and we
+      Based on the complexity and scale of your cost ecosystem — entities, departments and vendors in
+      scope — not simply the number of users. The cost stays predictable as the savings grow, and we
       are not quietly incentivised to leave money on the table.
       {% endblocktrans %}
     </p>
@@ -24,16 +25,16 @@
     <div class="dn-tiers rv">
       <div class="dn-tier">
         <div class="dn-tn">{% trans "Pilot" %}</div>
-        <h3>{% trans "Data cost assessment" %}</h3>
+        <h3>{% trans "Free cost assessment" %}</h3>
         <p class="dn-small" style="margin:8px 0 0">
-          {% trans "Four to six weeks, focused on a subset of your market data and technology stack." %}
+          {% trans "Four to six weeks, focused on a subset of your vendors and cost categories." %}
         </p>
         <div class="dn-price">{% trans "Fixed fee" %}<span>{% trans "quoted on scope" %}</span></div>
         <ul>
-          <li>{% trans "Ingestion of selected contracts, invoices and entitlement files" %}</li>
-          <li>{% trans "Normalised view of spend by vendor, desk, user and entity" %}</li>
+          <li>{% trans "Ingestion of selected contracts, invoices and usage files" %}</li>
+          <li>{% trans "Connected view of spend by vendor, department, user and cost center" %}</li>
           <li>{% trans "Identified saving opportunities and quick wins" %}</li>
-          <li>{% trans "Exportable report for CFO, procurement and desks" %}</li>
+          <li>{% trans "Exportable report for finance, procurement and operations" %}</li>
         </ul>
         <p class="dn-small" style="margin:0 0 20px;color:var(--ash-2)">
           {% trans "For firms that want to validate savings potential before committing to a platform." %}
@@ -46,14 +47,14 @@
         <div class="dn-tn">{% trans "Standard" %}</div>
         <h3>{% trans "Platform subscription" %}</h3>
         <p class="dn-small" style="margin:8px 0 0">
-          {% trans "Ongoing use of DataNaut across core entities, desks and key vendors." %}
+          {% trans "Ongoing use of DataNaut across core entities, departments and key vendors." %}
         </p>
-        <div class="dn-price">{% trans "Annual" %}<span>{% trans "by entities, desks and vendors in scope" %}</span></div>
+        <div class="dn-price">{% trans "Annual" %}<span>{% trans "by entities, departments and vendors in scope" %}</span></div>
         <ul>
           <li>{% trans "All pilot features, continuously updated" %}</li>
           <li>{% trans "Full contract and usage repository across in-scope vendors" %}</li>
-          <li>{% trans "Dashboards for trading desks, finance and procurement" %}</li>
-          <li>{% trans "Renewal calendar with duplicate and dormancy detection" %}</li>
+          <li>{% trans "Dashboards for finance, procurement and operations" %}</li>
+          <li>{% trans "Renewal calendar with duplicate and unused-service detection" %}</li>
           <li>{% trans "Support and quarterly optimisation reviews" %}</li>
         </ul>
         <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid"><span>{% trans "Talk to us about pricing" %}</span></a>
@@ -67,7 +68,7 @@
         </p>
         <div class="dn-price">{% trans "Custom" %}<span>{% trans "scoped with your teams" %}</span></div>
         <ul>
-          <li>{% trans "Unlimited entities and desks in scope" %}</li>
+          <li>{% trans "Unlimited entities and departments in scope" %}</li>
           <li>{% trans "Integration with internal systems and BI tooling" %}</li>
           <li>{% trans "Bespoke reporting for regulators and internal audit" %}</li>
           <li>{% trans "Support through consolidation and transformation work" %}</li>
@@ -105,8 +106,8 @@
       </div>
       <div class="dn-card">
         <div class="dn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M3 19a6 6 0 0112 0M14 19a5 5 0 017 0"/></svg></div>
-        <h3>{% trans "Desks and users" %}</h3>
-        <p>{% trans "The unit that matters for attribution. Mapping usage down to the desk is what makes any recommendation safe to act on." %}</p>
+        <h3>{% trans "Departments and users" %}</h3>
+        <p>{% trans "The unit that matters for attribution. Mapping usage down to the department and user is what makes any recommendation safe to act on." %}</p>
       </div>
     </div>
 
@@ -114,7 +115,7 @@
       <h4>{% trans "What this is not" %}</h4>
       <p>
         {% blocktrans trimmed %}
-        DataNaut is a cost and inventory platform. It is not a market data vendor, a reseller, or a
+        DataNaut is a cost intelligence and inventory platform. It is not a vendor, a reseller, or a
         broker of licences — we have no commercial relationship with the vendors whose contracts we
         help you analyse, which is what makes the analysis worth reading.
         {% endblocktrans %}
@@ -134,10 +135,10 @@
   <div class="dn-shell">
     <h2>{% trans "Not sure which tier fits?" %}</h2>
     <p class="dn-lede">
-      {% trans "Most firms start with the assessment and decide afterwards. Tell us the shape of your estate and we will tell you what makes sense." %}
+      {% trans "Most companies start with the assessment and decide afterwards. Tell us the shape of your cost base and we will tell you what makes sense." %}
     </p>
     <div class="dn-cta-row">
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Talk to us" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
       <a href="{% url 'roi_calculator' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "Estimate your savings" %}</span></a>
     </div>
   </div>

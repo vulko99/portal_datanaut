@@ -1,24 +1,24 @@
 {% extends "landing/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "For CFO & finance · DataNaut" %}{% endblock %}
+{% block title %}{% trans "Finance & operations · DataNaut" %}{% endblock %}
 
 {% block content %}
 
 <div class="dn-phero">
   <div class="dn-shell">
-    <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
+    <div class="dn-eyebrow">{% trans "Solutions" %}</div>
     <h1>{% trans "Turn opaque spend into a managed asset" %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
-      Market data is one of the largest lines you cannot currently explain to the board. Not because
-      anyone is careless — because the record of what was bought, billed and used sits in three
+      Company spend is one of the largest lines you cannot fully explain to the board. Not because
+      anyone is careless — because the record of what was bought, billed and used sits across
       systems that were never designed to agree.
       {% endblocktrans %}
     </p>
     <div class="dn-cta-row" style="margin-top:26px">
       <a href="{% url 'roi_calculator' %}" class="dn-btn dn-btn-solid"><span>{% trans "Estimate your savings" %}</span></a>
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Talk to us about ROI" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-ghost"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
     </div>
   </div>
 </div>
@@ -57,11 +57,49 @@
     </div>
 
     <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
+      <div class="dn-eyebrow">{% trans "Who it's for" %}</div>
+      <h2>{% trans "Built around the teams that touch cost" %}</h2>
+      <p class="dn-lede">
+        {% blocktrans trimmed %}
+        DataNaut is organised around business roles rather than only industries — so every team works
+        from the same connected record.
+        {% endblocktrans %}
+      </p>
+    </div>
+
+    <div class="dn-grid-3 rv">
+      <div class="dn-card">
+        <h3>{% trans "Finance" %}</h3>
+        <p>{% trans "Understand where company money goes and identify cost reduction opportunities." %}</p>
+      </div>
+      <div class="dn-card">
+        <h3>{% trans "Procurement" %}</h3>
+        <p>{% trans "Enter vendor negotiations with clear spend, contract and usage evidence." %}</p>
+      </div>
+      <div class="dn-card">
+        <h3>{% trans "Operations" %}</h3>
+        <p>{% trans "Understand recurring operational costs across departments and suppliers." %}</p>
+      </div>
+      <div class="dn-card">
+        <h3>{% trans "CIO / CTO" %}</h3>
+        <p>{% trans "Track technology, SaaS, cloud and infrastructure costs." %}</p>
+      </div>
+      <div class="dn-card">
+        <h3>{% trans "Market Data Managers" %}</h3>
+        <p>{% trans "Manage vendors, contracts, entitlements and usage across complex market data environments." %}</p>
+      </div>
+      <div class="dn-card">
+        <h3>{% trans "Internal Audit" %}</h3>
+        <p>{% trans "Maintain a traceable relationship between contracts, invoices, vendors and costs." %}</p>
+      </div>
+    </div>
+
+    <div class="dn-sec-head rv" style="margin-top:clamp(50px,6vw,84px)">
       <div class="dn-eyebrow">{% trans "Where the waste concentrates" %}</div>
       <h2>{% trans "Four buckets, in the order they are worth attacking" %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        Dormant licences come first because removing them affects nobody. Contract-level
+        Unused services come first because removing them affects nobody. Contract-level
         renegotiation comes last because it follows the renewal calendar rather than your timetable.
         {% endblocktrans %}
       </p>
@@ -76,7 +114,7 @@
         <div class="dn-pb">
           <div class="dn-brk">
             <div>
-              <div class="dn-brk-t"><b>{% trans "Dormant licences" %}</b><i>{% trans "act immediately" %}</i></div>
+              <div class="dn-brk-t"><b>{% trans "Unused services" %}</b><i>{% trans "act immediately" %}</i></div>
               <div class="dn-brk-b"><em class="w" data-r="12%" style="right:100%"></em></div>
             </div>
             <div>
@@ -102,7 +140,7 @@
         <div class="dn-ph"><h4>{% trans "Why it compounds" %}</h4></div>
         <div class="dn-pb">
           <p class="dn-small" style="margin:0 0 14px">
-            {% trans "Market data contracts renew automatically. A licence added for a three-month project four years ago is still billing today unless someone actively removed it." %}
+            {% trans "Many contracts renew automatically. A service added for a three-month project four years ago is still billing today unless someone actively removed it." %}
           </p>
           <p class="dn-small" style="margin:0 0 14px">
             {% trans "Notice periods make it worse. Miss the window by a week and the cost is locked for another full term, whatever the usage data says." %}
@@ -131,7 +169,7 @@
       {% trans "A fixed-fee assessment produces a savings range with the assumptions written down, and a prioritised list of what to act on first." %}
     </p>
     <div class="dn-cta-row">
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
       <a href="{% url 'pricing' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See pricing" %}</span></a>
     </div>
   </div>

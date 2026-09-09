@@ -8,11 +8,11 @@
 <div class="dn-phero">
   <div class="dn-shell">
     <div class="dn-eyebrow">{% trans "Method" %}</div>
-    <h1>{% trans "Ingest, normalise, optimise" %}</h1>
+    <h1>{% trans "Ingest, connect, analyze, identify, act" %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
       In that order, because the order is the point. You cannot renegotiate a contract you cannot
-      trace to a person, and you cannot cut a licence without knowing whose screen goes dark.
+      trace to a service, and you cannot cut a cost without knowing who depends on it.
       {% endblocktrans %}
     </p>
   </div>
@@ -21,38 +21,55 @@
 <section class="dn-section">
   <div class="dn-shell">
 
-    <div class="dn-pipe rv">
+    <div class="dn-pipe rv" style="grid-template-columns:repeat(5,1fr)">
       <div class="dn-step">
-        <span class="n">{% trans "Stage 01" %}</span>
+        <span class="n">{% trans "01 — Ingest" %}</span>
         <h3>{% trans "Ingest" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Contracts, invoices and entitlement files, in whatever shape they arrive." %}</p>
+        <p class="dn-small" style="margin:0">{% trans "Bring in contracts, invoices, spreadsheets, usage data and vendor information." %}</p>
         <ul>
-          <li>{% trans "Core market data and technology vendors" %}</li>
-          <li>{% trans "Vendor exports, internal feeds, APIs and SFTP drops" %}</li>
+          <li>{% trans "Vendor exports, internal systems, APIs and file drops" %}</li>
           <li>{% trans "PDFs, CSVs and spreadsheets, parsed rather than retyped" %}</li>
           <li>{% trans "Commercial terms, notice periods and renewal dates captured" %}</li>
         </ul>
       </div>
       <div class="dn-step">
-        <span class="n">{% trans "Stage 02" %}</span>
-        <h3>{% trans "Normalise" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "One cost and usage model, by vendor, desk, user and legal entity." %}</p>
+        <span class="n">{% trans "02 — Connect" %}</span>
+        <h3>{% trans "Connect" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Map vendors, services, contracts, invoices, users, departments and cost centers." %}</p>
         <ul>
-          <li>{% trans "Entities, desks and cost centres mapped to a common structure" %}</li>
-          <li>{% trans "Every line of spend tied to a desk, team and function" %}</li>
+          <li>{% trans "Vendors, services and cost centers mapped to a common structure" %}</li>
+          <li>{% trans "Every line of spend tied to a department, team and function" %}</li>
           <li>{% trans "Currencies and billing periods reconciled to one basis" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "03 — Analyze" %}</span>
+        <h3>{% trans "Analyze" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Understand spend, utilization, renewals and cost trends." %}</p>
+        <ul>
+          <li>{% trans "Spend and usage by vendor, department and cost center" %}</li>
+          <li>{% trans "Utilization and entitlement analysis" %}</li>
           <li>{% trans "An audit trail that holds up when it is questioned" %}</li>
         </ul>
       </div>
       <div class="dn-step">
-        <span class="n">{% trans "Stage 03" %}</span>
-        <h3>{% trans "Optimise" %}</h3>
-        <p class="dn-small" style="margin:0">{% trans "Dashboards, alerts and evidence you can take into a negotiation." %}</p>
+        <span class="n">{% trans "04 — Identify" %}</span>
+        <h3>{% trans "Identify" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Find anomalies, unused spend, duplication and savings opportunities." %}</p>
         <ul>
-          <li>{% trans "Dormant licences and duplicate coverage, quantified" %}</li>
+          <li>{% trans "Unused services and duplicate coverage, quantified" %}</li>
           <li>{% trans "Renewals surfaced ahead of the notice window" %}</li>
+          <li>{% trans "Billing discrepancies against contract terms" %}</li>
+        </ul>
+      </div>
+      <div class="dn-step">
+        <span class="n">{% trans "05 — Act" %}</span>
+        <h3>{% trans "Act" %}</h3>
+        <p class="dn-small" style="margin:0">{% trans "Use the findings to optimize contracts, vendors and recurring costs." %}</p>
+        <ul>
           <li>{% trans "Negotiation packs built from your own usage data" %}</li>
-          <li>{% trans "Exports for finance, procurement, desks and audit" %}</li>
+          <li>{% trans "One view finance, procurement and the board all accept" %}</li>
+          <li>{% trans "Exports for finance, procurement, operations and audit" %}</li>
         </ul>
       </div>
     </div>
@@ -64,7 +81,7 @@
       <p class="dn-lede">
         {% blocktrans trimmed %}
         Each of these currently takes days of manual work across procurement, finance and the
-        desks — and produces a different answer depending on who assembles it.
+        departments — and produces a different answer depending on who assembles it.
         {% endblocktrans %}
       </p>
     </div>
@@ -73,8 +90,8 @@
       <div class="dn-row">
         <span class="idx">01</span>
         <div>
-          <h3>{% trans "Who is actually using this feed?" %}</h3>
-          <p>{% trans "Entitlements mapped to named desks and users, with recent activity, so the answer is evidence rather than assumption." %}</p>
+          <h3>{% trans "Who is actually using this service?" %}</h3>
+          <p>{% trans "Usage and entitlements mapped to named departments and users, with recent activity, so the answer is evidence rather than assumption." %}</p>
         </div>
         <span class="amt dn-sig">{% trans "Usage view" %}</span>
       </div>
@@ -82,7 +99,7 @@
         <span class="idx">02</span>
         <div>
           <h3>{% trans "Are we paying twice for the same thing?" %}</h3>
-          <p>{% trans "Overlapping coverage detected across vendors and entities, including cases where two contracts were never visible to each other." %}</p>
+          <p>{% trans "Overlapping coverage detected across vendors and departments, including cases where two contracts were never visible to each other." %}</p>
         </div>
         <span class="amt dn-sig">{% trans "Duplicate detection" %}</span>
       </div>
@@ -98,7 +115,7 @@
         <span class="idx">04</span>
         <div>
           <h3>{% trans "Why did spend rise this year?" %}</h3>
-          <p>{% trans "Movement broken down by vendor, entity and desk, so the answer is a set of decisions rather than a shrug." %}</p>
+          <p>{% trans "Movement broken down by vendor, cost center and department, so the answer is a set of decisions rather than a shrug." %}</p>
         </div>
         <span class="amt dn-sig">{% trans "Spend attribution" %}</span>
       </div>
@@ -122,13 +139,13 @@
       <div class="dn-tl">
         <div>
           <span class="wk">{% trans "Weeks 1–2" %}</span>
-          <h3>{% trans "Ingest and normalise" %}</h3>
-          <p>{% trans "Selected contracts, invoices and entitlement files loaded and mapped to your entity and desk structure." %}</p>
+          <h3>{% trans "Ingest and connect" %}</h3>
+          <p>{% trans "Selected contracts, invoices and usage files loaded and mapped to your vendor, department and cost center structure." %}</p>
         </div>
         <div>
           <span class="wk">{% trans "Weeks 3–4" %}</span>
           <h3>{% trans "Reconcile and find the gaps" %}</h3>
-          <p>{% trans "Line-by-line matching against contract terms. Overlaps, dormant licences and billing discrepancies surfaced with evidence attached." %}</p>
+          <p>{% trans "Line-by-line matching against contract terms. Overlaps, unused services and billing discrepancies surfaced with evidence attached." %}</p>
         </div>
         <div>
           <span class="wk">{% trans "Weeks 5–6" %}</span>
@@ -149,8 +166,8 @@
             <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px">
               <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Contracts and schedules for the vendors in scope" %}</li>
               <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Twelve months of invoices, in any format" %}</li>
-              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "A current entitlement export from each vendor" %}</li>
-              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Your desk and legal entity structure" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Usage or entitlement exports where they exist" %}</li>
+              <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "Your department and cost center structure" %}</li>
               <li class="dn-small" style="padding-left:18px;position:relative"><span style="position:absolute;left:0;top:.63em;width:8px;height:1px;background:var(--sig);display:block"></span>{% trans "An hour with someone who knows the history" %}</li>
             </ul>
             <p class="dn-small" style="margin:20px 0 0;color:var(--ash-2)">
@@ -163,7 +180,7 @@
           <div class="dn-ph"><h4>{% trans "What we do not do" %}</h4></div>
           <div class="dn-pb">
             <p class="dn-small" style="margin:0 0 12px">
-              {% trans "We are not a market data vendor or reseller, and we have no commercial relationship with the vendors whose contracts we help you analyse." %}
+              {% trans "We are not a vendor or reseller, and we have no commercial relationship with the vendors whose contracts we help you analyse." %}
             </p>
             <p class="dn-small" style="margin:0">
               {% trans "That independence is the reason the analysis is worth reading — there is no version of this where we benefit from you buying more." %}
@@ -178,12 +195,12 @@
 
 <div class="dn-band">
   <div class="dn-shell">
-    <h2>{% trans "Start with a data cost assessment" %}</h2>
+    <h2>{% trans "Start with a free cost assessment" %}</h2>
     <p class="dn-lede">
-      {% trans "Two vendors, a handful of desks, a fixed scope. You get a quantified savings range before committing to a platform." %}
+      {% trans "A few vendors, a handful of departments, a fixed scope. You get a quantified savings range before committing to a platform." %}
     </p>
     <div class="dn-cta-row">
-      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book an assessment" %}</span></a>
+      <a href="{% url 'contact' %}" class="dn-btn dn-btn-solid dn-btn-lg"><span>{% trans "Book a Free Cost Assessment" %}</span></a>
       <a href="{% url 'pricing' %}" class="dn-btn dn-btn-ghost dn-btn-lg"><span>{% trans "See pricing" %}</span></a>
     </div>
   </div>

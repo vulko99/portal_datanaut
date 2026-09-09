@@ -11,8 +11,8 @@
     <h1>{% trans "Why DataNaut exists" %}</h1>
     <p class="dn-lede" style="margin-top:16px">
       {% blocktrans trimmed %}
-      Because the same conversation happens in every trading floor and finance team: spend is up,
-      nobody can say precisely why, and the vendor knows more about your usage than you do.
+      Because the same conversation happens in every finance, procurement and operations team: spend
+      is up, nobody can say precisely why, and the vendor knows more about your usage than you do.
       {% endblocktrans %}
     </p>
   </div>
@@ -26,13 +26,13 @@
         <div class="dn-ph"><h4>{% trans "The problem" %}</h4></div>
         <div class="dn-pb">
           <p class="dn-small" style="margin:0 0 14px">
-            {% trans "Market data and technology contracts are negotiated by procurement, paid by finance, and used by desks — and none of those three hold the whole record." %}
+            {% trans "Company costs are negotiated by procurement, paid by finance, and used by departments — and none of those three hold the whole record." %}
           </p>
           <p class="dn-small" style="margin:0 0 14px">
-            {% trans "The result is predictable: duplicated coverage across entities, licences nobody has opened in a year, and renewals negotiated against a spreadsheet somebody rebuilt from a partial export." %}
+            {% trans "The result is predictable: duplicated coverage across departments, services nobody has used in a year, and renewals negotiated against a spreadsheet somebody rebuilt from a partial export." %}
           </p>
           <p class="dn-small" style="margin:0">
-            {% trans "None of that is carelessness. It is what happens when a record is split three ways and reassembled by hand each quarter." %}
+            {% trans "None of that is carelessness. It is what happens when a record is split across systems and reassembled by hand each quarter." %}
           </p>
         </div>
       </div>
@@ -62,8 +62,8 @@
         <span class="n">{% trans "Phase 1 — MVP" %}</span>
         <h3>{% trans "Contract & spend visibility" %}</h3>
         <ul>
-          <li>{% trans "Import contracts, invoices and entitlement files" %}</li>
-          <li>{% trans "Normalised mapping by vendor, desk, user and entity" %}</li>
+          <li>{% trans "Import contracts, invoices and usage files" %}</li>
+          <li>{% trans "Connected mapping by vendor, department, user and cost center" %}</li>
           <li>{% trans "Dashboards with spend visibility and quick wins" %}</li>
           <li>{% trans "Exports for finance and compliance (Excel / PDF)" %}</li>
         </ul>
