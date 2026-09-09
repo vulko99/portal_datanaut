@@ -499,14 +499,15 @@ code{color:var(--sig);background:var(--panel-2);padding:.15em .4em}
       </div>
       <div>
         <h5>{% trans "Who it's for" %}</h5>
-        <a href="{% url 'for_trading_desks' %}">{% trans "Trading desks" %}</a>
-        <a href="{% url 'for_cfo' %}">{% trans "CFO &amp; finance" %}</a>
-        <a href="{% url 'for_investors' %}">{% trans "Investors &amp; board" %}</a>
+        <a href="{% url 'for_cfo' %}">{% trans "Finance" %}</a>
+        <a href="{% url 'for_cfo' %}">{% trans "Procurement" %}</a>
+        <a href="{% url 'for_cfo' %}">{% trans "Operations" %}</a>
+        <a href="{% url 'for_cfo' %}">{% trans "Technology" %}</a>
+        <a href="{% url 'for_trading_desks' %}">{% trans "Market Data" %}</a>
       </div>
       <div>
         <h5>{% trans "Company" %}</h5>
         <a href="{% url 'about' %}">{% trans "About" %}</a>
-        <a href="{% url 'pricing' %}">{% trans "Pricing" %}</a>
         <a href="{% url 'contact' %}">{% trans "Contact" %}</a>
         <a href="mailto:clients.datanaut@outlook.com">clients.datanaut@outlook.com</a>
       </div>

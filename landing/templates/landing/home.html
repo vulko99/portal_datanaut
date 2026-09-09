@@ -39,21 +39,25 @@
         </p>
       </div>
 
-      <!-- ---------- signature: the reconciliation ---------- -->
-      <div class="dn-recon" id="dnRecon">
+      <!-- ---------- product example: invoice reconciliation ---------- -->
+      <div class="dn-recon">
         <div class="dn-recon-head">
-          <h4>{% trans "Reconciliation — quarterly invoice run" %}</h4>
-          <div class="dn-recon-toggle" role="group">
-            <button type="button" data-state="before">{% trans "Before" %}</button>
-            <button type="button" class="on" data-state="after">{% trans "After" %}</button>
-          </div>
+          <h4>{% trans "Invoice reconciliation" %}</h4>
+          <span class="dn-recon-tag">{% trans "Illustrative example" %}</span>
         </div>
-        <div class="dn-recon-stage" id="dnStage" aria-hidden="true"></div>
-        <div class="dn-recon-foot">
-          <span><b id="dnCount">—</b> {% trans "line items" %}</span>
-          <span><b id="dnMatch">—</b> {% trans "matched to contract" %}</span>
-          <span class="dn-warn"><b id="dnDup">—</b> {% trans "duplicated" %}</span>
-          <span class="dn-legend"><i></i> {% trans "overlap" %}</span>
+        <div class="dn-recon-body">
+          <div class="dn-recon-id">{% trans "Invoice #INV-2026-0418" %}</div>
+          <div class="dn-recon-rows">
+            <div><span>{% trans "Vendor" %}</span><b>Bloomberg</b></div>
+            <div><span>{% trans "Invoice amount" %}</span><b>€38,420</b></div>
+            <div><span>{% trans "Contract amount" %}</span><b>€38,420</b></div>
+            <div><span>{% trans "Status" %}</span><b class="dn-good">{% trans "MATCHED" %}</b></div>
+          </div>
+          <div class="dn-recon-checks">
+            <span><i>✓</i> {% trans "Contract matched" %}</span>
+            <span><i>✓</i> {% trans "Amount verified" %}</span>
+            <span><i>✓</i> {% trans "Usage available" %}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -68,10 +72,10 @@
   <div class="dn-shell">
     <div class="dn-sec-head rv">
       <div class="dn-eyebrow">{% trans "The idea" %}</div>
-      <h2>{% trans "Understand your costs. Find where to save." %}</h2>
+      <h2>{% trans "Understand your costs" %}</h2>
       <p class="dn-lede">
         {% blocktrans trimmed %}
-        See what you pay, who you pay, what you receive, and where you can reduce costs.
+        Know what you pay, who you pay, what you receive and where you can reduce costs.
         {% endblocktrans %}
       </p>
     </div>
@@ -426,7 +430,7 @@
 <!-- ============================ CTA ============================ -->
 <div class="dn-band">
   <div class="dn-shell">
-    <h2>{% trans "See what you pay. Find where to save." %}</h2>
+    <h2>{% trans "From fragmented spend to actionable savings." %}</h2>
     <p class="dn-lede">
       {% blocktrans trimmed %}
       We review your current costs and show where you can get clearer visibility and reduce spend.
@@ -450,31 +454,27 @@
 
 @media(max-width:1060px){ .dn-hero-grid{grid-template-columns:1fr!important;gap:38px!important} }
 
-/* reconciliation signature */
+/* reconciliation example (illustrative product card) */
 .dn-recon{border:1px solid var(--hair);background:var(--panel);position:relative;overflow:hidden}
 .dn-recon::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--sig),transparent);opacity:.5}
 .dn-recon-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--panel-2);flex-wrap:wrap}
 .dn-recon-head h4{font-family:var(--fm);font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);font-weight:500}
-.dn-recon-toggle{display:flex;border:1px solid var(--hair-2)}
-.dn-recon-toggle button{border:0;background:transparent;padding:6px 13px;font-family:var(--fm);
-  font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ash);transition:.2s}
-.dn-recon-toggle button.on{background:var(--sig);color:#04202A}
-.dn-recon-stage{position:relative;height:326px;background-image:linear-gradient(var(--hair) 1px,transparent 1px);background-size:100% 27.6px}
-@media(max-width:560px){.dn-recon-stage{height:290px}}
-.dn-frag{position:absolute;font-family:var(--fm);font-size:.7rem;white-space:nowrap;
-  background:var(--panel-2);border:1px solid var(--hair-2);padding:5px 9px;color:var(--ash);
-  transition:transform .8s cubic-bezier(.65,.02,.25,1),opacity .5s,border-color .4s,background .4s;will-change:transform}
-.dn-frag .s{color:var(--sig);margin-right:9px}
-.dn-frag .a{color:var(--bone);margin-left:11px}
-.dn-frag.dup{border-color:var(--warn);background:var(--warn-dim)}
-.dn-frag.dup .a,.dn-frag.dup .s{color:var(--warn)}
-.dn-recon-foot{display:flex;gap:20px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--hair);
-  background:var(--panel-2);font-family:var(--fm);font-size:.68rem;color:var(--ash)}
-.dn-recon-foot b{color:var(--bone);font-weight:600}
-.dn-legend{display:inline-flex;align-items:center;gap:7px}
-.dn-legend i{width:9px;height:9px;border:1px solid var(--warn);background:var(--warn-dim);display:block}
+.dn-recon-tag{font-family:var(--fm);font-size:.57rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ash-2);border:1px solid var(--hair-2);padding:3px 8px}
+.dn-recon-body{padding:18px 16px}
+.dn-recon-id{font-family:var(--fm);font-size:.72rem;color:var(--sig);margin-bottom:14px}
+.dn-recon-rows{display:flex;flex-direction:column;border:1px solid var(--hair);margin-bottom:16px}
+.dn-recon-rows>div{display:flex;justify-content:space-between;gap:12px;padding:11px 13px;
+  border-bottom:1px solid var(--hair);font-family:var(--fm);font-size:.76rem}
+.dn-recon-rows>div:last-child{border-bottom:0}
+.dn-recon-rows span{color:var(--ash)}
+.dn-recon-rows b{color:var(--bone);font-weight:500}
+.dn-recon-rows b.dn-good{color:var(--good)}
+.dn-recon-checks{display:flex;flex-direction:column;gap:9px}
+.dn-recon-checks span{font-family:var(--fm);font-size:.72rem;color:var(--ash);display:flex;align-items:center;gap:10px}
+.dn-recon-checks i{color:var(--good);font-style:normal}
 
 /* ticker */
 .dn-ticker{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);background:var(--panel);overflow:hidden;white-space:nowrap}
@@ -528,82 +528,7 @@ if(tt){
   tt.innerHTML = seg + seg;
 }
 
-/* ---------- reconciliation ---------- */
-var ROWS=[
-  {s:'INV',ref:'INV-4471-02',amt:'18,400',dup:false},
-  {s:'CTR',ref:'MSA 4.2(a)', amt:'18,400',dup:false},
-  {s:'USE',ref:'seat 0114',  amt:'—',     dup:false},
-  {s:'INV',ref:'INV-4471-09',amt:'22,150',dup:true},
-  {s:'CTR',ref:'MSA 4.2(d)', amt:'22,150',dup:true},
-  {s:'INV',ref:'INV-8802-01',amt:'22,150',dup:true},
-  {s:'USE',ref:'seat 0207',  amt:'—',     dup:false},
-  {s:'INV',ref:'INV-4471-15',amt:'9,600', dup:false},
-  {s:'CTR',ref:'MSA 4.2(f)', amt:'9,600', dup:false},
-  {s:'USE',ref:'seat 0341',  amt:'—',     dup:false}
-];
-var SX=[0.42,0.06,0.55,0.13,0.61,0.28,0.02,0.47,0.20,0.58];
-var SY=[0.05,0.31,0.58,0.79,0.13,0.44,0.68,0.90,0.22,0.52];
-
-var stage=document.getElementById('dnStage');
-if(stage){
-  var nodes=[];
-  ROWS.forEach(function(r){
-    var el=document.createElement('div');
-    el.className='dn-frag'+(r.dup?' dup':'');
-    el.innerHTML='<span class="s">'+r.s+'</span>'+r.ref+'<span class="a">'+r.amt+'</span>';
-    stage.appendChild(el);nodes.push(el);
-  });
-
-  var state='after';
-  function layout(st){
-    var w=stage.clientWidth,h=stage.clientHeight;
-    nodes.forEach(function(el,i){
-      var x,y;
-      if(st==='after'){
-        var rh=Math.min(27.6,(h-24)/ROWS.length);
-        x=18;y=12+i*rh;el.style.opacity='1';
-      }else{
-        x=10+SX[i]*Math.max(40,w-215);
-        y=6+SY[i]*Math.max(40,h-44);
-        el.style.opacity='.86';
-      }
-      el.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
-      el.style.transitionDelay=RM?'0ms':(i*42)+'ms';
-    });
-    var dup=ROWS.filter(function(r){return r.dup;}).length;
-    document.getElementById('dnCount').textContent=ROWS.length;
-    document.getElementById('dnMatch').textContent=(st==='after')?(ROWS.length-dup):'?';
-    document.getElementById('dnDup').textContent=(st==='after')?dup:'?';
-  }
-  layout(state);
-  addEventListener('resize',function(){layout(state);});
-
-  document.querySelectorAll('.dn-recon-toggle button').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){x.classList.remove('on');});
-      b.classList.add('on');state=b.dataset.state;layout(state);
-    });
-  });
-
-  /* play it once when it first scrolls into view */
-  if(!RM){
-    var played=false;
-    var rio=new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(!e.isIntersecting||played)return;played=true;
-        document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){
-          x.classList.toggle('on',x.dataset.state==='before');});
-        state='before';layout('before');
-        setTimeout(function(){
-          document.querySelectorAll('.dn-recon-toggle button').forEach(function(x){
-            x.classList.toggle('on',x.dataset.state==='after');});
-          state='after';layout('after');
-        },1500);
-      });
-    },{threshold:.35});
-    rio.observe(document.getElementById('dnRecon'));
-  }
-}
+/* reconciliation example is now static markup — no script needed */
 })();
 </script>
 {% endblock %}
