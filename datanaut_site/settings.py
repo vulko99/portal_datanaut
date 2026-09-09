@@ -1,11 +1,20 @@
+import os
+
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-%ndk%m=r^+t_i&$1s@-&tw@x2zcqu&w^zfwm_r6#(tc=%am&0b"
+# Read from the environment when present; fall back to the existing values so
+# local development keeps working without any setup.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-%ndk%m=r^+t_i&$1s@-&tw@x2zcqu&w^zfwm_r6#(tc=%am&0b",
+)
 
-DEBUG = True
+# DEBUG defaults to True (unchanged). Set DJANGO_DEBUG=False in the hosting
+# environment (e.g. the PythonAnywhere WSGI file) for a public deployment.
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() != "false"
 
 ALLOWED_HOSTS = [
     ".pythonanywhere.com",
@@ -16,13 +25,20 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
-# ако по-късно знаем точния адрес в pythonanywhere (примерно yourname.pythonanywhere.com),
-# ще го сложим и в CSRF_TRUSTED_ORIGINS
 CSRF_TRUSTED_ORIGINS = [
     "https://datanaut.space",
     "https://www.datanaut.space",
     "https://portal.datanaut.space",
 ]
+
+# On PythonAnywhere set PYTHONANYWHERE_HOST=yourname.pythonanywhere.com in the
+# WSGI file; it is then trusted for CSRF-protected forms (contact, login, the
+# language switcher). ".pythonanywhere.com" is already allowed above.
+_pa_host = os.environ.get("PYTHONANYWHERE_HOST")
+if _pa_host:
+    if _pa_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_pa_host)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{_pa_host}")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
